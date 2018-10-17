@@ -1,0 +1,5 @@
+#Nginx Rewrite Config
+
+if (!-e $request_filename){
+        rewrite ^/(.*)$ /index.php/$1 last;
+}
