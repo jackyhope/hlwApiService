@@ -16,10 +16,10 @@ class api_AdminroleService extends api_Abstract implements AdminroleServiceIf {
     public function behaviorlog(AdminroleDTO $adminrole) {
         $result = new ResultDO();
 
-        $id = $adminrole->id ? gdl_lib_BaseUtils::getStr($adminrole->id, 'int') : 0;
-        $field = $adminrole->field ? gdl_lib_BaseUtils::getStr($adminrole->field) : '*';
-        $limit = $adminrole->limit ? gdl_lib_BaseUtils::getStr($adminrole->limit, 'int') : 0;
-        $reg = $adminrole->reg ? gdl_lib_BaseUtils::getStr($adminrole->reg) : 0;
+        $id = $adminrole->id ? hlw_lib_BaseUtils::getStr($adminrole->id, 'int') : 0;
+        $field = $adminrole->field ? hlw_lib_BaseUtils::getStr($adminrole->field) : '*';
+        $limit = $adminrole->limit ? hlw_lib_BaseUtils::getStr($adminrole->limit, 'int') : 0;
+        $reg = $adminrole->reg ? hlw_lib_BaseUtils::getStr($adminrole->reg) : 0;
 
 
 
@@ -82,7 +82,7 @@ class api_AdminroleService extends api_Abstract implements AdminroleServiceIf {
         $result = new ResultDO();
         try {
             $modeluser = new model_newexam_user();
-            $name = gdl_lib_BaseUtils::getStr($adminrole->name, 'string');
+            $name = hlw_lib_BaseUtils::getStr($adminrole->name, 'string');
             $field = $adminrole->field ? $adminrole->field : '*';
 
             $res = $modeluser->select("username='{$name}' or idcard='{$name}'", $field)->items;

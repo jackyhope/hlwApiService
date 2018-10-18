@@ -1,5 +1,5 @@
 <?php
-class model_newexam_contrastpractice extends gdl_components_basemodel 
+class model_newexam_contrastpractice extends hlw_components_basemodel 
 {
 
     public function primarykey() {

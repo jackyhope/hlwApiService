@@ -8,7 +8,7 @@ class api_PlanService extends api_Abstract implements PlanServiceIf
     public function introduce($planId)
     {
         $introduceResultDTO = new IntroduceResultDTO();
-        $planId = gdl_lib_BaseUtils::getStr($planId);
+        $planId = hlw_lib_BaseUtils::getStr($planId);
         try {
             $modelPlan = new model_newexam_plan();
             $res = $modelPlan->selectOne(array("id=$planId"), 'id,name,introduce', '', 'order by id desc');

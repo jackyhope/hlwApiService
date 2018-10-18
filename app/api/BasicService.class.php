@@ -380,12 +380,12 @@ class api_BasicService extends api_Abstract implements BasicServiceIf
         try {
             //$res = array();
             //今后可设置为全局统一读取配置，利用缓存
-             $faceType = gdl_lib_BaseUtils::getStr($basic->type,'int');
+             $faceType = hlw_lib_BaseUtils::getStr($basic->type,'int');
             if(!empty($faceType) && $faceType==2) $res = YouTu::facecompareOne($basic->field, $basic->name);
             elseif(!empty($faceType) && $faceType==1) $res = FaceVisa::facecompareOne($basic->field, $basic->name);
             else $res = YouTu::facecompareOne($basic->field, $basic->name);
             //$res = array('msg'=>$res);
-            gdl_lib_BaseUtils::addLog(json_encode(['type' => $basic->type,'res' => $res,'data' => $basic]));
+            hlw_lib_BaseUtils::addLog(json_encode(['type' => $basic->type,'res' => $res,'data' => $basic]));
             $result->success = true;
             $result->code=2;
             $result->data[0] = $res;
@@ -419,8 +419,8 @@ class api_BasicService extends api_Abstract implements BasicServiceIf
     public function getBasicInfo(BasicDTO $basic){
         $result = new ResultDO();
         try {
-            $admin_reg = $basic->admin_reg ? gdl_lib_BaseUtils::getStr($basic->admin_reg) : 0;
-            $dtime = $basic->time ? gdl_lib_BaseUtils::getStr($basic->time) : 0;;
+            $admin_reg = $basic->admin_reg ? hlw_lib_BaseUtils::getStr($basic->admin_reg) : 0;
+            $dtime = $basic->time ? hlw_lib_BaseUtils::getStr($basic->time) : 0;;
             if($dtime=='1day'){
                 $period = strtotime(date('Y-m-01', strtotime('-1 month')));
             } else if($dtime=='6day'){
@@ -573,11 +573,11 @@ class api_BasicService extends api_Abstract implements BasicServiceIf
     public function BasicRoom($identity_id, $search,$plaformid)
     {
         $resultDO = new ResultDO();
-        $identity_id = gdl_lib_BaseUtils::getStr($identity_id);
-        $search = gdl_lib_BaseUtils::getStr($search);
+        $identity_id = hlw_lib_BaseUtils::getStr($identity_id);
+        $search = hlw_lib_BaseUtils::getStr($search);
         $condition = array("identity_id=$identity_id and ex_basic.closed=1");
         if (!empty($search)){
-            $condition = array("ex_basic.closed=1 and ex_basic_user.gdl_userid=$identity_id AND $search ");
+            $condition = array("ex_basic.closed=1 and ex_basic_user.hlw_userid=$identity_id AND $search ");
         }
         try {
             $modelBasicUser = new model_newexam_basicuser();

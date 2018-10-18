@@ -1,5 +1,5 @@
 <?php
-class model_lanhui_category extends gdl_components_basemodel
+class model_lanhui_category extends hlw_components_basemodel
 {
     public function primarykey()
     {
@@ -8,6 +8,6 @@ class model_lanhui_category extends gdl_components_basemodel
 
     public function tableName()
     {
-        return 'gdl_category';
+        return 'hlw_category';
     }
 }

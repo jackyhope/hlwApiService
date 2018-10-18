@@ -24,11 +24,11 @@ class api_ProjectuserService extends api_Abstract implements ProjectuserServiceI
 		$result->message = "用户列表为空";
 		$result->data = array();
 		//工程id
-		$pid = $project->eventid ? gdl_lib_BaseUtils::getStr($project->eventid, 'int') : 0; 
+		$pid = $project->eventid ? hlw_lib_BaseUtils::getStr($project->eventid, 'int') : 0; 
 		//条件查询 type 0获取全部 1已通过考试 2未通过考试 3未参加考试
-		$type = $project->type ? gdl_lib_BaseUtils::getStr($project->type, 'int') : 0;
+		$type = $project->type ? hlw_lib_BaseUtils::getStr($project->type, 'int') : 0;
 		//分页
-		$page = $project->page ? gdl_lib_BaseUtils::getStr($project->page, 'int') : 0;
+		$page = $project->page ? hlw_lib_BaseUtils::getStr($project->page, 'int') : 0;
 		
 		if(empty($pid)){ //工程id不能为空
 			$result->success = false;
@@ -223,8 +223,8 @@ class api_ProjectuserService extends api_Abstract implements ProjectuserServiceI
      */
 	 public function getoneuserinfo(ProjectOneRequestDTO $oneuser){
 		 
-		 $pid = $oneuser->eventid ? gdl_lib_BaseUtils::getStr($oneuser->eventid, 'int') : 0;  
-		 $userid = $oneuser->userid ? gdl_lib_BaseUtils::getStr($oneuser->userid, 'int') : 0;
+		 $pid = $oneuser->eventid ? hlw_lib_BaseUtils::getStr($oneuser->eventid, 'int') : 0;  
+		 $userid = $oneuser->userid ? hlw_lib_BaseUtils::getStr($oneuser->userid, 'int') : 0;
 		 $result = new ResultDO();
 		 if($pid and $userid){
 			$condition['eventid'] = $pid; //工程id

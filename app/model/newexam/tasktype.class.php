@@ -2,7 +2,7 @@
 /**
  * 任务类型表
  */
-class model_newexam_tasktype extends gdl_components_basemodel
+class model_newexam_tasktype extends hlw_components_basemodel
 {
 
     public function primarykey()

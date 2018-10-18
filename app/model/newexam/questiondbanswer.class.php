@@ -1,5 +1,5 @@
 <?php
-class model_newexam_questiondbanswer extends gdl_components_basemodel
+class model_newexam_questiondbanswer extends hlw_components_basemodel
 {
 
     public function primarykey() {

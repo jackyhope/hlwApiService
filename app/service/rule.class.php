@@ -4,7 +4,7 @@
  * @author yanghao <yh38615890@sina.cn>
  * @copyright (c) 2017, gandianli
  */
-class service_rule extends gdl_components_baseservice
+class service_rule extends hlw_components_baseservice
 {
     public function __construct()
     {
@@ -16,7 +16,7 @@ class service_rule extends gdl_components_baseservice
      */
     public function getRuleModelByConditionId($conditionId)
     {
-        $conditionId = gdl_lib_BaseUtils::getStr($conditionId);
+        $conditionId = hlw_lib_BaseUtils::getStr($conditionId);
         $model = new model_newexam_taskconditionrulemodelrelation();
         if (is_array($conditionId)){ // 如果是条件ID数组
             $conditionId = array_unique($conditionId);

@@ -3,7 +3,7 @@
  * 用户积分变更
  * @copyright (c) 2017, gandianli
  */
-class service_plaform extends gdl_components_baseservice
+class service_plaform extends hlw_components_baseservice
 {
     public function __construct()
     {

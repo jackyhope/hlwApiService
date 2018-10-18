@@ -21,7 +21,7 @@ class api_BannerService extends api_Abstract implements BannerServiceIf
      */
     public function getBanners($type)
     {
-        $type = gdl_lib_BaseUtils::getStr($type, 'int');
+        $type = hlw_lib_BaseUtils::getStr($type, 'int');
         $result = new ResultDO();
         try {
             $model = new model_newexam_banner();
@@ -33,13 +33,13 @@ class api_BannerService extends api_Abstract implements BannerServiceIf
             } else {
                 $result->code = 0;
                 $result->message = $model->getDbError();
-                gdl_lib_BaseUtils::addLog(json_encode($model));
+                hlw_lib_BaseUtils::addLog(json_encode($model));
             }
             $result->success = TRUE;
         } catch (Exception $ex) {
             $result->success = FALSE;
             $result->code = $ex->getCode();
-            gdl_lib_BaseUtils::addLog(json_encode($ex));
+            hlw_lib_BaseUtils::addLog(json_encode($ex));
         }
         return $result;
     }

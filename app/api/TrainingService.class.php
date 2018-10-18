@@ -25,8 +25,8 @@ class api_TrainingService extends api_Abstract implements TrainingServiceIf
     {
         $resultDO = new ResultDO();
 
-        $identity_id = $feedBackDo->identity_id ? gdl_lib_BaseUtils::getStr($feedBackDo->identity_id, 'int') : 0;
-        $content = $feedBackDo->content ? gdl_lib_BaseUtils::getStr($feedBackDo->content, 'string') : '';
+        $identity_id = $feedBackDo->identity_id ? hlw_lib_BaseUtils::getStr($feedBackDo->identity_id, 'int') : 0;
+        $content = $feedBackDo->content ? hlw_lib_BaseUtils::getStr($feedBackDo->content, 'string') : '';
 
         try {
             $modelFeedBack = new model_newexam_feedback();
@@ -79,7 +79,7 @@ class api_TrainingService extends api_Abstract implements TrainingServiceIf
     public function creditRecord($identity_id)
     {
         $resultDO = new ResultDO();
-        $identity_id = gdl_lib_BaseUtils::getStr($identity_id);
+        $identity_id = hlw_lib_BaseUtils::getStr($identity_id);
         try {
             $modelContrastpractice = new model_newexam_contrastpractice();
             $Contrastpractice = $modelContrastpractice->select("scores>=1 and identity_id='{$identity_id}'", 'question_id,scores,question,practice_time,q_question,name','','order by id desc')->items;

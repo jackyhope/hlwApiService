@@ -5,7 +5,7 @@
  * @date 2017-04-27
  * @copyright (c) gandianli
  */
-class service_archives extends gdl_components_baseservice
+class service_archives extends hlw_components_baseservice
 {
     public function __construct()
     {

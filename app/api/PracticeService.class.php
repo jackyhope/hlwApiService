@@ -12,12 +12,12 @@ class api_PracticeService extends api_Abstract implements PracticeServiceIf
     {
         $result = new ResultDO();
         try {
-            $id = $userDo->id ? gdl_lib_BaseUtils::getStr($userDo->id, 'int') : '';
-            $isdelete = $userDo->admin_reg ? gdl_lib_BaseUtils::getStr($userDo->isdelete, 'int') : '0';
-            $status = $userDo->admin_reg ? gdl_lib_BaseUtils::getStr($userDo->status, 'int') : '1';
-            $admin_reg = $userDo->admin_reg ? gdl_lib_BaseUtils::getStr($userDo->admin_reg, 'string') : '';
-			$offset = $userDo->offset ? gdl_lib_BaseUtils::getStr($userDo->offset, 'int') : 0;
-			$num = $userDo->num ? gdl_lib_BaseUtils::getStr($userDo->num, 'int') : 10;
+            $id = $userDo->id ? hlw_lib_BaseUtils::getStr($userDo->id, 'int') : '';
+            $isdelete = $userDo->admin_reg ? hlw_lib_BaseUtils::getStr($userDo->isdelete, 'int') : '0';
+            $status = $userDo->admin_reg ? hlw_lib_BaseUtils::getStr($userDo->status, 'int') : '1';
+            $admin_reg = $userDo->admin_reg ? hlw_lib_BaseUtils::getStr($userDo->admin_reg, 'string') : '';
+			$offset = $userDo->offset ? hlw_lib_BaseUtils::getStr($userDo->offset, 'int') : 0;
+			$num = $userDo->num ? hlw_lib_BaseUtils::getStr($userDo->num, 'int') : 10;
 			$page = $offset*$num;
             $questiondb = new model_newexam_qbank();
             if (!empty($admin_reg)){

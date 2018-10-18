@@ -1,5 +1,5 @@
 <?php
-class service_singlelogin extends gdl_components_baseservice
+class service_singlelogin extends hlw_components_baseservice
 {
     public function __construct() 
     {

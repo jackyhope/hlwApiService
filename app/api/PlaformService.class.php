@@ -22,7 +22,7 @@ class api_PlaformService extends api_Abstract implements PlaformServiceIf
             $ids = [];
             $condition = array();
             $result = new ResultDO();
-            $userid = $userid ? gdl_lib_BaseUtils::getStr($userid, 'int') : 0;
+            $userid = $userid ? hlw_lib_BaseUtils::getStr($userid, 'int') : 0;
 
             $leftJoin = array(
                 'ex_user_company as uc' => 'ex_plaform.id=uc.plaform_id'
@@ -68,8 +68,8 @@ class api_PlaformService extends api_Abstract implements PlaformServiceIf
         } else {
             $condition = array();
             $result = new ResultDO();
-            $plaformType = $plaformType ? gdl_lib_BaseUtils::getStr($plaformType, 'int') : 0;
-            $name = $name ? gdl_lib_BaseUtils::getStr($name) : '';
+            $plaformType = $plaformType ? hlw_lib_BaseUtils::getStr($plaformType, 'int') : 0;
+            $name = $name ? hlw_lib_BaseUtils::getStr($name) : '';
 
             if ($plaformType == 1) {
                 $condition['type'] = $plaformType;
@@ -110,7 +110,7 @@ class api_PlaformService extends api_Abstract implements PlaformServiceIf
     public function getPlaformInfoById($plaform_id)
     {
         $plaformInfoResultDTO = new PlaformInfoResultDTO();
-        $plaform_id = gdl_lib_BaseUtils::getStr($plaform_id);
+        $plaform_id = hlw_lib_BaseUtils::getStr($plaform_id);
         try {
             $modelPlaform = new model_newexam_plaform();
             $res = $modelPlaform->selectOne(array("id=$plaform_id"), 'id,name,`real`', '', 'order by id desc');
@@ -132,8 +132,8 @@ class api_PlaformService extends api_Abstract implements PlaformServiceIf
     public function plaformInviteCodeConfirm($code,$userid)
     {
         $plaformInviteCodeResultDO = new PlaformInviteCodeResultDTO();
-        $userid = gdl_lib_BaseUtils::getStr($userid, 'int');
-        $code = gdl_lib_BaseUtils::getStr($code, 'string');
+        $userid = hlw_lib_BaseUtils::getStr($userid, 'int');
+        $code = hlw_lib_BaseUtils::getStr($code, 'string');
         try {
             $modelPlaformInviteCode = new model_newexam_plaforminvitecode();
             $modelUserCompany = new model_newexam_usercompany();
@@ -159,13 +159,13 @@ class api_PlaformService extends api_Abstract implements PlaformServiceIf
                             $whereUser = [
                                 'userid' => $userid
                             ];
-                            $itemUser = 'gdl_userid,username,realname,idcard';
+                            $itemUser = 'hlw_userid,username,realname,idcard';
                             $retUser = $modelUser->selectOne($whereUser, $itemUser);
-                            if ($retUser['gdl_userid']) {
+                            if ($retUser['hlw_userid']) {
                                 $modelBasicUser->insert([
                                     'basic_id' => '256',
                                     'identity_id' => $ret,
-                                    'gdl_userid' => $userid,
+                                    'hlw_userid' => $userid,
                                     'plaform_id' => $res['plaform_id'],
                                     'username' => $retUser['username'],
                                     'usertruename' => $retUser['realname'],
@@ -175,7 +175,7 @@ class api_PlaformService extends api_Abstract implements PlaformServiceIf
                                 $modelBasicUser->insert([
                                     'basic_id' => '255',
                                     'identity_id' => $ret,
-                                    'gdl_userid' => $userid,
+                                    'hlw_userid' => $userid,
                                     'plaform_id' => $res['plaform_id'],
                                     'username' => $retUser['username'],
                                     'usertruename' => $retUser['realname'],

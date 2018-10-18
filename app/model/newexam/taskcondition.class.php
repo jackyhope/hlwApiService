@@ -1,5 +1,5 @@
 <?php
-class model_newexam_taskcondition extends gdl_components_basemodel
+class model_newexam_taskcondition extends hlw_components_basemodel
 {
 
     public function primarykey() {

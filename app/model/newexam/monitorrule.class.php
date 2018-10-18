@@ -1,5 +1,5 @@
 <?php
-class model_newexam_monitorrule extends gdl_components_basemodel
+class model_newexam_monitorrule extends hlw_components_basemodel
 {
 
     public function primarykey() {

@@ -1,6 +1,6 @@
 <?php
 
-class model_lanhui_member extends gdl_components_basemodel
+class model_lanhui_member extends hlw_components_basemodel
 {
     public function primarykey()
     {
@@ -9,7 +9,7 @@ class model_lanhui_member extends gdl_components_basemodel
 
     public function tableName()
     {
-        return 'gdl_member';
+        return 'hlw_member';
     }
 
     function content_table($moduleid, $itemid, $split, $table_data = '') {

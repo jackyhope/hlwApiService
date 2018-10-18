@@ -4,7 +4,7 @@
  * @author yanghao <yh38615890@sina.cn>
  * @copyright (c) 2017, gandianli
  */
-class service_reward extends gdl_components_baseservice
+class service_reward extends hlw_components_baseservice
 {
     public function __construct()
     {
@@ -16,7 +16,7 @@ class service_reward extends gdl_components_baseservice
      */
     public function getRewardByConditionId($conditionId)
     {
-        $conditionId = gdl_lib_BaseUtils::getStr($conditionId);
+        $conditionId = hlw_lib_BaseUtils::getStr($conditionId);
         $model = new model_newexam_taskreward();
         if (is_array($conditionId)){ // 如果是条件ID数组
             $conditionId = array_unique($conditionId);

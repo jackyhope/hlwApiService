@@ -1,5 +1,5 @@
 <?php
-class model_newexam_basicuser extends gdl_components_basemodel
+class model_newexam_basicuser extends hlw_components_basemodel
 {
 
     public function primarykey() {

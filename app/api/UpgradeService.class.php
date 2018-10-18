@@ -22,7 +22,7 @@ class api_UpgradeService extends api_Abstract implements UpgradeServiceIf
      */
     public function getVersion($versionType)
     {
-        $versionType = gdl_lib_BaseUtils::getStr($versionType, 'int');
+        $versionType = hlw_lib_BaseUtils::getStr($versionType, 'int');
         $result = new getVersionResultDTO();
         try {
             $model = new model_newexam_version();
@@ -37,12 +37,12 @@ class api_UpgradeService extends api_Abstract implements UpgradeServiceIf
             } else {
                 $result->success = FALSE;
                 $result->code = 0;
-                gdl_lib_BaseUtils::addLog(json_encode($model));
+                hlw_lib_BaseUtils::addLog(json_encode($model));
             }
         } catch (Exception $ex) {
             $result->success = FALSE;
             $result->code = $ex->getCode();
-            gdl_lib_BaseUtils::addLog(json_encode($ex));
+            hlw_lib_BaseUtils::addLog(json_encode($ex));
         }
         $result->success = TRUE;
         $result->code = 1;
@@ -56,7 +56,7 @@ class api_UpgradeService extends api_Abstract implements UpgradeServiceIf
      */
     public function getVersionContent($versionId) 
     {
-        $versionId = gdl_lib_BaseUtils::getStr($versionId, 'int');
+        $versionId = hlw_lib_BaseUtils::getStr($versionId, 'int');
         $result = new versionContentResultDTO();
         try {
             $model = new model_newexam_appversion();
@@ -69,12 +69,12 @@ class api_UpgradeService extends api_Abstract implements UpgradeServiceIf
             } else {
                 $result->success = FALSE;
                 $result->code = 0;
-                gdl_lib_BaseUtils::addLog(json_encode($model));
+                hlw_lib_BaseUtils::addLog(json_encode($model));
             }
         } catch (Exception $ex) {
             $result->success = FALSE;
             $result->code = $ex->getCode();
-            gdl_lib_BaseUtils::addLog(json_encode($ex));
+            hlw_lib_BaseUtils::addLog(json_encode($ex));
         }
         $result->success = TRUE;
         $result->code = 1;

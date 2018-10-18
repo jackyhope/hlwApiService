@@ -12,9 +12,9 @@ class api_CompanyService extends api_Abstract implements CompanyServiceIf
 {
     public function getCompanyInfoById($companyId, $userId, $relation = false,$identity_id = null)
     {
-        $companyId = gdl_lib_BaseUtils::getStr($companyId, 'int');
-        $userId = gdl_lib_BaseUtils::getStr($userId, 'int');
-        $identity_id = gdl_lib_BaseUtils::getStr($identity_id, 'int');
+        $companyId = hlw_lib_BaseUtils::getStr($companyId, 'int');
+        $userId = hlw_lib_BaseUtils::getStr($userId, 'int');
+        $identity_id = hlw_lib_BaseUtils::getStr($identity_id, 'int');
         $result = new CompanyInfoResultDTO();
         try {
             //判断公司是否和此用户绑定

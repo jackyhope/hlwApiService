@@ -15,8 +15,8 @@ class api_SignrulesService extends api_Abstract implements SignrulesServiceIf
     public function record(SignrulesDTO $userDo) 
     {
         $result = new ResultDO();
-		$identity_id = $userDo->identity_id ? gdl_lib_BaseUtils::getStr($userDo->identity_id,'int') : 0;
-		$pid = $userDo->pid ? gdl_lib_BaseUtils::getStr($userDo->pid,'int') : 0;
+		$identity_id = $userDo->identity_id ? hlw_lib_BaseUtils::getStr($userDo->identity_id,'int') : 0;
+		$pid = $userDo->pid ? hlw_lib_BaseUtils::getStr($userDo->pid,'int') : 0;
 
         try {
 			$come_back = [];
@@ -78,13 +78,13 @@ class api_SignrulesService extends api_Abstract implements SignrulesServiceIf
 	public function checkin(SignrulesDTO $userDo) 
     {
         $result = new ResultDO();
-		$identity_id = $userDo->identity_id ? gdl_lib_BaseUtils::getStr($userDo->identity_id,'int') : 0;
-		$pid = $userDo->pid ? gdl_lib_BaseUtils::getStr($userDo->pid,'int') : 0;
-		$address = $userDo->address ? gdl_lib_BaseUtils::getStr($userDo->address,'string') : 0;
+		$identity_id = $userDo->identity_id ? hlw_lib_BaseUtils::getStr($userDo->identity_id,'int') : 0;
+		$pid = $userDo->pid ? hlw_lib_BaseUtils::getStr($userDo->pid,'int') : 0;
+		$address = $userDo->address ? hlw_lib_BaseUtils::getStr($userDo->address,'string') : 0;
 		$sign = $userDo->sign ? $userDo->sign : [];
-		$plaform_id = $userDo->plaform_id ? gdl_lib_BaseUtils::getStr($userDo->plaform_id,'int') : 0;
+		$plaform_id = $userDo->plaform_id ? hlw_lib_BaseUtils::getStr($userDo->plaform_id,'int') : 0;
 		$note = $userDo->note ? $userDo->note : '';
-		$type = $userDo->type ? gdl_lib_BaseUtils::getStr($userDo->type,'int') : 0;
+		$type = $userDo->type ? hlw_lib_BaseUtils::getStr($userDo->type,'int') : 0;
 		
         try {
 			$come_back = [];
@@ -236,10 +236,10 @@ class api_SignrulesService extends api_Abstract implements SignrulesServiceIf
 	public function checkrecord(SignrulDTO $userDo) 
     {
         $result = new ResultDO();
-		$identity_id = $userDo->identity_id ? gdl_lib_BaseUtils::getStr($userDo->identity_id,'int') : 0;
-		$pid = $userDo->pid ? gdl_lib_BaseUtils::getStr($userDo->pid,'int') : 0;
-		$plaform_id = $userDo->plaform_id ? gdl_lib_BaseUtils::getStr($userDo->plaform_id,'int') : 0;
-		$datime = $userDo->datime ? gdl_lib_BaseUtils::getStr($userDo->datime,'string') : date('Y-m-d');
+		$identity_id = $userDo->identity_id ? hlw_lib_BaseUtils::getStr($userDo->identity_id,'int') : 0;
+		$pid = $userDo->pid ? hlw_lib_BaseUtils::getStr($userDo->pid,'int') : 0;
+		$plaform_id = $userDo->plaform_id ? hlw_lib_BaseUtils::getStr($userDo->plaform_id,'int') : 0;
+		$datime = $userDo->datime ? hlw_lib_BaseUtils::getStr($userDo->datime,'string') : date('Y-m-d');
 
         try {
 			$come_back = [];
@@ -331,10 +331,10 @@ class api_SignrulesService extends api_Abstract implements SignrulesServiceIf
 	public function checkrecordmonth(SignrulDTO $userDo) 
     {
         $result = new ResultDO();
-		$identity_id = $userDo->identity_id ? gdl_lib_BaseUtils::getStr($userDo->identity_id,'int') : 0;
-		$pid = $userDo->pid ? gdl_lib_BaseUtils::getStr($userDo->pid,'int') : 0;
-		$plaform_id = $userDo->plaform_id ? gdl_lib_BaseUtils::getStr($userDo->plaform_id,'int') : 0;
-		$datime = $userDo->datime ? gdl_lib_BaseUtils::getStr($userDo->datime,'string') : date('Y-m');
+		$identity_id = $userDo->identity_id ? hlw_lib_BaseUtils::getStr($userDo->identity_id,'int') : 0;
+		$pid = $userDo->pid ? hlw_lib_BaseUtils::getStr($userDo->pid,'int') : 0;
+		$plaform_id = $userDo->plaform_id ? hlw_lib_BaseUtils::getStr($userDo->plaform_id,'int') : 0;
+		$datime = $userDo->datime ? hlw_lib_BaseUtils::getStr($userDo->datime,'string') : date('Y-m');
 
         try {
 			
@@ -398,12 +398,12 @@ class api_SignrulesService extends api_Abstract implements SignrulesServiceIf
 	public function signnote(SignrulesDTO $userDo) 
     {
         $result = new ResultDO();
-		$identity_id = $userDo->identity_id ? gdl_lib_BaseUtils::getStr($userDo->identity_id,'int') : 0;
-		$pid = $userDo->pid ? gdl_lib_BaseUtils::getStr($userDo->pid,'int') : 0;
-		$note = $userDo->address ? gdl_lib_BaseUtils::getStr($userDo->address,'string') : 0; //备注
-		$plaform_id = $userDo->plaform_id ? gdl_lib_BaseUtils::getStr($userDo->plaform_id,'int') : 0;
+		$identity_id = $userDo->identity_id ? hlw_lib_BaseUtils::getStr($userDo->identity_id,'int') : 0;
+		$pid = $userDo->pid ? hlw_lib_BaseUtils::getStr($userDo->pid,'int') : 0;
+		$note = $userDo->address ? hlw_lib_BaseUtils::getStr($userDo->address,'string') : 0; //备注
+		$plaform_id = $userDo->plaform_id ? hlw_lib_BaseUtils::getStr($userDo->plaform_id,'int') : 0;
 		$datime = $userDo->admin_reg ? strtotime($userDo->admin_reg.' 23:59:58') : time();
-		$sorts = $userDo->type ? gdl_lib_BaseUtils::getStr($userDo->type,'int') : 1;
+		$sorts = $userDo->type ? hlw_lib_BaseUtils::getStr($userDo->type,'int') : 1;
 		
         try {
 			$come_back = [];
@@ -479,8 +479,8 @@ class api_SignrulesService extends api_Abstract implements SignrulesServiceIf
     {
         $result = new ResultDO();
 		
-		$pid = $userDo->pid ? gdl_lib_BaseUtils::getStr($userDo->pid,'int') : 0;
-		$note = $userDo->address ? gdl_lib_BaseUtils::getStr($userDo->address,'string') : ''; //备注
+		$pid = $userDo->pid ? hlw_lib_BaseUtils::getStr($userDo->pid,'int') : 0;
+		$note = $userDo->address ? hlw_lib_BaseUtils::getStr($userDo->address,'string') : ''; //备注
 		
 		
         try {

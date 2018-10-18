@@ -18,7 +18,7 @@ class api_LibraryService extends api_Abstract implements LibraryServiceIf
         $resultDO = new ResultDO();
         $condition = array();
 
-        $admin_reg = gdl_lib_BaseUtils::getStr($admin_reg);
+        $admin_reg = hlw_lib_BaseUtils::getStr($admin_reg);
 
         try {
             if ($admin_reg) {
@@ -60,11 +60,11 @@ class api_LibraryService extends api_Abstract implements LibraryServiceIf
         $resultDO = new ResultDO();
         $condition = array();
 
-        $admin_reg = $librarylistDO->admin_reg ? gdl_lib_BaseUtils::getStr($librarylistDO->admin_reg) : '';
-        $share = $librarylistDO->share ? gdl_lib_BaseUtils::getStr($librarylistDO->share) : 0;
-        $cateid = $librarylistDO->catid ? gdl_lib_BaseUtils::getStr($librarylistDO->catid) : 0;
-		$offset = $librarylistDO->offset ? gdl_lib_BaseUtils::getStr($librarylistDO->offset, 'int') : 0;
-		$num = $librarylistDO->num ? gdl_lib_BaseUtils::getStr($librarylistDO->num, 'int') : 10;
+        $admin_reg = $librarylistDO->admin_reg ? hlw_lib_BaseUtils::getStr($librarylistDO->admin_reg) : '';
+        $share = $librarylistDO->share ? hlw_lib_BaseUtils::getStr($librarylistDO->share) : 0;
+        $cateid = $librarylistDO->catid ? hlw_lib_BaseUtils::getStr($librarylistDO->catid) : 0;
+		$offset = $librarylistDO->offset ? hlw_lib_BaseUtils::getStr($librarylistDO->offset, 'int') : 0;
+		$num = $librarylistDO->num ? hlw_lib_BaseUtils::getStr($librarylistDO->num, 'int') : 10;
 		$page = $offset*$num;
 
         try {
@@ -113,7 +113,7 @@ class api_LibraryService extends api_Abstract implements LibraryServiceIf
         }
 
         try {
-            $libraryId = gdl_lib_BaseUtils::getStr($libraryId, 'int');
+            $libraryId = hlw_lib_BaseUtils::getStr($libraryId, 'int');
             $modelLibrary = new model_newexam_library();
 
             $resLibrary = $modelLibrary->selectOne(array('id' => $libraryId), 'id,title,l_type,fileurl');

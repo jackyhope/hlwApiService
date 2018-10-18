@@ -126,8 +126,8 @@ class api_QuestionsService extends api_Abstract implements QuestionsServiceIf
         $result = new AnswerResuiltDTO();
         $data = array();
         try {
-            $qtype = gdl_lib_BaseUtils::getStr($qtype);
-            $questionId = gdl_lib_BaseUtils::getStr($questionId);
+            $qtype = hlw_lib_BaseUtils::getStr($qtype);
+            $questionId = hlw_lib_BaseUtils::getStr($questionId);
 
             $modelQuestionsAnswer = $qtype == 1 ? new model_newexam_questionsanswer() : new model_newexam_questiondbanswer();
             $condition['questions_id'] = $questionId;

@@ -32,7 +32,7 @@ class api_UserService extends api_Abstract implements UserServiceIf {
         if ($level) {
             $condition = array();
             $result = new ResultDO();
-            $userid = $userid ? gdl_lib_BaseUtils::getStr($userid, 'int') : 0;
+            $userid = $userid ? hlw_lib_BaseUtils::getStr($userid, 'int') : 0;
 
             $leftJoin = array(
                 'ex_user_company as uc' => 'ex_plaform.id=uc.plaform_id'
@@ -78,8 +78,8 @@ class api_UserService extends api_Abstract implements UserServiceIf {
         } else {
             $condition = array();
             $result = new ResultDO();
-            $plaformType = $plaformType ? gdl_lib_BaseUtils::getStr($plaformType, 'int') : 0;
-            $name = $name ? gdl_lib_BaseUtils::getStr($name) : '';
+            $plaformType = $plaformType ? hlw_lib_BaseUtils::getStr($plaformType, 'int') : 0;
+            $name = $name ? hlw_lib_BaseUtils::getStr($name) : '';
 
             if ($plaformType == 1) {
                 $condition['type'] = $plaformType;
@@ -126,9 +126,9 @@ class api_UserService extends api_Abstract implements UserServiceIf {
     public function getUseridByUcid($ucid) {
         $condition = array();
         $result = new UseridResultDTO();
-        $ucid = $ucid ? gdl_lib_BaseUtils::getStr($ucid, 'int') : 0;
+        $ucid = $ucid ? hlw_lib_BaseUtils::getStr($ucid, 'int') : 0;
 
-        $condition['gdl_userid'] = $ucid;
+        $condition['hlw_userid'] = $ucid;
         $items = 'userid,realname,idcard1,username';
         try {
             $modelPlaform = new model_newexam_user();
@@ -159,12 +159,12 @@ class api_UserService extends api_Abstract implements UserServiceIf {
     public function login(UserLoginRequestDTO $login) {
         $result = new UserLoginResultDTO();
         try {
-            $username = gdl_lib_BaseUtils::getStr($login->username, 'string');
-            $password = gdl_lib_BaseUtils::getStr($login->password, 'string');
-            $plaform = gdl_lib_BaseUtils::getStr($login->plaform, 'int');
+            $username = hlw_lib_BaseUtils::getStr($login->username, 'string');
+            $password = hlw_lib_BaseUtils::getStr($login->password, 'string');
+            $plaform = hlw_lib_BaseUtils::getStr($login->plaform, 'int');
 
 //            if (strlen($username) == 15 || strlen($username) == 18) {
-            if (!gdl_lib_BaseUtils::validation_filter_id_card($username)) {
+            if (!hlw_lib_BaseUtils::validation_filter_id_card($username)) {
                 $result->code = 0;
                 $result->message = '请输入正确的身份证！';
             }
@@ -189,7 +189,7 @@ class api_UserService extends api_Abstract implements UserServiceIf {
             if ($user['passsalt'] == 'aa123456') {
                 $password = $password === '' ? '' : md5(sha1($password) . '*]f)={.zRuS;FZWUv6"TGJPO_5g<Kx#~k&|7nj(I');
             } else {
-                $password = md5((gdl_lib_BaseUtils::IsMd5($password) ? md5($password) : md5(md5($password))) . $user['passsalt']);
+                $password = md5((hlw_lib_BaseUtils::IsMd5($password) ? md5($password) : md5(md5($password))) . $user['passsalt']);
             }
 
             if ($user['password'] == $password) {
@@ -223,7 +223,7 @@ class api_UserService extends api_Abstract implements UserServiceIf {
 
     public function sigleLogin($identity_id) {
         $result = new ResultDO();
-        $identity_id = $identity_id ? gdl_lib_BaseUtils::getStr($identity_id, 'str') : 0;
+        $identity_id = $identity_id ? hlw_lib_BaseUtils::getStr($identity_id, 'str') : 0;
 
         try {
             $serviceSigleLogin = new service_singlelogin();
@@ -316,8 +316,8 @@ class api_UserService extends api_Abstract implements UserServiceIf {
         $result = new UserResultDTO();
         try {
             $modelUser = new model_newexam_user();
-            $field = $userDo->field ? gdl_lib_BaseUtils::getStr($userDo->field, 'string') : '*';
-            $uid = $userDo->id ? gdl_lib_BaseUtils::getStr($userDo->id, 'int') : 0;
+            $field = $userDo->field ? hlw_lib_BaseUtils::getStr($userDo->field, 'string') : '*';
+            $uid = $userDo->id ? hlw_lib_BaseUtils::getStr($userDo->id, 'int') : 0;
             $res = $modelUser->selectOne(
                     array('ex_user_company.id' => $uid), $field, '', 'order by ex_user_company.userid desc', array('ex_user_company' => 'ex_user_company.userid=ex_user.userid')
             );
@@ -345,9 +345,9 @@ class api_UserService extends api_Abstract implements UserServiceIf {
      */
     public function user(UserDTO $userDo) {
         $result = new ResultDO();
-        $where = $userDo->where ? gdl_lib_BaseUtils::getStr($userDo->where) : '';
-        $update = $userDo->update ? gdl_lib_BaseUtils::getStr($userDo->update) : '';
-        $id = $userDo->id ? gdl_lib_BaseUtils::getStr($userDo->id, 'int') : 0;
+        $where = $userDo->where ? hlw_lib_BaseUtils::getStr($userDo->where) : '';
+        $update = $userDo->update ? hlw_lib_BaseUtils::getStr($userDo->update) : '';
+        $id = $userDo->id ? hlw_lib_BaseUtils::getStr($userDo->id, 'int') : 0;
 
         try {
             $modelUser = new model_newexam_user();
@@ -398,11 +398,11 @@ class api_UserService extends api_Abstract implements UserServiceIf {
      */
     public function messagepush(UserDTO $userDo) {
         $result = new ResultDO();
-        $where = $userDo->where ? gdl_lib_BaseUtils::getStr($userDo->where, 'string') : '';
-        $update = $userDo->update ? gdl_lib_BaseUtils::getStr($userDo->update, 'string') : '';
-        $id = $userDo->id ? gdl_lib_BaseUtils::getStr($userDo->id, 'int') : 0;
-        $offset = $userDo->offset ? gdl_lib_BaseUtils::getStr($userDo->offset, 'int') : 0;
-        $num = $userDo->num ? gdl_lib_BaseUtils::getStr($userDo->num, 'int') : 10;
+        $where = $userDo->where ? hlw_lib_BaseUtils::getStr($userDo->where, 'string') : '';
+        $update = $userDo->update ? hlw_lib_BaseUtils::getStr($userDo->update, 'string') : '';
+        $id = $userDo->id ? hlw_lib_BaseUtils::getStr($userDo->id, 'int') : 0;
+        $offset = $userDo->offset ? hlw_lib_BaseUtils::getStr($userDo->offset, 'int') : 0;
+        $num = $userDo->num ? hlw_lib_BaseUtils::getStr($userDo->num, 'int') : 10;
         $page = $offset * $num;
         try {
             $messagepush = new model_newexam_messagepush();
@@ -444,9 +444,9 @@ class api_UserService extends api_Abstract implements UserServiceIf {
      */
     public function userList(UserDTO $userDo) {
         $result = new ResultDO();
-        $where = $userDo->where ? gdl_lib_BaseUtils::getStr($userDo->where, 'string') : '';
-        $field = $userDo->field ? gdl_lib_BaseUtils::getStr($userDo->field, 'string') : '*';
-        $update = $userDo->update ? gdl_lib_BaseUtils::getStr($userDo->update, 'string') : '';
+        $where = $userDo->where ? hlw_lib_BaseUtils::getStr($userDo->where, 'string') : '';
+        $field = $userDo->field ? hlw_lib_BaseUtils::getStr($userDo->field, 'string') : '*';
+        $update = $userDo->update ? hlw_lib_BaseUtils::getStr($userDo->update, 'string') : '';
         try {
             $modeluser = new model_newexam_user();
 
@@ -482,7 +482,7 @@ class api_UserService extends api_Abstract implements UserServiceIf {
      * @return ResultDO
      */
     public function getAllUserByProjecttid($projecttid, $admin_reg) {
-        $projecttid = gdl_lib_BaseUtils::getStr($projecttid);
+        $projecttid = hlw_lib_BaseUtils::getStr($projecttid);
         $result = new ResultDO();
         try {
             $modelMember = new model_newexam_user();
@@ -511,7 +511,7 @@ class api_UserService extends api_Abstract implements UserServiceIf {
      * @return ResultDO
      */
     public function getAllUserBySpecialtyid($specialtyid, $admin_reg) {
-        $specialtyid = gdl_lib_BaseUtils::getStr($specialtyid);
+        $specialtyid = hlw_lib_BaseUtils::getStr($specialtyid);
         $result = new ResultDO();
         try {
             $modelMember = new model_newexam_user();
@@ -536,14 +536,14 @@ class api_UserService extends api_Abstract implements UserServiceIf {
     public function newpassword(UserPasswordRequestDTO $password) {
         $result = new UserLoginResultDTO();
         try {
-            $username = gdl_lib_BaseUtils::getStr($password->idcard, 'string');
-            $userid = gdl_lib_BaseUtils::getStr($password->userid, 'string');
-            $plaform = gdl_lib_BaseUtils::getStr($password->plaform, 'int');
-            $company = gdl_lib_BaseUtils::getStr($password->company, 'int');
+            $username = hlw_lib_BaseUtils::getStr($password->idcard, 'string');
+            $userid = hlw_lib_BaseUtils::getStr($password->userid, 'string');
+            $plaform = hlw_lib_BaseUtils::getStr($password->plaform, 'int');
+            $company = hlw_lib_BaseUtils::getStr($password->company, 'int');
 
             $controller = array('ex_user.idcard' => $username, 'ex_user_company.plaform_id' => $plaform, 'ex_user_company.status' => 0);
             $company ? $controller['ex_user_company.company_id'] = $company : '';
-            if (!gdl_lib_BaseUtils::validation_filter_id_card($username)) {
+            if (!hlw_lib_BaseUtils::validation_filter_id_card($username)) {
                 $result->code = 0;
                 $result->message = '请输入正确的身份证！';
             }
@@ -576,9 +576,9 @@ class api_UserService extends api_Abstract implements UserServiceIf {
      */
     public function userconfig(UserDTO $userDo) {
         $result = new ResultDO();
-        $id = $userDo->id ? gdl_lib_BaseUtils::getStr($userDo->id, 'int') : '0';
-        $field = $userDo->field ? gdl_lib_BaseUtils::getStr($userDo->field, 'str') : '*';
-        $plaform_id = $userDo->type ? gdl_lib_BaseUtils::getStr($userDo->type, 'int') : '0';
+        $id = $userDo->id ? hlw_lib_BaseUtils::getStr($userDo->id, 'int') : '0';
+        $field = $userDo->field ? hlw_lib_BaseUtils::getStr($userDo->field, 'str') : '*';
+        $plaform_id = $userDo->type ? hlw_lib_BaseUtils::getStr($userDo->type, 'int') : '0';
 
         try {
 
@@ -609,9 +609,9 @@ class api_UserService extends api_Abstract implements UserServiceIf {
      */
     public function addconfig(UserLoginResultDTO $userDo) {
         $result = new ResultDO();
-        $id = $userDo->pid ? gdl_lib_BaseUtils::getStr($userDo->pid, 'int') : '0';
-        $connect = $userDo->message ? explode('|', gdl_lib_BaseUtils::getStr($userDo->message, 'string')) : '';
-        $plaform_id = $userDo->uid ? gdl_lib_BaseUtils::getStr($userDo->uid, 'int') : '0';
+        $id = $userDo->pid ? hlw_lib_BaseUtils::getStr($userDo->pid, 'int') : '0';
+        $connect = $userDo->message ? explode('|', hlw_lib_BaseUtils::getStr($userDo->message, 'string')) : '';
+        $plaform_id = $userDo->uid ? hlw_lib_BaseUtils::getStr($userDo->uid, 'int') : '0';
         $arr = array();
         $key = ['title', 'type', 'img', 'url'];
         $datime = date('Y-m-d');
@@ -678,18 +678,18 @@ class api_UserService extends api_Abstract implements UserServiceIf {
         try {
             $result = new ResultDO();
 
-            $ucid = $simpleDO->ucid ? gdl_lib_BaseUtils::getStr($simpleDO->ucid, 'int') : '0';
-            $username = $simpleDO->username ? gdl_lib_BaseUtils::getStr($simpleDO->username, 'string') : '';
-            $truename = $simpleDO->truename ? gdl_lib_BaseUtils::getStr($simpleDO->truename, 'string') : '';
-            $idcard = $simpleDO->idcard ? gdl_lib_BaseUtils::getStr($simpleDO->idcard, 'string') : '';
-            $phone = $simpleDO->phone ? gdl_lib_BaseUtils::getStr($simpleDO->phone, 'string') : '';
+            $ucid = $simpleDO->ucid ? hlw_lib_BaseUtils::getStr($simpleDO->ucid, 'int') : '0';
+            $username = $simpleDO->username ? hlw_lib_BaseUtils::getStr($simpleDO->username, 'string') : '';
+            $truename = $simpleDO->truename ? hlw_lib_BaseUtils::getStr($simpleDO->truename, 'string') : '';
+            $idcard = $simpleDO->idcard ? hlw_lib_BaseUtils::getStr($simpleDO->idcard, 'string') : '';
+            $phone = $simpleDO->phone ? hlw_lib_BaseUtils::getStr($simpleDO->phone, 'string') : '';
 
             $model = new model_newexam_user();
             $modelUserCompany = new model_newexam_usercompany();
             $modelPlaform = new model_newexam_plaform();
 
             $insert = [
-                'gdl_userid' => $ucid,
+                'hlw_userid' => $ucid,
                 'username' => $username,
                 'realname' => $truename,
                 'idcard' => $idcard,
@@ -746,14 +746,14 @@ class api_UserService extends api_Abstract implements UserServiceIf {
      */
     public function userinfo($idcard) {
         $result = new ResultDO();
-        $gdl_userid = $idcard;
+        $hlw_userid = $idcard;
 
 
         try {
 			
 			 $modelUserCompany = new model_newexam_user();
 
-            $res = $modelUserCompany->selectOne(['gdl_userid'=>$gdl_userid], 'realname,photo,idcard');
+            $res = $modelUserCompany->selectOne(['hlw_userid'=>$hlw_userid], 'realname,photo,idcard');
 
             $result->data[] =$res;
 
@@ -778,11 +778,11 @@ class api_UserService extends api_Abstract implements UserServiceIf {
         $result = new ResultDO();
         try {
 			
-			$userid = $userDo->id ? gdl_lib_BaseUtils::getStr($userDo->id, 'int') : '0';
-			$plaform_id = $userDo->type ? gdl_lib_BaseUtils::getStr($userDo->type , 'int') : '0';
-			$identity_id = $userDo->offset ? gdl_lib_BaseUtils::getStr($userDo->offset, 'int') : '0';
-			$cid = $userDo->num ? gdl_lib_BaseUtils::getStr($userDo->num, 'int') : '0';
-			$marks = $userDo->where ? gdl_lib_BaseUtils::getStr($userDo->where, 'string') : 'c';
+			$userid = $userDo->id ? hlw_lib_BaseUtils::getStr($userDo->id, 'int') : '0';
+			$plaform_id = $userDo->type ? hlw_lib_BaseUtils::getStr($userDo->type , 'int') : '0';
+			$identity_id = $userDo->offset ? hlw_lib_BaseUtils::getStr($userDo->offset, 'int') : '0';
+			$cid = $userDo->num ? hlw_lib_BaseUtils::getStr($userDo->num, 'int') : '0';
+			$marks = $userDo->where ? hlw_lib_BaseUtils::getStr($userDo->where, 'string') : 'c';
 			switch($marks){
 				case 'c':
 					$res = [[2]];
@@ -901,8 +901,8 @@ class api_UserService extends api_Abstract implements UserServiceIf {
     public function newsinfo(UserDTO $userDo) {
         $result = new ResultDO();
 
-        $identity_id = $userDo->id ? gdl_lib_BaseUtils::getStr($userDo->id, 'int') : 0;
-		$plaform_id = $userDo->plaformid ? gdl_lib_BaseUtils::getStr($userDo->plaformid, 'int') : 0;
+        $identity_id = $userDo->id ? hlw_lib_BaseUtils::getStr($userDo->id, 'int') : 0;
+		$plaform_id = $userDo->plaformid ? hlw_lib_BaseUtils::getStr($userDo->plaformid, 'int') : 0;
 
         try {
 			$modelUserCompany = new model_newexam_usercompany();
@@ -936,8 +936,8 @@ class api_UserService extends api_Abstract implements UserServiceIf {
     public function specialist(UserDTO $userDo) {
         $result = new ResultDO();
 
-        $identity_id = $userDo->id ? gdl_lib_BaseUtils::getStr($userDo->id, 'int') : 0;
-		$plaform_id = $userDo->plaformid ? gdl_lib_BaseUtils::getStr($userDo->plaformid, 'int') : 0;
+        $identity_id = $userDo->id ? hlw_lib_BaseUtils::getStr($userDo->id, 'int') : 0;
+		$plaform_id = $userDo->plaformid ? hlw_lib_BaseUtils::getStr($userDo->plaformid, 'int') : 0;
 
         try {
 			$modelUserCompany = new model_newexam_usercompany();

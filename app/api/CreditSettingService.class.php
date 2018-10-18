@@ -7,8 +7,8 @@ class api_CreditSettingService extends api_Abstract implements CreditSettingServ
 
     public function CreditSetting($type, $id) {
         $resultDO = new ResultDO();
-        $type = gdl_lib_BaseUtils::getStr($type, 'int');
-        $id = gdl_lib_BaseUtils::getStr($id, 'int');
+        $type = hlw_lib_BaseUtils::getStr($type, 'int');
+        $id = hlw_lib_BaseUtils::getStr($id, 'int');
         try {
             if ($type == 1) {
                 $model = new model_newexam_qbank(); //题库

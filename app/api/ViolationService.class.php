@@ -15,7 +15,7 @@ class api_ViolationService extends api_Abstract implements ViolationServiceIf
     {
         $result = new ResultDO();
 
-        $id = $violationDo->id ? gdl_lib_BaseUtils::getStr($violationDo->id) : 0;
+        $id = $violationDo->id ? hlw_lib_BaseUtils::getStr($violationDo->id) : 0;
         $field = 'behavior,person_id,person_name,create_time';
 
         try {

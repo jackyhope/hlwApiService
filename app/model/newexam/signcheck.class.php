@@ -1,5 +1,5 @@
 <?php
-class model_newexam_signcheck extends gdl_components_basemodel
+class model_newexam_signcheck extends hlw_components_basemodel
 {
 
     public function primarykey() {

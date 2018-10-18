@@ -15,11 +15,11 @@ class api_TaskorderService extends api_Abstract implements TaskorderServiceIf
     {
         $result = new ResultDO();
 
-        $id = $taskorder->id ? gdl_lib_BaseUtils::getStr($taskorder->id,'int') : 0;
-		$field = $taskorder->field ? gdl_lib_BaseUtils::getStr($taskorder->field) : '*';
-		$limit = $taskorder->limit ? gdl_lib_BaseUtils::getStr($taskorder->limit) : 0;
-		$mark = $taskorder->mark ? gdl_lib_BaseUtils::getStr($taskorder->mark,'int') : 1;
-		$sign = $taskorder->sign ? gdl_lib_BaseUtils::getStr($taskorder->sign,'int') : 0;
+        $id = $taskorder->id ? hlw_lib_BaseUtils::getStr($taskorder->id,'int') : 0;
+		$field = $taskorder->field ? hlw_lib_BaseUtils::getStr($taskorder->field) : '*';
+		$limit = $taskorder->limit ? hlw_lib_BaseUtils::getStr($taskorder->limit) : 0;
+		$mark = $taskorder->mark ? hlw_lib_BaseUtils::getStr($taskorder->mark,'int') : 1;
+		$sign = $taskorder->sign ? hlw_lib_BaseUtils::getStr($taskorder->sign,'int') : 0;
 
         if (!$id) {
             $result->success = false;
@@ -70,8 +70,8 @@ class api_TaskorderService extends api_Abstract implements TaskorderServiceIf
     {
         $result = new ResultDO();
 
-        $id = $taskorder->id ? gdl_lib_BaseUtils::getStr($taskorder->id,'int') : 0;
-		$field = $taskorder->field ? gdl_lib_BaseUtils::getStr($taskorder->field) : '*';
+        $id = $taskorder->id ? hlw_lib_BaseUtils::getStr($taskorder->id,'int') : 0;
+		$field = $taskorder->field ? hlw_lib_BaseUtils::getStr($taskorder->field) : '*';
 
 
         if (!$id || !pid) {
@@ -110,10 +110,10 @@ class api_TaskorderService extends api_Abstract implements TaskorderServiceIf
     {
         $result = new ResultDO();
 
-        $id = $taskorder->id ? gdl_lib_BaseUtils::getStr($taskorder->id,'int') : 0;
+        $id = $taskorder->id ? hlw_lib_BaseUtils::getStr($taskorder->id,'int') : 0;
 		$admin_reg = $taskorder->admin_reg ? $taskorder->admin_reg : 0;
-		$limit = $taskorder->limit ? gdl_lib_BaseUtils::getStr($taskorder->limit) : 10;
-		$field = $taskorder->field ? gdl_lib_BaseUtils::getStr($taskorder->field) : '*';
+		$limit = $taskorder->limit ? hlw_lib_BaseUtils::getStr($taskorder->limit) : 10;
+		$field = $taskorder->field ? hlw_lib_BaseUtils::getStr($taskorder->field) : '*';
 
         if (!$id) {
             $result->success = false;

@@ -1,5 +1,5 @@
 <?php
-class model_newexam_weblogall extends gdl_components_basemodel
+class model_newexam_weblogall extends hlw_components_basemodel
 {
 
     public function primarykey() {

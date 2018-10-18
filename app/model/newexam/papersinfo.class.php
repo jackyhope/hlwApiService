@@ -1,5 +1,5 @@
 <?php
-class model_newexam_papersinfo extends gdl_components_basemodel
+class model_newexam_papersinfo extends hlw_components_basemodel
 {
 
     public function primarykey() {

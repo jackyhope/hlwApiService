@@ -18,12 +18,12 @@ class api_EngprojectService extends api_Abstract implements EngprojectServiceIf
     {
         $result = new ResultDO();
 
-        $id = $engprojectDo->id ? gdl_lib_BaseUtils::getStr($engprojectDo->id) : 0;
+        $id = $engprojectDo->id ? hlw_lib_BaseUtils::getStr($engprojectDo->id) : 0;
         $task_title = empty($engprojectDo->filename['task_title']) ? 0 : mysql_escape_string($engprojectDo->filename['task_title']);
 		$plaformArr = empty($engprojectDo->filename['plaformArr']) ? 0 : mysql_escape_string($engprojectDo->filename['plaformArr']);
 		
-		$page = $engprojectDo->limit ? gdl_lib_BaseUtils::getStr($engprojectDo->limit,'int') : 0;
-		$num = $engprojectDo->num ? gdl_lib_BaseUtils::getStr($engprojectDo->num,'int') : 10;
+		$page = $engprojectDo->limit ? hlw_lib_BaseUtils::getStr($engprojectDo->limit,'int') : 0;
+		$num = $engprojectDo->num ? hlw_lib_BaseUtils::getStr($engprojectDo->num,'int') : 10;
 		$page = $page*10;
         if (!$id) {
             $result->success = false;
@@ -37,7 +37,7 @@ class api_EngprojectService extends api_Abstract implements EngprojectServiceIf
             $str = null;
             $eventuser = new model_newexam_eventuser();
             $field = $engprojectDo->field ? $engprojectDo->field : '*';
-            $res = $eventuser->select('gdl_userid = ' . $engprojectDo->id.' and plaform_id in('.$plaformArr.')', $field,'', 'order by id desc limit '.$page.','.$num)->items;
+            $res = $eventuser->select('hlw_userid = ' . $engprojectDo->id.' and plaform_id in('.$plaformArr.')', $field,'', 'order by id desc limit '.$page.','.$num)->items;
             if (!empty($res[0])) {
                 foreach ($res as $v) {
                     $str[] = $v['eventid'];
@@ -210,8 +210,8 @@ class api_EngprojectService extends api_Abstract implements EngprojectServiceIf
             $field = $engprojectDo->field ? $engprojectDo->field : '*';
             $task_title = empty($engprojectDo->filename['task_title']) ? 0 : mysql_escape_string($engprojectDo->filename['task_title']);
 			
-			$page = $engprojectDo->limit ? gdl_lib_BaseUtils::getStr($engprojectDo->limit,'int') : 0;
-			$num = $engprojectDo->num ? gdl_lib_BaseUtils::getStr($engprojectDo->num,'int') : 10;
+			$page = $engprojectDo->limit ? hlw_lib_BaseUtils::getStr($engprojectDo->limit,'int') : 0;
+			$num = $engprojectDo->num ? hlw_lib_BaseUtils::getStr($engprojectDo->num,'int') : 10;
 			$page = $page*10;
 
             $status = $engprojectDo->status ? (int) $engprojectDo->status : 0;
@@ -253,12 +253,12 @@ class api_EngprojectService extends api_Abstract implements EngprojectServiceIf
     {
         $result = new ResultDO();
         try {
-            $eventid = $engprojectDocDo->eventid ? gdl_lib_BaseUtils::getStr($engprojectDocDo->eventid, 'int') : 0;
+            $eventid = $engprojectDocDo->eventid ? hlw_lib_BaseUtils::getStr($engprojectDocDo->eventid, 'int') : 0;
             $identity_id = $engprojectDocDo->identity_id ? $engprojectDocDo->identity_id : 0;
 			
-			$type = $engprojectDocDo->type ? gdl_lib_BaseUtils::getStr($engprojectDocDo->type,'int') : 0;
-			$page = $engprojectDocDo->offset ? gdl_lib_BaseUtils::getStr($engprojectDocDo->offset,'int') : 0;
-			$num = $engprojectDocDo->num ? gdl_lib_BaseUtils::getStr($engprojectDocDo->num,'int') : 10;
+			$type = $engprojectDocDo->type ? hlw_lib_BaseUtils::getStr($engprojectDocDo->type,'int') : 0;
+			$page = $engprojectDocDo->offset ? hlw_lib_BaseUtils::getStr($engprojectDocDo->offset,'int') : 0;
+			$num = $engprojectDocDo->num ? hlw_lib_BaseUtils::getStr($engprojectDocDo->num,'int') : 10;
 			$page = $page*10;
 			
             if (!$eventid) {
@@ -308,8 +308,8 @@ class api_EngprojectService extends api_Abstract implements EngprojectServiceIf
 		$cpi=0;
         $result = new ResultDO();
         try {
-            $eventid = gdl_lib_BaseUtils::getStr($eventid, 'int');
-            $id = gdl_lib_BaseUtils::getStr($id, 'int');
+            $eventid = hlw_lib_BaseUtils::getStr($eventid, 'int');
+            $id = hlw_lib_BaseUtils::getStr($id, 'int');
 
             if (!$eventid) {
                 throw new Exception('缺少工程ID');
@@ -365,12 +365,12 @@ class api_EngprojectService extends api_Abstract implements EngprojectServiceIf
     {
         $result = new ResultDO();
         try {
-            $title = $engProjectDoc->title ? gdl_lib_BaseUtils::getStr($engProjectDoc->title) : '';
-            $address = $engProjectDoc->address ? gdl_lib_BaseUtils::getStr($engProjectDoc->address) : '';
-            $eventid = $engProjectDoc->eventid ? gdl_lib_BaseUtils::getStr($engProjectDoc->eventid, 'int') : 0;
-            $introduction = $engProjectDoc->introduction ? gdl_lib_BaseUtils::getStr($engProjectDoc->introduction) : '';
-            $type = $engProjectDoc->type ? gdl_lib_BaseUtils::getStr($engProjectDoc->type, 'int') : 0;
-            $identity_id = $engProjectDoc->identity_id ? gdl_lib_BaseUtils::getStr($engProjectDoc->identity_id, 'int') : 0;
+            $title = $engProjectDoc->title ? hlw_lib_BaseUtils::getStr($engProjectDoc->title) : '';
+            $address = $engProjectDoc->address ? hlw_lib_BaseUtils::getStr($engProjectDoc->address) : '';
+            $eventid = $engProjectDoc->eventid ? hlw_lib_BaseUtils::getStr($engProjectDoc->eventid, 'int') : 0;
+            $introduction = $engProjectDoc->introduction ? hlw_lib_BaseUtils::getStr($engProjectDoc->introduction) : '';
+            $type = $engProjectDoc->type ? hlw_lib_BaseUtils::getStr($engProjectDoc->type, 'int') : 0;
+            $identity_id = $engProjectDoc->identity_id ? hlw_lib_BaseUtils::getStr($engProjectDoc->identity_id, 'int') : 0;
 
             if (!$title || !$identity_id || !$type || !$address || !$eventid) {
                 throw new Exception('信息不完整');
@@ -416,9 +416,9 @@ class api_EngprojectService extends api_Abstract implements EngprojectServiceIf
         $result = new ResultDO();
 
         try {
-            $title = $engProjectDoc->title ? gdl_lib_BaseUtils::getStr($engProjectDoc->title) : 0;
-            $id = $engProjectDoc->eventid ? gdl_lib_BaseUtils::getStr($engProjectDoc->eventid) : 0;
-            $identity_id = $engProjectDoc->identity_id ? gdl_lib_BaseUtils::getStr($engProjectDoc->identity_id) : 0;
+            $title = $engProjectDoc->title ? hlw_lib_BaseUtils::getStr($engProjectDoc->title) : 0;
+            $id = $engProjectDoc->eventid ? hlw_lib_BaseUtils::getStr($engProjectDoc->eventid) : 0;
+            $identity_id = $engProjectDoc->identity_id ? hlw_lib_BaseUtils::getStr($engProjectDoc->identity_id) : 0;
 
             $update = array();
             if ($title) {
@@ -470,12 +470,12 @@ class api_EngprojectService extends api_Abstract implements EngprojectServiceIf
     {
         $result = new ResultDO();
         try {
-            $title = $engProjectDoc->title ? gdl_lib_BaseUtils::getStr($engProjectDoc->title) : '';
-            $address = $engProjectDoc->address ? gdl_lib_BaseUtils::getStr($engProjectDoc->address) : '';
-            $eventid = $engProjectDoc->eventid ? gdl_lib_BaseUtils::getStr($engProjectDoc->eventid, 'int') : 0;
-            $introduction = $engProjectDoc->introduction ? gdl_lib_BaseUtils::getStr($engProjectDoc->introduction) : '';
-            $userid = $engProjectDoc->userid ? gdl_lib_BaseUtils::getStr($engProjectDoc->userid, 'int') : 0;
-            $id = gdl_lib_BaseUtils::getStr($id,'int');
+            $title = $engProjectDoc->title ? hlw_lib_BaseUtils::getStr($engProjectDoc->title) : '';
+            $address = $engProjectDoc->address ? hlw_lib_BaseUtils::getStr($engProjectDoc->address) : '';
+            $eventid = $engProjectDoc->eventid ? hlw_lib_BaseUtils::getStr($engProjectDoc->eventid, 'int') : 0;
+            $introduction = $engProjectDoc->introduction ? hlw_lib_BaseUtils::getStr($engProjectDoc->introduction) : '';
+            $userid = $engProjectDoc->userid ? hlw_lib_BaseUtils::getStr($engProjectDoc->userid, 'int') : 0;
+            $id = hlw_lib_BaseUtils::getStr($id,'int');
 
             if (!$title || !$userid || !$address || !$eventid) {
                 throw new Exception('信息不完整');
@@ -524,8 +524,8 @@ class api_EngprojectService extends api_Abstract implements EngprojectServiceIf
             $eventback = new model_newexam_eventbask();
             $field = $engprojectDo->field ? $engprojectDo->field : '*';
             $status = $engprojectDo->status ? $engprojectDo->status : '0';
-			$page = $engprojectDo->limit ? gdl_lib_BaseUtils::getStr($engprojectDo->limit,'int') : 0;
-			$num = $engprojectDo->num ? gdl_lib_BaseUtils::getStr($engprojectDo->num,'int') : 10;
+			$page = $engprojectDo->limit ? hlw_lib_BaseUtils::getStr($engprojectDo->limit,'int') : 0;
+			$num = $engprojectDo->num ? hlw_lib_BaseUtils::getStr($engprojectDo->num,'int') : 10;
 			$page = $page*10;
 			$limit = 'limit '.$page.','.$num;
 			
@@ -587,8 +587,8 @@ class api_EngprojectService extends api_Abstract implements EngprojectServiceIf
     {
         $result = new ResultDO();
         try {
-            $identity_id = $engProjectDoc->identity_id ? gdl_lib_BaseUtils::getStr($engProjectDoc->identity_id, 'int') : 0;
-            $address = $engProjectDoc->address ? gdl_lib_BaseUtils::getStr($engProjectDoc->address) : 0;
+            $identity_id = $engProjectDoc->identity_id ? hlw_lib_BaseUtils::getStr($engProjectDoc->identity_id, 'int') : 0;
+            $address = $engProjectDoc->address ? hlw_lib_BaseUtils::getStr($engProjectDoc->address) : 0;
 
             if (!$identity_id || !$address) {
                 throw new Exception('信息不完整');

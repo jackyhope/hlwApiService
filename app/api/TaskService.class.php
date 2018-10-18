@@ -12,8 +12,8 @@ class api_TaskService extends api_Abstract implements TaskServiceIf
     //根据任务ID 获取任务基本信息
     public function getTaskInfo(TaskDTO $task){
         $result = new ResultDO();
-        $id = $task->id ? gdl_lib_BaseUtils::getStr($task->id,'int') : 0;
-        $identity_id = $task->identity_id ? gdl_lib_BaseUtils::getStr($task->identity_id,'int') : 0;
+        $id = $task->id ? hlw_lib_BaseUtils::getStr($task->id,'int') : 0;
+        $identity_id = $task->identity_id ? hlw_lib_BaseUtils::getStr($task->identity_id,'int') : 0;
         if (!$id || $identity_id==0) {
             $result->success = false;
             $result->code = 0;
@@ -161,12 +161,12 @@ class api_TaskService extends api_Abstract implements TaskServiceIf
 
         $result = new ResultDO();
 
-        $identity_id = $taskUser->identity_id ? gdl_lib_BaseUtils::getStr($taskUser->identity_id,'int') : 0;
-        $is_complete = $taskUser->is_complete ? gdl_lib_BaseUtils::getStr($taskUser->is_complete) :0;//是否完成
-        $adminreg = $taskUser->adminreg ? gdl_lib_BaseUtils::getStr($taskUser->adminreg) :'';//
-        $lose_efficacy = $taskUser->lose_efficacy ? gdl_lib_BaseUtils::getStr($taskUser->lose_efficacy,'int') : 0;//是否失效
-        $page = $taskUser->page ? gdl_lib_BaseUtils::getStr($taskUser->page) : 1;
-        $center = $taskUser->center ? gdl_lib_BaseUtils::getStr($taskUser->center,'int') : 0;
+        $identity_id = $taskUser->identity_id ? hlw_lib_BaseUtils::getStr($taskUser->identity_id,'int') : 0;
+        $is_complete = $taskUser->is_complete ? hlw_lib_BaseUtils::getStr($taskUser->is_complete) :0;//是否完成
+        $adminreg = $taskUser->adminreg ? hlw_lib_BaseUtils::getStr($taskUser->adminreg) :'';//
+        $lose_efficacy = $taskUser->lose_efficacy ? hlw_lib_BaseUtils::getStr($taskUser->lose_efficacy,'int') : 0;//是否失效
+        $page = $taskUser->page ? hlw_lib_BaseUtils::getStr($taskUser->page) : 1;
+        $center = $taskUser->center ? hlw_lib_BaseUtils::getStr($taskUser->center,'int') : 0;
         if (!$identity_id) {
             $result->success = false;
             $result->code = 0;
@@ -434,9 +434,9 @@ class api_TaskService extends api_Abstract implements TaskServiceIf
      */
     public function receiveTask(TaskUserDTO $taskUser){
         $result = new ResultDO();
-        $task_id     = $taskUser->task_id ? gdl_lib_BaseUtils::getStr($taskUser->task_id,'int') : 0;
-        $identity_id = $taskUser->identity_id ? gdl_lib_BaseUtils::getStr($taskUser->identity_id,'int') : 0;
-        $task_type = $taskUser->task_type ? gdl_lib_BaseUtils::getStr($taskUser->task_type,'int') : 0;
+        $task_id     = $taskUser->task_id ? hlw_lib_BaseUtils::getStr($taskUser->task_id,'int') : 0;
+        $identity_id = $taskUser->identity_id ? hlw_lib_BaseUtils::getStr($taskUser->identity_id,'int') : 0;
+        $task_type = $taskUser->task_type ? hlw_lib_BaseUtils::getStr($taskUser->task_type,'int') : 0;
         $taskUserModel = new model_newexam_taskuser();
         try{
             $tUser = $taskUserModel->selectOne(" identity_id = {$identity_id} AND task_id = {$task_id} and status=1");
@@ -476,9 +476,9 @@ class api_TaskService extends api_Abstract implements TaskServiceIf
      */
     public function checkUserTaskAndPutTask(TaskUserDTO $taskUser){
         $result = new ResultDO();
-        $identity_id = $taskUser->identity_id ? gdl_lib_BaseUtils::getStr($taskUser->identity_id,'int') : 0;
-        $task_classify = $taskUser->task_classify ? gdl_lib_BaseUtils::getStr($taskUser->task_classify,'int') : 0;//试卷分类
-        $put_data = $taskUser->data ? gdl_lib_BaseUtils::reMoveXss($taskUser->data) : '';
+        $identity_id = $taskUser->identity_id ? hlw_lib_BaseUtils::getStr($taskUser->identity_id,'int') : 0;
+        $task_classify = $taskUser->task_classify ? hlw_lib_BaseUtils::getStr($taskUser->task_classify,'int') : 0;//试卷分类
+        $put_data = $taskUser->data ? hlw_lib_BaseUtils::reMoveXss($taskUser->data) : '';
         if (!$identity_id) {
             $result->success = false;
             $result->code = 0;

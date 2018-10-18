@@ -9,15 +9,15 @@ class api_StudyplanService extends api_Abstract implements StudyplanServiceIf
 
     public function getStudyplan(StudyplanDTO $StudyplanDo)
     {
-		$offset = $StudyplanDo->offset ? gdl_lib_BaseUtils::getStr($StudyplanDo->offset, 'int') : 0;
-		$num = $StudyplanDo->num ? gdl_lib_BaseUtils::getStr($StudyplanDo->num, 'int') : 10;
+		$offset = $StudyplanDo->offset ? hlw_lib_BaseUtils::getStr($StudyplanDo->offset, 'int') : 0;
+		$num = $StudyplanDo->num ? hlw_lib_BaseUtils::getStr($StudyplanDo->num, 'int') : 10;
 		$page = $offset*$num;
         $result = new ResultDO();
         try {
             $studyplandb= new model_newexam_studyplan();
-            $id = gdl_lib_BaseUtils::getStr($StudyplanDo->id, 'int');
-            $inid = gdl_lib_BaseUtils::getStr($StudyplanDo->inid, 'string');
-            $admin_reg = gdl_lib_BaseUtils::getStr($StudyplanDo->admin_reg, 'string');
+            $id = hlw_lib_BaseUtils::getStr($StudyplanDo->id, 'int');
+            $inid = hlw_lib_BaseUtils::getStr($StudyplanDo->inid, 'string');
+            $admin_reg = hlw_lib_BaseUtils::getStr($StudyplanDo->admin_reg, 'string');
             $where = array(
                 'id'=>$id,
                 'isdelete'=>0,
@@ -54,12 +54,12 @@ class api_StudyplanService extends api_Abstract implements StudyplanServiceIf
         $result = new ResultDO();
         try {
             $studyfeedbackdb= new model_newexam_studyfeedback();
-            $study_plan_id = gdl_lib_BaseUtils::getStr($addStudyplanDo->study_plan_id, 'int');
-            $content = gdl_lib_BaseUtils::getStr($addStudyplanDo->content, 'string');
-            $identity_id = gdl_lib_BaseUtils::getStr($addStudyplanDo->identity_id, 'int');
-            $status = gdl_lib_BaseUtils::getStr($addStudyplanDo->status, 'int');
-            $title = gdl_lib_BaseUtils::getStr($addStudyplanDo->title, 'string');
-            $feedbackid = $addStudyplanDo->feedbackid ? gdl_lib_BaseUtils::getStr($addStudyplanDo->feedbackid, 'int') : '';
+            $study_plan_id = hlw_lib_BaseUtils::getStr($addStudyplanDo->study_plan_id, 'int');
+            $content = hlw_lib_BaseUtils::getStr($addStudyplanDo->content, 'string');
+            $identity_id = hlw_lib_BaseUtils::getStr($addStudyplanDo->identity_id, 'int');
+            $status = hlw_lib_BaseUtils::getStr($addStudyplanDo->status, 'int');
+            $title = hlw_lib_BaseUtils::getStr($addStudyplanDo->title, 'string');
+            $feedbackid = $addStudyplanDo->feedbackid ? hlw_lib_BaseUtils::getStr($addStudyplanDo->feedbackid, 'int') : '';
             if($feedbackid){
                $condition['id'] = $feedbackid;
                $item = array(

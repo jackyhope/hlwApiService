@@ -3,7 +3,7 @@
  * 任务规则表
  * @author yanghao <yh38615890@sina.cn>
  */
-class model_newexam_taskreward extends gdl_components_basemodel
+class model_newexam_taskreward extends hlw_components_basemodel
 {
 
     public function primarykey()

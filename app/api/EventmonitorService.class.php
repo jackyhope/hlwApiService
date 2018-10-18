@@ -1,8 +1,8 @@
 <?php
 
-use com\gdl\agk\interfaces\EventmonitorServiceIf;
-use com\gdl\common\dataobject\common\ResultDO;
-use com\gdl\agk\dataobject\eventmonitor\EventprojectDTO;
+use com\hlw\ks\interfaces\EventmonitorServiceIf;
+use com\hlw\common\dataobject\common\ResultDO;
+use com\hlw\ks\dataobject\eventmonitor\EventprojectDTO;
 
 
 class api_EventmonitorService extends api_Abstract implements EventmonitorServiceIf
@@ -11,7 +11,7 @@ class api_EventmonitorService extends api_Abstract implements EventmonitorServic
    
 
     /**
-     * ÐÂÌí¼Ó ÊÓÆµÍ·Í¼ 
+     * ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ÆµÍ·Í¼ 
      * @param EngprojectRequestDTO $engprojectDo
      * @return ResultDO
      */
@@ -44,8 +44,8 @@ class api_EventmonitorService extends api_Abstract implements EventmonitorServic
         return $result;
     }
 	/**
-	* »ñÈ¡ÊÓÆµÏêÇé
-	* @param $vid ÊÓÆµid
+	* ï¿½ï¿½È¡ï¿½ï¿½Æµï¿½ï¿½ï¿½ï¿½
+	* @param $vid ï¿½ï¿½Æµid
 	*/
 	public function details($vid){
 		$result = new ResultDO();
@@ -72,7 +72,7 @@ class api_EventmonitorService extends api_Abstract implements EventmonitorServic
 
 	}
 	/**
-	* ÈË¹¤ÖÇÄÜÅÐ±ðÊÇ·ñÎ¥¹æ²Ù×÷
+	* ï¿½Ë¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½ï¿½Ç·ï¿½Î¥ï¿½ï¿½ï¿½ï¿½ï¿½
 	*/
 
    
