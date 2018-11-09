@@ -8,9 +8,8 @@ define('ENV', 'online');
 if(ENV == 'local'){
     require __DIR__.'/../hlw_php/ApiCore.php';
 } else {
-    require '/home/wwwroot/hlw_php/ApiCore.php';
+    require realpath( __DIR__).'/ApiCore.php';
 }
-
 
 ApiCore::init('app', 'hlwApiSdk');
 SDb::setConfigFile(__DIR__ . '/app/conf/db.php');
