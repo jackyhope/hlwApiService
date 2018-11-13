@@ -4,6 +4,6 @@ class api_TestService extends api_Abstract implements TestServiceIf
 {
     public function test($string)
     {
-        echo $string.'122345';
+        return $string.'122345';
     }
 }
