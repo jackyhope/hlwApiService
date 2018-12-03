@@ -13,6 +13,16 @@ if(ENV == 'local'){
 }
 
 ApiCore::init('app', 'hlwApiSdk');
-SDb::setConfigFile(__DIR__ . '/app/conf/db.php');
+
+
+if (strpos($_SERVER['SERVER_ADDR'], '192.168.116.27') !== FALSE) {//测试环境1
+    SDb::setConfigFile(__DIR__ . '/app/conf/db.test.php');
+}else if (strpos($_SERVER['SERVER_ADDR'], '192.168.116.31') !== FALSE) { //测试环境2
+    SDb::setConfigFile(__DIR__ . '/app/conf/db.test.php');
+}else if (strpos($_SERVER['SERVER_ADDR'], '192.168') !== FALSE) { //本地环境
+    SDb::setConfigFile(__DIR__ . '/app/conf/db.local.php');
+} else {//线上环境
+    SDb::setConfigFile(__DIR__ . '/app/conf/db.product.php');
+}
 require __DIR__ . '/app/conf/constant.php';
 ApiCore::run();
