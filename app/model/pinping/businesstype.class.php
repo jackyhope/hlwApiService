@@ -1,5 +1,5 @@
 <?php
-class model_cl_behaviorrecord extends hlw_components_basemodel
+class model_pinping_businesstype extends hlw_components_basemodel
 {
 
     public function primarykey() {
@@ -7,8 +7,7 @@ class model_cl_behaviorrecord extends hlw_components_basemodel
     }
 
     public function tableName() {
-        return 'cl_behavior_record';
+        return 'mx_business_type';
     }
 
 }
-
