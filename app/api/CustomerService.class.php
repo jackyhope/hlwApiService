@@ -1,20 +1,19 @@
 <?php
 
 use com\hlw\huilie\interfaces\CustomerServiceIf;
-use com\hlw\huilie\dataobject\customer\CustomerRequestDTO;
 use com\hlw\common\dataobject\common\ResultDO;
 
 class api_CustomerService extends api_Abstract implements CustomerServiceIf {
 
-    public function saveCustomer(CustomerRequestDTO $CustomerDo) {
+    public function saveCustomer(\com\hlw\huilie\dataobject\customer\CustomerRequestDTO $CustomerDo) {
         $resultDo = new ResultDO();
-
         if (!$CustomerDo->name) {
             $resultDo->code = 500;
             $resultDo->success = TRUE;
-            $resultDo->message = "确实企业名称";
+            $resultDo->message = '缺少名称';
+            return $resultDo;
         }
-
+//
         $customer_name = hlw_lib_BaseUtils::getStr($CustomerDo->name);
         $customer_address = $CustomerDo->address ? hlw_lib_BaseUtils::getStr($CustomerDo->address) : '';
         $customer_phonetwo = $CustomerDo->phonetwo ? hlw_lib_BaseUtils::getStr($CustomerDo->phonetwo) : '';
@@ -71,10 +70,10 @@ class api_CustomerService extends api_Abstract implements CustomerServiceIf {
                 'telephone' => $customer_tele,
                 'introduce' => $customer_introduce
             ];
-            
-            
+
+
             if (!$isExist['customer_id']) {
-                $insert_res = $model_customer->insert($customer_ins,TRUE);
+                $model_customer->insert($customer_ins);
                 $customer_id = $model_customer->lastInsertId();
                 $mode = 'add'; //add
             } else {
@@ -104,31 +103,41 @@ class api_CustomerService extends api_Abstract implements CustomerServiceIf {
                 $model_customer_data->update(['customer_id' => $customer_id], $customer_data_ins);
             }
 
+            $isExistLinkMan = $model_contacts->selectOne(['mx_r_contacts_customer.`customer_id`' => $customer_id], 'mx_r_contacts_customer.contacts_id', '', '', ['mx_r_contacts_customer' => 'mx_r_contacts_customer.contacts_id=mx_contacts.contacts_id']);
+            if ($isExistLinkMan['contacts_id']) {
+                $customer_auth_upd = [
+                    'name' => $customer_contacts_linkman,
+                    'telephone' => $customer_contacts_linktel,
+                    'email' => $customer_contacts_linkmail,
+                    'qq_no' => $customer_contacts_linkqq,
+                    'post' => $customer_contacts_linkjob
+                ];
+                $model_contacts->update(['contacts_id' => $isExistLinkMan['contacts_id']], $customer_auth_upd);
+            } else {
+                $customer_auth_ins = [
+                    'name' => $customer_contacts_linkman,
+                    'telephone' => $customer_contacts_linktel,
+                    'email' => $customer_contacts_linkmail,
+                    'qq_no' => $customer_contacts_linkqq,
+                    'post' => $customer_contacts_linkjob
+                ];
+                $model_contacts->insert($customer_auth_ins);
+                $contacts_id = $model_contacts->lastInsertId();
 
-            $customer_auth_ins = [
-                'name' => $customer_contacts_linkman,
-                'telephone' => $customer_contacts_linktel,
-                'email' => $customer_contacts_linkmail,
-                'qq_no' => $customer_contacts_linkqq,
-                'post' => $customer_contacts_linkjob
-            ];
-            $model_contacts->insert($customer_auth_ins);
-            $contacts_id = $model_contacts->lastInsertId();
+                //修改coustmer首要联系人
+                $model_customer->update(['customer_id' => $customer_id], ['contacts_id' => $contacts_id]);
 
-            //修改coustmer首要联系人
-            $model_customer->update(['customer_id' => $customer_id], ['contacts_id' => $contacts_id]);
-
-            $customer_contacts_r_ins = [
-                'contacts_id' => $contacts_id,
-                'customer_id' => $customer_id
-            ];
-            $model_rcontacts_customer->insert($customer_contacts_r_ins);
-
+                $customer_contacts_r_ins = [
+                    'contacts_id' => $contacts_id,
+                    'customer_id' => $customer_id
+                ];
+                $model_rcontacts_customer->insert($customer_contacts_r_ins);
+            }
             $model_customer->commit();
 
             $resultDo->success = TRUE;
             $resultDo->code = 200;
-            $resultDo->message = json_encode($insert_res);
+            $resultDo->message = json_encode($isExistLinkMan);
 
             return $resultDo;
         } catch (Exception $ex) {
