@@ -13,8 +13,24 @@ class api_CustomerService extends api_Abstract implements CustomerServiceIf {
             $resultDo->message = '缺少名称';
             return $resultDo;
         }
+
+        if (!$CustomerDo->hy) {
+            $resultDo->code = 500;
+            $resultDo->success = TRUE;
+            $resultDo->message = '缺少从事行业';
+            return $resultDo;
+        }
+        
+        if (!$CustomerDo->mun) {
+            $resultDo->code = 500;
+            $resultDo->success = TRUE;
+            $resultDo->message = '缺少企业规模';
+            return $resultDo;
+        }
 //
         $customer_name = hlw_lib_BaseUtils::getStr($CustomerDo->name);
+        $customer_hy = hlw_lib_BaseUtils::getStr($CustomerDo->hy);
+        $customer_mun = hlw_lib_BaseUtils::getStr($CustomerDo->mun);
         $customer_address = $CustomerDo->address ? hlw_lib_BaseUtils::getStr($CustomerDo->address) : '';
         $customer_phonetwo = $CustomerDo->phonetwo ? hlw_lib_BaseUtils::getStr($CustomerDo->phonetwo) : '';
         $customer_phoneone = $CustomerDo->phoneone ? hlw_lib_BaseUtils::getStr($CustomerDo->phoneone) : '';
@@ -56,6 +72,7 @@ class api_CustomerService extends api_Abstract implements CustomerServiceIf {
             $customer_ins = [
                 'cooperation_code' => '',
                 'name' => $customer_name,
+                'industry' => hlw_lib_constant::$huilie_to_oa_hy[$customer_hy],
                 'hr_company_logo' => '',
                 'short_name' => $customer_name,
                 'customer_owner_name' => '',
@@ -89,7 +106,8 @@ class api_CustomerService extends api_Abstract implements CustomerServiceIf {
                     'zip' => $customer_zip,
                     'busstops' => $customer_busstops,
                     'sdate' => $customer_sdate,
-                    'website' => $customer_website
+                    'website' => $customer_website,
+                    'scale' => hlw_lib_constant::$huilie_to_oa_mun[$customer_mun]
                 ];
                 $model_customer_data->insert($customer_data_ins);
             } elseif ($mode == 'update') {
@@ -98,7 +116,8 @@ class api_CustomerService extends api_Abstract implements CustomerServiceIf {
                     'zip' => $customer_zip,
                     'busstops' => $customer_busstops,
                     'sdate' => $customer_sdate,
-                    'website' => $customer_website
+                    'website' => $customer_website,
+                    'scale' => hlw_lib_constant::$huilie_to_oa_mun[$customer_mun]
                 ];
                 $model_customer_data->update(['customer_id' => $customer_id], $customer_data_ins);
             }
@@ -137,7 +156,7 @@ class api_CustomerService extends api_Abstract implements CustomerServiceIf {
 
             $resultDo->success = TRUE;
             $resultDo->code = 200;
-            $resultDo->message = json_encode($isExistLinkMan);
+            $resultDo->message = '';
 
             return $resultDo;
         } catch (Exception $ex) {
