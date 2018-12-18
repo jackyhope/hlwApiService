@@ -72,7 +72,7 @@ class api_CustomerService extends api_Abstract implements CustomerServiceIf {
             $customer_ins = [
                 'cooperation_code' => '',
                 'name' => $customer_name,
-                'industry' => hlw_lib_constant::$huilie_to_oa_hy[$customer_hy],
+                'industry' => hlw_conf_constant::$huilie_to_oa_hy[$customer_hy],
                 'hr_company_logo' => '',
                 'short_name' => $customer_name,
                 'customer_owner_name' => '',
@@ -107,7 +107,7 @@ class api_CustomerService extends api_Abstract implements CustomerServiceIf {
                     'busstops' => $customer_busstops,
                     'sdate' => $customer_sdate,
                     'website' => $customer_website,
-                    'scale' => hlw_lib_constant::$huilie_to_oa_mun[$customer_mun]
+                    'scale' => hlw_conf_constant::$huilie_to_oa_mun[$customer_mun]
                 ];
                 $model_customer_data->insert($customer_data_ins);
             } elseif ($mode == 'update') {
@@ -117,7 +117,7 @@ class api_CustomerService extends api_Abstract implements CustomerServiceIf {
                     'busstops' => $customer_busstops,
                     'sdate' => $customer_sdate,
                     'website' => $customer_website,
-                    'scale' => hlw_lib_constant::$huilie_to_oa_mun[$customer_mun]
+                    'scale' => hlw_conf_constant::$huilie_to_oa_mun[$customer_mun]
                 ];
                 $model_customer_data->update(['customer_id' => $customer_id], $customer_data_ins);
             }

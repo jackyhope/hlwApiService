@@ -95,12 +95,12 @@ class api_JobService extends api_Abstract implements JobServiceIf {
             $business_sdate = $saveJobDo->sdate ? hlw_lib_BaseUtils::getStr($saveJobDo->sdate) : '';
 
 
-            $exp_arr = hlw_lib_Constant::$huilie_to_oa_exp[$business_exp];
-            $edu = hlw_lib_Constant::$huilie_to_oa_edu[$business_edu];
-            $report = hlw_lib_Constant::$huilie_to_oa_report[$business_report];
-            $age = hlw_lib_Constant::$huilie_to_oa_age[$business_age];
-            $sex = hlw_lib_Constant::$huilie_to_oa_sex[$business_sex];
-            $hy = hlw_lib_Constant::$huilie_to_oa_hy[$business_hy];
+            $exp_arr = hlw_conf_constant::$huilie_to_oa_exp[$business_exp];
+            $edu = hlw_conf_constant::$huilie_to_oa_edu[$business_edu];
+            $report = hlw_conf_constant::$huilie_to_oa_report[$business_report];
+            $age = hlw_conf_constant::$huilie_to_oa_age[$business_age];
+            $sex = hlw_conf_constant::$huilie_to_oa_sex[$business_sex];
+            $hy = hlw_conf_constant::$huilie_to_oa_hy[$business_hy];
 
             $model_business = new model_pinping_business();
             $model_business_data = new model_pinping_businessdata();
