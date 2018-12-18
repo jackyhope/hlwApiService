@@ -145,7 +145,7 @@ class api_JobService extends api_Abstract implements JobServiceIf {
                     'status_type_id' => 1,
                     'grade' => '5',
                     'isshare' => '',
-                    'pro_type' => '4|慧简历'
+                    'pro_type' => '4'
                 ];
                 $model_business->insert($business_ins);
                 $business_id = $model_business->lastInsertId();
@@ -199,7 +199,7 @@ class api_JobService extends api_Abstract implements JobServiceIf {
                     'status_type_id' => 1,
                     'grade' => '5',
                     'isshare' => '',
-                    'pro_type' => '4|慧简历'
+                    'pro_type' => '4'
                 ];
                 $model_business->update(['huilie_job_id' => $business_job_id], $business_upd);
                 $business_info = $model_business->selectOne(['huilie_job_id' => $business_job_id], '$business_id');
