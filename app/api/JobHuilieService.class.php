@@ -28,9 +28,13 @@ class api_JobHuilieService extends api_Abstract implements JobHuilieServiceIf {
         try {
             $model_userid_job = new model_huiliewang_useridjob();
             $model_company_job = new model_huiliewang_companyjob();
-            $userid_job_info = $model_userid_job->selectOne(['huilie_eid' => $boss_resume_id], 'id');
+            $model_resume = new model_resume_resume();
+            $userid_job_info = $model_userid_job->selectOne(['huilie_eid' => $boss_resume_id,'job_id' => $job_id], 'id');
             if (!$userid_job_info['id']) {
                 //上传简历
+                $resume_ins = [
+                    
+                ];
                 
                 
                 $job_info = $model_company_job->selectOne(['id' => $job_id], 'name,uid,com_name');
