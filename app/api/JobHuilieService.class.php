@@ -29,9 +29,10 @@ class api_JobHuilieService extends api_Abstract implements JobHuilieServiceIf {
             $model_userid_job = new model_huiliewang_useridjob();
             $model_company_job = new model_huiliewang_companyjob();
             $userid_job_info = $model_userid_job->selectOne(['huilie_eid' => $boss_resume_id], 'id');
-            if ($userid_job_info['id']) {
+            if (!$userid_job_info['id']) {
+                //上传简历
                 
-            } else {
+                
                 $job_info = $model_company_job->selectOne(['id' => $job_id], 'name,uid,com_name');
 
                 $userid_job_ins = [
@@ -55,6 +56,8 @@ class api_JobHuilieService extends api_Abstract implements JobHuilieServiceIf {
                 ];
 
                 $model_userid_job->insert($userid_job_ins);
+                
+                
             }
         } catch (Exception $ex) {
             
