@@ -17,7 +17,7 @@ class model_pinping_resume extends hlw_components_basemodel
     }
 
     /**
-     * @desc »ñÈ¡¼òÀúÁªÏµĞÅÏ¢
+     * @desc è·å–ç®€å†è”ç³»ä¿¡æ¯
      * @param $id
      * @param string $fields
      * @return array

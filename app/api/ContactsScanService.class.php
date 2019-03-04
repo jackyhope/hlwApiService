@@ -1,6 +1,6 @@
 <?php
 /**
- * @desc ÓÃ»§ÐÅÏ¢ä¯ÀÀ
+ * @desc ç”¨æˆ·ä¿¡æ¯æµè§ˆ
  * Date: 2019/3/2
  */
 
@@ -11,7 +11,7 @@ use com\hlw\common\dataobject\common\ResultDO;
 class api_ContactsScanService extends api_Abstract implements ContactInfoServiceIf
 {
     /**
-     * @desc  ÓÃ»§ÊÇ·ñ¿ÉÒÔ²é¿´ÁªÏµÈËÐÅÏ¢
+     * @desc  ç”¨æˆ·æ˜¯å¦å¯ä»¥æŸ¥çœ‹è”ç³»äººä¿¡æ¯
      * @param contactScanRequestDTO $contactInfoDo
      * @return ResultDO
      */
@@ -20,7 +20,7 @@ class api_ContactsScanService extends api_Abstract implements ContactInfoService
         if (!$contactInfoDo->itemId || !$contactInfoDo->userRoleId || $contactInfoDo->type <= 0) {
             $resultDo->success = true;
             $resultDo->code = 500;
-            $resultDo->message = 'È±ÉÙ±Ø´«²ÎÊý';
+            $resultDo->message = 'ç¼ºå°‘å¿…ä¼ å‚æ•°';
             return $resultDo;
         }
         $itemId = hlw_lib_BaseUtils::getStr($contactInfoDo->itemId, 'int');
@@ -36,7 +36,7 @@ class api_ContactsScanService extends api_Abstract implements ContactInfoService
     }
 
     /**
-     * @desc ²é¿´ÁªÏµÈËÐÅÏ¢
+     * @desc æŸ¥çœ‹è”ç³»äººä¿¡æ¯
      * @param contactScanRequestDTO $contactInfoDo
      * @return ResultDO
      */
@@ -45,7 +45,7 @@ class api_ContactsScanService extends api_Abstract implements ContactInfoService
         if (!$contactInfoDo->itemId || !$contactInfoDo->userRoleId || $contactInfoDo->type <= 0) {
             $resultDo->success = true;
             $resultDo->code = 500;
-            $resultDo->message = 'È±ÉÙ±Ø´«²ÎÊý';
+            $resultDo->message = 'ç¼ºå°‘å¿…ä¼ å‚æ•°';
             return $resultDo;
         }
         $itemId = hlw_lib_BaseUtils::getStr($contactInfoDo->itemId, 'int');
@@ -59,11 +59,11 @@ class api_ContactsScanService extends api_Abstract implements ContactInfoService
             $resultDo->message = $contactScanModel->getError();
             return $resultDo;
         }
-        //·µ»ØÐÅÏ¢
+        //è¿”å›žä¿¡æ¯
         $phone = '';
         $email = '';
         if ($type == 2) {
-            //¿Í»§ÐÅÏ¢
+            //å®¢æˆ·ä¿¡æ¯
             $contactCustomerModel = new model_pinping_rcontactscustomer();
             $contactModel = new model_pinping_contacts();
             $contactIdArr = $contactCustomerModel->selectOne(['customer_id' => $itemId], 'contacts_id');

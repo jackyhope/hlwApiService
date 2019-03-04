@@ -8,11 +8,11 @@
 
 class model_pinping_contactsscan extends hlw_components_basemodel
 {
-    //Ê±¼äÏŞÖÆ
+    //æ—¶é—´é™åˆ¶
     protected $daysLimit = [1 => 15, 2 => 30];
-    //²é¿´´ÎÊı
+    //æŸ¥çœ‹æ¬¡æ•°
     protected $numbersLimit = [1 => 50, 2 => 0];
-    //Ã»ÓĞÈ¨ÏŞÏŞÖÆµÄroleId
+    //æ²¡æœ‰æƒé™é™åˆ¶çš„roleId
     protected $superRoleId = [1];
 
     public function primarykey() {
@@ -24,48 +24,48 @@ class model_pinping_contactsscan extends hlw_components_basemodel
     }
 
     /**
-     * ²éÑ¯ÊÇ·ñ¿ÉÒÔ²é¿´ĞÅÏ¢[$itemId]
+     * æŸ¥è¯¢æ˜¯å¦å¯ä»¥æŸ¥çœ‹ä¿¡æ¯[$itemId]
      * @param $itemId
      * @param $userRoleId
-     * @param int $type 1:¼òÀúĞÅÏ¢ 2£º¿Í»§ĞÅÏ¢
+     * @param int $type 1:ç®€å†ä¿¡æ¯ 2ï¼šå®¢æˆ·ä¿¡æ¯
      * @return bool
      */
     public function isScan($itemId, $userRoleId, $type = 1) {
-        //ÌØÊâID
+        //ç‰¹æ®ŠID
         if ($this->superRoleId && in_array($userRoleId, $this->superRoleId)) {
             return true;
         }
         if (!isset($this->daysLimit[$type])) {
-            $this->setError(500, 'ÀàĞÍ´íÎó£¡');
+            $this->setError(500, 'ç±»å‹é”™è¯¯ï¼');
             return false;
         }
-        //×î´ó²éÑ¯ÌìÊı
+        //æœ€å¤§æŸ¥è¯¢å¤©æ•°
         $limitDays = $this->daysLimit[$type];
-        //×î´ó²éÑ¯´ÎÊı
+        //æœ€å¤§æŸ¥è¯¢æ¬¡æ•°
         $limitCount = $this->numbersLimit[$type];
 
         $where = "user_role_id = {$userRoleId} and item_id = {$itemId} and item_type = {$type}";
-        $info = $this->selectOne($where, '', '', 'add_time desc ');
+        $info = $this->selectOne($where, '', '', ['id'=>'desc']);
         if ($info) {
-            //ÊÇ·ñÔÚÓĞÏŞÆÚÄÚ,Èç¹ûÔÚ¿ÉÒÔ²é¿´
+            //æ˜¯å¦åœ¨æœ‰é™æœŸå†…,å¦‚æœåœ¨å¯ä»¥æŸ¥çœ‹
             $limitTimestamp = $limitDays * 86400;
             if ($info['add_time'] > (time() - $limitTimestamp)) {
                 return true;
             }
-            //¿Í»§ĞÅÏ¢Ö»ÄÜ30ÌìÄÚ¿ÉÒÔ²é¿´,Ã»ÓĞ²é¿´´ÎÊıÏŞÖÆ
+            //å®¢æˆ·ä¿¡æ¯åªèƒ½30å¤©å†…å¯ä»¥æŸ¥çœ‹,æ²¡æœ‰æŸ¥çœ‹æ¬¡æ•°é™åˆ¶
             if ($limitCount <= 0) {
-                $this->setError(400, "ĞÅÏ¢Ö»ÄÜ{$limitDays}ÌìÄÚ²é¿´");
+                $this->setError(400, "ä¿¡æ¯åªèƒ½{$limitDays}å¤©å†…æŸ¥çœ‹");
                 return false;
             }
         }
-        //ÊÇ·ñÂú×ã²éÑ¯´ÎÊıÏŞÖÆ
+        //æ˜¯å¦æ»¡è¶³æŸ¥è¯¢æ¬¡æ•°é™åˆ¶
         if ($limitCount > 0) {
-            //2¡¢²éÑ¯µ±Ìì²é¿´¸öÊıÊÇ·ñÒÑ¾­³¬Á¿¡¾50¸ö1Ìì¡¿
+            //2ã€æŸ¥è¯¢å½“å¤©æŸ¥çœ‹ä¸ªæ•°æ˜¯å¦å·²ç»è¶…é‡ã€50ä¸ª1å¤©ã€‘
             $startTime = strtotime(date('Y-m-d 00:00:00', time()));
             $where = $where . " and add_time >= {$startTime} and add_time <= " . time();
             $counts = $this->selectOne($where, 'count(*) as counts');
             if ($counts['counts'] >= $limitCount) {
-                $this->setError(400, "µ±Ìì²é¿´¸öÊıÒÑ¾­³¬Á¿{$limitCount}¸öÁË");
+                $this->setError(400, "å½“å¤©æŸ¥çœ‹ä¸ªæ•°å·²ç»è¶…é‡{$limitCount}ä¸ªäº†");
                 return false;
             }
         }
@@ -73,26 +73,26 @@ class model_pinping_contactsscan extends hlw_components_basemodel
     }
 
     /**
-     * @desc ä¯ÀÀĞÅÏ¢
+     * @desc æµè§ˆä¿¡æ¯
      * @param $itemId
      * @param $userRoleId
-     * @param int $type 1:¼òÀúĞÅÏ¢ 2£º¿Í»§ĞÅÏ¢
+     * @param int $type 1:ç®€å†ä¿¡æ¯ 2ï¼šå®¢æˆ·ä¿¡æ¯
      * @return bool
      */
     public function scanInfo($itemId, $userRoleId, $type = 1) {
-        //²éÑ¯È¨ÏŞÅĞ¶Ï
+        //æŸ¥è¯¢æƒé™åˆ¤æ–­
         if (!$this->isScan($itemId, $userRoleId, $type)) {
-            $this->setError(400, '¸ÃÓÃ»§²»ÄÜä¯ÀÀ¸ÃĞÅÏ¢À² -' . $this->getError());
+            $this->setError(400, 'è¯¥ç”¨æˆ·ä¸èƒ½æµè§ˆè¯¥ä¿¡æ¯å•¦ -' . $this->getError());
             return false;
         }
-        //²éÑ¯²Ù×÷
+        //æŸ¥è¯¢æ“ä½œ
         $where = ['user_role_id' => $userRoleId, 'item_id' => $itemId, 'item_type' => $type];
-        $info = $this->selectOne($where, '', '', 'add_time desc ');
+        $info = $this->selectOne($where, '*', '', ['add_time'=>'desc']);
         try {
             if ($info) {
                 $id = $info['id'];
                 $scanNum = $info['scan_num'] + 1;
-                return $this->update(['id' => $id, ['last_scan_time' => time(), 'scan_num' => $scanNum]]);
+                return $this->update(['id' => $id], ['last_scan_time' => time(), 'scan_num' => $scanNum]);
             }
             $where['add_time'] = time();
             $where['scan_num'] = 1;
