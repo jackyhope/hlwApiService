@@ -62,7 +62,7 @@ class model_pinping_contactsscan extends hlw_components_basemodel
         if ($limitCount > 0) {
             //2、查询当天查看个数是否已经超量【50个1天】
             $startTime = strtotime(date('Y-m-d 00:00:00', time()));
-            $where = $where . " and add_time >= {$startTime} and add_time <= " . time();
+            $where =  "user_role_id = {$userRoleId} and item_type = {$type} and add_time >= {$startTime} and add_time <= " . time();
             $counts = $this->selectOne($where, 'count(*) as counts');
             if ($counts['counts'] >= $limitCount) {
                 $this->setError(400, "当天查看个数已经超量{$limitCount}个了");
@@ -82,7 +82,7 @@ class model_pinping_contactsscan extends hlw_components_basemodel
     public function scanInfo($itemId, $userRoleId, $type = 1) {
         //查询权限判断
         if (!$this->isScan($itemId, $userRoleId, $type)) {
-            $this->setError(400, '该用户不能浏览该信息啦 -' . $this->getError());
+            $this->setError(400, $this->getError());
             return false;
         }
         //查询操作

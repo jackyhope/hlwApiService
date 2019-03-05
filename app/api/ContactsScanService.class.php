@@ -42,9 +42,9 @@ class api_ContactsScanService extends api_Abstract implements ContactInfoService
      */
     public function scan(ContactScanRequestDTO $contactInfoDo) {
         $resultDo = new ResultDO();
-        if (!$contactInfoDo->itemId || !$contactInfoDo->userRoleId || $contactInfoDo->type <= 0) {
-            $resultDo->success = true;
-            $resultDo->code = 500;
+        if (!$contactInfoDo->itemId || !$contactInfoDo->userRoleId || $contactInfoDo->type <= 0 ) {
+            $resultDo->success = false;
+            $resultDo->code = 300;
             $resultDo->message = '缺少必传参数';
             return $resultDo;
         }
@@ -54,7 +54,7 @@ class api_ContactsScanService extends api_Abstract implements ContactInfoService
         $contactScanModel = new model_pinping_contactsscan();
         $res = $contactScanModel->scanInfo($itemId, $userRoleId, $type);
         if (!$res) {
-            $resultDo->success = true;
+            $resultDo->success = false;
             $resultDo->code = 500;
             $resultDo->message = $contactScanModel->getError();
             return $resultDo;
