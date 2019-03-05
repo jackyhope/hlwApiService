@@ -68,7 +68,7 @@ class api_ContactsScanService extends api_Abstract implements ContactInfoService
             $contactModel = new model_pinping_contacts();
             $contactIdArr = $contactCustomerModel->selectOne(['customer_id' => $itemId], 'contacts_id');
             $contactsId = $contactIdArr['contacts_id'];
-            $contactInfo = $contactModel->selectOne(['contract_id' => $contactsId]);
+            $contactInfo = $contactModel->selectOne(['contacts_id' => $contactsId],'telephone,email');
             $phone = $contactInfo['telephone'];
             $email = $contactInfo['email'];
         }
