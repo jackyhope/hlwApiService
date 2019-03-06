@@ -69,6 +69,7 @@ class model_pinping_contactsscan extends hlw_components_basemodel
                 return false;
             }
         }
+        $this->setError(200, "是否查看");
         return true;
     }
 

@@ -31,7 +31,7 @@ class api_ContactsScanService extends api_Abstract implements ContactInfoService
         $res = $contactScanModel->isScan($itemId, $userRoleId, $type);
         $resultDo->success = $res;
         $resultDo->code = 200;
-        $resultDo->message = json_encode(['msg' => $contactScanModel->getError()]);
+        $resultDo->message = $contactScanModel->getError();
         return $resultDo;
     }
 
