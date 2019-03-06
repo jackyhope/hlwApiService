@@ -5,7 +5,6 @@
  * @date 2018-10-18
  */
 error_reporting(E_ALL);
-define('ENV', 'local');
 if(ENV == 'local'){
     require __DIR__.'/../hlw_php/ApiCore.php';
 } else {
