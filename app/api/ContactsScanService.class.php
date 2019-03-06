@@ -65,12 +65,9 @@ class api_ContactsScanService extends api_Abstract implements ContactInfoService
         $qq = '';
         $wetchat = '';
         if ($type == 2) {
-            //客户信息
-            $contactCustomerModel = new model_pinping_rcontactscustomer();
+            //客户联系人信息
             $contactModel = new model_pinping_contacts();
-            $contactIdArr = $contactCustomerModel->selectOne(['customer_id' => $itemId], 'contacts_id');
-            $contactsId = $contactIdArr['contacts_id'];
-            $contactInfo = $contactModel->selectOne(['contacts_id' => $contactsId],'telephone,email,qq_no,wetchat');
+            $contactInfo = $contactModel->selectOne(['contacts_id' => $itemId],'telephone,email,qq_no,wetchat');
             $phone = $contactInfo['telephone'];
             $email = $contactInfo['email'];
             $qq = $contactInfo['qq_no'];
