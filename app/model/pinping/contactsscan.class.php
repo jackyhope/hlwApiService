@@ -45,7 +45,7 @@ class model_pinping_contactsscan extends hlw_components_basemodel
         $limitCount = $this->numbersLimit[$type];
 
         $where = "user_role_id = {$userRoleId} and item_id = {$itemId} and item_type = {$type}";
-        $info = $this->selectOne($where, '', '', ['id'=>'desc']);
+        $info = $this->selectOne($where, '', '', ['id' => 'desc']);
         if ($info) {
             //是否在有限期内,如果在可以查看
             $limitTimestamp = $limitDays * 86400;
@@ -62,14 +62,15 @@ class model_pinping_contactsscan extends hlw_components_basemodel
         if ($limitCount > 0) {
             //2、查询当天查看个数是否已经超量【50个1天】
             $startTime = strtotime(date('Y-m-d 00:00:00', time()));
-            $where =  "user_role_id = {$userRoleId} and item_type = {$type} and add_time >= {$startTime} and add_time <= " . time();
+            $where = "user_role_id = {$userRoleId} and item_type = {$type} and add_time >= {$startTime} and add_time <= " . time();
             $counts = $this->selectOne($where, 'count(*) as counts');
             if ($counts['counts'] >= $limitCount) {
                 $this->setError(400, "当天查看个数已经超量{$limitCount}个了");
                 return false;
             }
         }
-        $this->setError(200, "是否查看");
+        $message = $limitCount > 0 ? '是否查看' : '';
+        $this->setError(200, $message);
         return true;
     }
 
@@ -88,7 +89,7 @@ class model_pinping_contactsscan extends hlw_components_basemodel
         }
         //查询操作
         $where = ['user_role_id' => $userRoleId, 'item_id' => $itemId, 'item_type' => $type];
-        $info = $this->selectOne($where, '*', '', ['add_time'=>'desc']);
+        $info = $this->selectOne($where, '*', '', ['add_time' => 'desc']);
         try {
             if ($info) {
                 $id = $info['id'];
