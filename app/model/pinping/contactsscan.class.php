@@ -69,7 +69,7 @@ class model_pinping_contactsscan extends hlw_components_basemodel
                 return false;
             }
         }
-        $message = $limitCount > 0 ? '是否查看' : '';
+        $message = $limitCount > 0 ? '查看联系方式将会消耗今日查看次数' : "查看联系方式后{$limitDays}天内可继续查看";
         $this->setError(200, $message);
         return true;
     }
