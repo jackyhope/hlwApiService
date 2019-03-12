@@ -42,7 +42,7 @@ class api_ContactsScanService extends api_Abstract implements ContactInfoService
      */
     public function scan(ContactScanRequestDTO $contactInfoDo) {
         $resultDo = new ResultDO();
-        if (!$contactInfoDo->itemId || !$contactInfoDo->userRoleId || $contactInfoDo->type <= 0 ) {
+        if (!$contactInfoDo->itemId || !$contactInfoDo->userRoleId || $contactInfoDo->type <= 0) {
             $resultDo->success = false;
             $resultDo->code = 300;
             $resultDo->message = '缺少必传参数';
@@ -63,25 +63,25 @@ class api_ContactsScanService extends api_Abstract implements ContactInfoService
         $phone = '';
         $email = '';
         $qq = '';
-        $wetchat = '';
+        $wechat = '';
         if ($type == 2) {
             //客户联系人信息
             $contactModel = new model_pinping_contacts();
-            $contactInfo = $contactModel->selectOne(['contacts_id' => $itemId],'telephone,email,qq_no,wetchat');
-            $phone = $contactInfo['telephone'];
-            $email = $contactInfo['email'];
-            $qq = $contactInfo['qq_no'];
-            $wetchat = $contactInfo['wetchat'];
+            $contactInfo = $contactModel->selectOne(['contacts_id' => $itemId], '*');
+            $phone = isset($contactInfo['telephone']) ? $contactInfo['telephone'] : '';
+            $email = isset($contactInfo['email']) ? $contactInfo['email'] : '';
+            $qq = isset($contactInfo['qq_no']) ? $contactInfo['qq_no'] : '';
+            $wechat = isset($contactInfo['wetchat']) ? $contactInfo['wetchat'] : '';
         }
         if ($type == 1) {
             $resumeModel = new model_pinping_resume();
             $contactInfo = $resumeModel->getInfo($itemId);
-            $phone = $contactInfo['telephone'];
-            $email = $contactInfo['email'];
-            $qq = $contactInfo['qq_number'];
-            $wetchat = $contactInfo['wechat_number'];
+            $phone = isset($contactInfo['telephone']) ? $contactInfo['telephone'] : '';
+            $email = isset($contactInfo['email']) ? $contactInfo['email'] : '';
+            $qq = isset($contactInfo['qq_number']) ? $contactInfo['qq_number'] : '';
+            $wechat = isset($contactInfo['wechat_number']) ? $contactInfo['wechat_number'] : '';
         }
-        $data = ['telephone' => $phone, 'email' => $email,'qq'=>$qq,'wetchat'=>$wetchat];
+        $data = ['telephone' => $phone, 'email' => $email, 'qq' => $qq, 'wetchat' => $wechat];
         $resultDo->success = $res;
         $resultDo->code = 200;
         $resultDo->message = json_encode($data);

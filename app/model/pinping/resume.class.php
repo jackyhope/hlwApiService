@@ -22,7 +22,7 @@ class model_pinping_resume extends hlw_components_basemodel
      * @param string $fields
      * @return array
      */
-    public function getInfo($id, $fields = 'telephone,email,qq_number,wechat_number') {
+    public function getInfo($id, $fields = '*') {
         return $this->selectOne(['eid' => $id], $fields);
     }
 }
