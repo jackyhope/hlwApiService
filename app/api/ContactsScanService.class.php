@@ -23,9 +23,27 @@ class api_ContactsScanService extends api_Abstract implements ContactInfoService
             $resultDo->message = '缺少必传参数';
             return $resultDo;
         }
+
         $itemId = hlw_lib_BaseUtils::getStr($contactInfoDo->itemId, 'int');
         $userRoleId = hlw_lib_BaseUtils::getStr($contactInfoDo->userRoleId, 'int');
         $type = hlw_lib_BaseUtils::getStr($contactInfoDo->type, 'int');
+        $subRoleId = hlw_lib_BaseUtils::getStr($contactInfoDo->subRoleId);
+
+        //联系人查看权限【自己创建得或者下级创建的可以查看】
+        $contactModel = new model_pinping_contacts();
+        $contactInfo = $contactModel->selectOne(['contacts_id' => $itemId], '*');
+        $creatorRoleId = isset($contactInfo['creator_role_id']) ? $contactInfo['creator_role_id'] : 0;
+        if ($subRoleId) {
+            $subRoleId = explode(',', $subRoleId);
+        }
+        if ($creatorRoleId != $userRoleId) {
+            if(!$subRoleId || !in_array($creatorRoleId, $subRoleId)){
+                $resultDo->success = true;
+                $resultDo->code = 500;
+                $resultDo->message = '您无权查看该联系人';
+                return $resultDo;
+            }
+        }
 
         $contactScanModel = new model_pinping_contactsscan();
         $res = $contactScanModel->isScan($itemId, $userRoleId, $type);
