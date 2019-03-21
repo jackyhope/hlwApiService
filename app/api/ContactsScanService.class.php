@@ -30,18 +30,20 @@ class api_ContactsScanService extends api_Abstract implements ContactInfoService
         $subRoleId = hlw_lib_BaseUtils::getStr($contactInfoDo->subRoleId);
 
         //联系人查看权限【自己创建得或者下级创建的可以查看】
-        $contactModel = new model_pinping_contacts();
-        $contactInfo = $contactModel->selectOne(['contacts_id' => $itemId], '*');
-        $creatorRoleId = isset($contactInfo['creator_role_id']) ? $contactInfo['creator_role_id'] : 0;
-        if ($subRoleId) {
-            $subRoleId = explode(',', $subRoleId);
-        }
-        if ($creatorRoleId != $userRoleId) {
-            if(!$subRoleId || !in_array($creatorRoleId, $subRoleId)){
-                $resultDo->success = true;
-                $resultDo->code = 500;
-                $resultDo->message = '您无权查看该联系人';
-                return $resultDo;
+        if($type == 2){
+            $contactModel = new model_pinping_contacts();
+            $contactInfo = $contactModel->selectOne(['contacts_id' => $itemId], '*');
+            $creatorRoleId = isset($contactInfo['creator_role_id']) ? $contactInfo['creator_role_id'] : 0;
+            if ($subRoleId) {
+                $subRoleId = explode(',', $subRoleId);
+            }
+            if ($creatorRoleId != $userRoleId) {
+                if(!$subRoleId || !in_array($creatorRoleId, $subRoleId)){
+                    $resultDo->success = true;
+                    $resultDo->code = 500;
+                    $resultDo->message = '您无权查看该联系人';
+                    return $resultDo;
+                }
             }
         }
 
