@@ -9,11 +9,12 @@
 class model_pinping_contactsscan extends hlw_components_basemodel
 {
     //时间限制
-    protected $daysLimit = [1 => 15, 2 => 30];
+    protected $daysLimit = [1 => 30, 2 => 15]; //人才30，客户15天
     //查看次数
     protected $numbersLimit = [1 => 50, 2 => 0];
     //没有权限限制的roleId
     protected $superRoleId = [1];
+    protected $configModel;
 
     public function primarykey() {
         return 'id';
@@ -21,6 +22,25 @@ class model_pinping_contactsscan extends hlw_components_basemodel
 
     public function tableName() {
         return 'mx_contacts_scan_his';
+    }
+
+    /**
+     * @desc 读取时间限制配置
+     * model_pinping_contactsscan constructor.
+     * @param bool $pkid
+     */
+    public function __construct($pkid = false) {
+        parent::__construct($pkid);
+        $configModel = new model_pinping_config();
+        if ($resume_look_time = $configModel->getInfoByName('resume_look_time')) {
+            $this->daysLimit[1] = $resume_look_time;
+        }
+        if ($contacts_look_time = $configModel->getInfoByName('contacts_look_time')) {
+            $this->daysLimit[2] = $contacts_look_time;
+        }
+        if ($resume_look_count = $configModel->getInfoByName('resume_look_count')) {
+            $resume_look_count && $this->numbersLimit[1] = $resume_look_count;
+        }
     }
 
     /**
@@ -39,6 +59,7 @@ class model_pinping_contactsscan extends hlw_components_basemodel
             $this->setError(500, '类型错误！');
             return false;
         }
+
         //最大查询天数
         $limitDays = $this->daysLimit[$type];
         //最大查询次数
