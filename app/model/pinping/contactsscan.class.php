@@ -121,7 +121,7 @@ class model_pinping_contactsscan extends hlw_components_basemodel
             $where['scan_num'] = 1;
             $this->insert($where);
         } catch (Exception $e) {
-            $this->select(500, $e->getMessage());
+            $this->setError(500, $e->getMessage());
         }
         $id = $this->lastInsertId();
         return $id > 0;
