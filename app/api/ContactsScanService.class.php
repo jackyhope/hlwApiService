@@ -84,6 +84,7 @@ class api_ContactsScanService extends api_Abstract implements ContactInfoService
         $email = '';
         $qq = '';
         $wechat = '';
+        $mobile = '';
         if ($type == 2) {
             //客户联系人信息
             $contactModel = new model_pinping_contacts();
@@ -92,6 +93,7 @@ class api_ContactsScanService extends api_Abstract implements ContactInfoService
             $email = isset($contactInfo['email']) ? $contactInfo['email'] : '';
             $qq = isset($contactInfo['qq_no']) ? $contactInfo['qq_no'] : '';
             $wechat = isset($contactInfo['wetchat']) ? $contactInfo['wetchat'] : '';
+            $mobile = isset($contactInfo['crm_ljgmqr']) ? $contactInfo['crm_ljgmqr'] : '';
         }
         if ($type == 1) {
             $resumeModel = new model_pinping_resume();
@@ -101,7 +103,7 @@ class api_ContactsScanService extends api_Abstract implements ContactInfoService
             $qq = isset($contactInfo['qq_number']) ? $contactInfo['qq_number'] : '';
             $wechat = isset($contactInfo['wechat_number']) ? $contactInfo['wechat_number'] : '';
         }
-        $data = ['telephone' => $phone, 'email' => $email, 'qq' => $qq, 'wetchat' => $wechat];
+        $data = ['telephone' => $phone, 'email' => $email, 'qq' => $qq, 'wetchat' => $wechat,'mobile'=>$mobile];
         $resultDo->success = $res;
         $resultDo->code = 200;
         $resultDo->message = json_encode($data);
