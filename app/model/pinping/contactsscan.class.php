@@ -111,19 +111,24 @@ class model_pinping_contactsscan extends hlw_components_basemodel
         //查询操作
         $where = ['user_role_id' => $userRoleId, 'item_id' => $itemId, 'item_type' => $type];
         $info = $this->selectOne($where, '*', '', ['add_time' => 'desc']);
+        $id = 0;
         try {
+            $this->beginTransaction();
             if ($info) {
                 $id = $info['id'];
                 $scanNum = $info['scan_num'] + 1;
-                return $this->update(['id' => $id], ['last_scan_time' => time(), 'scan_num' => $scanNum]);
+                $this->update(['id' => $id], ['last_scan_time' => time(), 'scan_num' => $scanNum]);
+            }else{
+                $where['add_time'] = time();
+                $where['scan_num'] = 1;
+                $this->insert($where);
+                $id = $this->lastInsertId();
             }
-            $where['add_time'] = time();
-            $where['scan_num'] = 1;
-            $this->insert($where);
+            $this->commit();
         } catch (Exception $e) {
+            $this->rollBack();
             $this->setError(500, $e->getMessage());
         }
-        $id = $this->lastInsertId();
         return $id > 0;
     }
 }
