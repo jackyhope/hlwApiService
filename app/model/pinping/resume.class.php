@@ -24,7 +24,7 @@ class model_pinping_resume extends hlw_components_basemodel
      */
     public function getInfo($id, $fields = '*') {
         if(!is_array($id)){
-            ['eid' => $id];
+            $id = ['eid' => $id];
         }
         return $this->selectOne($id, $fields);
     }
