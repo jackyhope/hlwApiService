@@ -326,7 +326,7 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
 //        $this->ResultDO->message = '测试查询的数组$invoice='.json_encode($invoice);
 //        $this->ResultDO->data = ['lii'=>[1,2,3]];
 //        $this->ResultDO->datas = $ddas;
-//        return $this->ResultDO;
+        //return $this->ResultDO;
         /////////////////////////////////////
         //↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓
         //阻断式--屏蔽连续重复写入相同结果
