@@ -29,4 +29,18 @@ class model_pinping_position extends hlw_components_basemodel
         }
         return $positionIds;
     }
+
+    /**
+     * @desc 职位部门列表
+     * @return array
+     */
+    public function positionDeparts(){
+        $list = $this->select();
+        $positions = isset($list->items) ? $list->items : [];
+        $return = [];
+        foreach ($positions as $info){
+            $return[$info['position_id']] = $info['department_id'];
+        }
+        return $return;
+    }
 }

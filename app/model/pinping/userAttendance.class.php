@@ -24,15 +24,23 @@ class model_pinping_userAttendance extends hlw_components_basemodel
 
     /**
      * @desc 考勤列表
-     * @param array $where
-     * @return DbData
+     * @param array $day
+     * @return array
      */
-    public function lists($where = []) {
-        if (!$where) {
-            $currentMoth = strtotime(date("Y-m-01", time()));
-            $where['create_time'] = $currentMoth;
+    public function lists($day) {
+        if (!$day) {
+            $currentMoth = strtotime(date("Y-m-01 00:00:00", time()));
+            $where['month'] = $currentMoth;
+        } else {
+            $where['month'] = strtotime(date("Y-m-01 00:00:00",strtotime($day)));
         }
         $list = $this->select($where, '*', '', ['id' => 'desc']);
-        return $list;
+        $list = isset($list->items) ? $list->items : [];
+        $data = [];
+        foreach ($list as $info) {
+            $data[$info['role_id']] = ['attend_day' => $info['attendance_days'], 'work_days' => $info['work_days']];
+        }
+        return $data;
     }
+
 }

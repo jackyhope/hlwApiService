@@ -86,12 +86,12 @@ class api_FinanceService extends api_Abstract implements ReachServiceIf
                     throw new \Exception('用户:' . $userName . '不存在，请核对');
                 }
                 $info = [
-                    'moth' => strtotime($date),
+                    'month' => strtotime($date),
                     'attendance_days' => $userInfo[$this->excelTitle['attendance_days']],
                     'work_days' => $userInfo[$this->excelTitle['work_days']],
                     'probation_days' => $userInfo[$this->excelTitle['probation_days']],
                     'user_name' => $userName,
-                    'user_id' => $userId,
+                    'role_id' => $userId,
                     'file_id' => $fileId,
                     'create_time' => time(),
                 ];
@@ -109,5 +109,15 @@ class api_FinanceService extends api_Abstract implements ReachServiceIf
         $resultDo->code = $res ? 200 : 500;
         $resultDo->message = $res ? '成功' : $attendanceMode->getDbError();
         return $resultDo;
+    }
+
+    /**
+     * @desc 获取节假日和周末上班日期
+     * @param string $moth
+     * @return array
+     */
+    private function getWeekDay($moth = '') {
+        $data = model_pinping_user::getWeekDay($moth);
+        return $data;
     }
 }

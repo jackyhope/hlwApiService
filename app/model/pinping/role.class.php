@@ -27,4 +27,36 @@ class model_pinping_role extends hlw_components_basemodel
         }
         return rtrim($roles, ',');
     }
+
+    /**
+     * @desc 用户职位
+     * @return array
+     */
+    public function rolesPositions() {
+        $roleList = $this->select();
+        $positions = isset($roleList->items) ? $roleList->items : [];
+        $role = [];
+        foreach ($positions as $info) {
+            $role[$info['role_id']] = $info['position_id'];
+        }
+        return $role;
+    }
+
+
+    /**
+     * @desc 角色部门
+     * @return array
+     */
+    public function roleDeparts() {
+        $positionModel = new model_pinping_position();
+        $departmentModel = new model_pinping_roleDepartment();
+        $departments = $departmentModel->lists();
+        $positionDeparts = $positionModel->positionDeparts();
+        $rolesPositions = $this->rolesPositions();
+        $roleDepart = [];
+        foreach ($rolesPositions as $role => $position) {
+            $roleDepart[$role] = ['id' => $positionDeparts[$position], 'name' => $departments[$positionDeparts[$position]]];
+        }
+        return $roleDepart;
+    }
 }

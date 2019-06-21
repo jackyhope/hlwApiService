@@ -38,4 +38,55 @@ class model_pinping_roleDepartment extends hlw_components_basemodel
         }
         return implode(',', $list);
     }
+
+    public function getAllDepart($parent) {
+        $ones = $this->select(['parent_id' => $parent]);
+        $sons = $ones->items ? $ones->items : [];
+        $data = [];
+        foreach ($sons as $info) {
+            $id = $info['department_id'];
+            $name = $info['name'];
+            $data[$id] = ['id' => $id, 'name' => $name, 'p_id' => $info['parent_id']];
+        }
+        foreach ($data as &$one) {
+            $patentId = $one['id'];
+            $sons = $this->select(['parent_id' => $patentId]);
+            $sons = $sons->items ? $sons->items : [];
+            foreach ($sons as $info) {
+                $id = $info['department_id'];
+                $name = $info['name'];
+                $one['sons'][] = ['id' => $id, 'name' => $name, 'p_id' => $info['parent_id']];
+            }
+        }
+        return $data;
+    }
+
+    /**
+     * @desc 部门数据
+     * @return array
+     */
+    public function lists() {
+        $list = $this->select();
+        $list = $list->items ? $list->items : [];
+        $data = [];
+        foreach ($list as $info) {
+            $data[$info['department_id']] = $info['name'];
+        }
+        return $data;
+    }
+
+    /**
+     * @desc 上级列表
+     * @return array
+     */
+    public function pList() {
+        $all = $this->lists();
+        $list = $this->select();
+        $list = $list->items ? $list->items : [];
+        $dataP = [];
+        foreach ($list as $info) {
+            $dataP[$info['department_id']] = ['name' => $all[$info['parent_id']], 'id' => $info['parent_id']];
+        }
+        return $dataP;
+    }
 }
