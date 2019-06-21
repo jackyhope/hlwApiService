@@ -96,7 +96,7 @@ class model_pinping_user extends hlw_components_basemodel
             $info['p_department_name'] = $parentDeparts[$roleDeparts[$roleId]['id']]['name'];
             $info['p_department_id'] = $parentDeparts[$roleDeparts[$roleId]['id']]['id'];
             //2、毕业时间维护
-            $this->graduateTime($info['entry'], $roleId,$graduationTime);
+            $this->graduateTime($info['entry'], $roleId, $graduationTime);
             //是否豁免期内
             $isTraining = $this->isTraining($graduationTime, $professionType);
             //3、出勤
@@ -119,6 +119,11 @@ class model_pinping_user extends hlw_components_basemodel
         ];
     }
 
+    /**
+     * @desc  数据组装
+     * @param $list
+     * @return array
+     */
     private function buildData($list) {
         if (!$list) {
             return [];
@@ -126,14 +131,20 @@ class model_pinping_user extends hlw_components_basemodel
         $departs = [];
         foreach ($list as &$info) {
             //部门数据
-            $departs[$info['department_id']]['name'] = $info['department_name'];
-            $departs[$info['department_id']]['id'] = $info['department_id'];
-            $departs[$info['department_id']]['p_id'] = $info['p_department_id'];
-            $departs[$info['department_id']]['p_name'] = $info['p_department_name'];
-            $departs[$info['department_id']]['count'] += 1;
-            $departs[$info['department_id']]['sum'] += $info['achievement']; //实际业绩
-            $departs[$info['department_id']]['average'] = round(departs[$info['department_id']]['sum'] / $departs[$info['department_id']]['count']);
-            $departs[$info['department_id']]['list'][] = $info;
+            $departmentId = $info['department_id'];
+            if(!$departmentId){
+                continue;
+            }
+            $departs[$departmentId]['name'] = $info['department_name'];
+            $departs[$departmentId]['id'] = $info['department_id'];
+            $departs[$departmentId]['p_id'] = $info['p_department_id'];
+            $departs[$departmentId]['p_name'] = $info['p_department_name'];
+            $departs[$departmentId]['count'] += 1; //人数
+            $departs[$departmentId]['sum'] += $info['achievement']; //实际业绩
+            $departs[$departmentId]['discount'] += $info['discount']; //折扣业绩
+            $departs[$departmentId]['achievement_rate'] = round($departs[$departmentId]['sum'] / $departs[$departmentId]['discount']); //部门达成率
+            $departs[$departmentId]['average'] = round($departs[$departmentId]['sum'] / $departs[$departmentId]['count']); //人均产值
+            $departs[$departmentId]['list'][] = $info;
         }
 
         if (!$departs) {
@@ -142,17 +153,22 @@ class model_pinping_user extends hlw_components_basemodel
         $departs = array_values($departs);
         $pList = [];
         foreach ($departs as $pInfo) {
-            $pList[$pInfo['p_id']]['name'] = $pInfo['p_name'];
-            $pList[$pInfo['p_id']]['id'] = $pInfo['p_id'];
-            $pList[$pInfo['p_id']]['p_id'] = 0;
-            $pList[$pInfo['p_id']]['p_name'] = '';
-            $pList[$pInfo['p_id']]['count'] += $pInfo['count'];
-            $pList[$pInfo['p_id']]['sum'] += $pInfo['sum'];
-            $pList[$pInfo['p_id']]['average'] = round($pList[$pInfo['p_id']]['sum'] / $pList[$pInfo['p_id']]['count']);
-            $pList[$pInfo['p_id']]['list'][] = $pInfo;
+            $pId = $pInfo['p_id'];
+            if(!$pId){
+                continue;
+            }
+            $pList[$pId]['name'] = $pInfo['p_name'];
+            $pList[$pId]['id'] = $pInfo['p_id'];
+            $pList[$pId]['p_id'] = 0;
+            $pList[$pId]['p_name'] = '';
+            $pList[$pId]['count'] += $pInfo['count'];
+            $pList[$pId]['sum'] += $pInfo['sum'];
+            $pList[$pId]['discount'] += $pInfo['discount'];
+            $pList[$pId]['achievement_rate'] += round($pList[$pId]['sum'] / $pList[$pId]['discount']);
+            $pList[$pId]['average'] = round($pList[$pId]['sum'] / $pList[$pId]['count']);
+            $pList[$pId]['list'][] = $pInfo;
         }
-        $pList = array_values($pList);
-        return $pList;
+        return array_values($pList);
     }
 
     /**
@@ -178,7 +194,7 @@ class model_pinping_user extends hlw_components_basemodel
      * @return array
      */
     public function users($where) {
-        $users = $this->select($where, "user_id,full_name", '', ['user_id' => 'desc']);
+        $users = $this->select($where, "role_id,user_id,full_name", '', ['user_id' => 'desc']);
         $list = $users->items;
         $return = [];
         foreach ($list as $info) {
