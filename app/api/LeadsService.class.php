@@ -137,4 +137,44 @@ class api_LeadsService extends api_Abstract implements LeadsServiceIf
         $resultDO ->datas = $rank_data;
         return $resultDO;
     }
+
+    //显示考勤表数据
+    function workfile($p, $listrows)
+    {
+        // TODO: Implement workfile() method.
+        $resultDO = new ResultDO();
+        $file_model = new model_pinping_file();
+        $file_model->setCount(true);
+        $forcount = $file_model->select(['file_type'=>1]);
+        $file_model->setLimit($listrows);
+        $file_model->setPage($p);
+        $data = $file_model->select(['file_type'=>1],'*')->items;
+        $data[]['totalcount'] = $forcount->pageSize;
+        $resultDO->datas = $data;
+        $resultDO->code = 200;
+        $resultDO->success = true;
+        return $resultDO;
+    }
+
+    function deletefile($id)
+    {
+        // TODO: Implement deletefile() method.
+//        $resultDO = new ResultDO();
+//
+//        $resultDO->success = false;
+//        $resultDO->code = 400;
+//        $resultDO->message = '删除失败';
+//
+        $file_model = new model_pinping_file();
+        $data = $file_model->selectOne(['file_id'=>$id]);
+        @unlink($data['file_path']);
+        $is_deleted = $file_model->delete(['file_id'=>13]);
+        var_dump($is_deleted);die;
+        if($is_deleted !== false ){
+            $resultDO->success = true;
+            $resultDO->code = 200;
+            $resultDO->message = '删除成功';
+        }
+        return $resultDO;
+    }
 }
