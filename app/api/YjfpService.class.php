@@ -66,15 +66,15 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
 
         //挨个 过滤输入 数据
         $pro_types = $yjfpDo->pro_types?hlw_lib_BaseUtils::getStr($yjfpDo->pro_types,'int'):0;
-        $effective_clue = $yjfpDo->effective_clue?hlw_lib_BaseUtils::getStr($yjfpDo->effective_clue,'int'):0;
-        $contract_sign = $yjfpDo->contract_sign?hlw_lib_BaseUtils::getStr($yjfpDo->contract_sign,'int'):0;
-        $receivable = $yjfpDo->receivable?hlw_lib_BaseUtils::getStr($yjfpDo->receivable,'int'):0;
-        $project_docking = $yjfpDo->project_docking?hlw_lib_BaseUtils::getStr($yjfpDo->project_docking,'int'):0;
-        $resume_provision = $yjfpDo->resume_provision?hlw_lib_BaseUtils::getStr($yjfpDo->resume_provision,'int'):0;
-        $intention_communicate = $yjfpDo->intention_communicate?hlw_lib_BaseUtils::getStr($yjfpDo->intention_communicate,'int'):0;
-        $interview_follow = $yjfpDo->interview_follow?hlw_lib_BaseUtils::getStr($yjfpDo->interview_follow,'int'):0;
-        $offer_negotiate = $yjfpDo->offer_negotiate?hlw_lib_BaseUtils::getStr($yjfpDo->offer_negotiate,'int'):0;
-        $reference_check = $yjfpDo->reference_check?hlw_lib_BaseUtils::getStr($yjfpDo->reference_check,'int'):0;
+        $effective_clue = $yjfpDo->effective_clue?hlw_lib_BaseUtils::getStr($yjfpDo->effective_clue,'float'):0;
+        $contract_sign = $yjfpDo->contract_sign?hlw_lib_BaseUtils::getStr($yjfpDo->contract_sign,'float'):0;
+        $receivable = $yjfpDo->receivable?hlw_lib_BaseUtils::getStr($yjfpDo->receivable,'float'):0;
+        $project_docking = $yjfpDo->project_docking?hlw_lib_BaseUtils::getStr($yjfpDo->project_docking,'float'):0;
+        $resume_provision = $yjfpDo->resume_provision?hlw_lib_BaseUtils::getStr($yjfpDo->resume_provision,'float'):0;
+        $intention_communicate = $yjfpDo->intention_communicate?hlw_lib_BaseUtils::getStr($yjfpDo->intention_communicate,'float'):0;
+        $interview_follow = $yjfpDo->interview_follow?hlw_lib_BaseUtils::getStr($yjfpDo->interview_follow,'float'):0;
+        $offer_negotiate = $yjfpDo->offer_negotiate?hlw_lib_BaseUtils::getStr($yjfpDo->offer_negotiate,'float'):0;
+        $reference_check = $yjfpDo->reference_check?hlw_lib_BaseUtils::getStr($yjfpDo->reference_check,'float'):0;
         $ResultDO = new YjfpResultDTO();
         if (!$pro_types) {
             $ResultDO->code = 500;
