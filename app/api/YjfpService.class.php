@@ -66,15 +66,15 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
 
         //挨个 过滤输入 数据
         $pro_types = $yjfpDo->pro_types?hlw_lib_BaseUtils::getStr($yjfpDo->pro_types,'int'):0;
-        $effective_clue = $yjfpDo->effective_clue?hlw_lib_BaseUtils::getStr($yjfpDo->effective_clue,'int'):0;
-        $contract_sign = $yjfpDo->contract_sign?hlw_lib_BaseUtils::getStr($yjfpDo->contract_sign,'int'):0;
-        $receivable = $yjfpDo->receivable?hlw_lib_BaseUtils::getStr($yjfpDo->receivable,'int'):0;
-        $project_docking = $yjfpDo->project_docking?hlw_lib_BaseUtils::getStr($yjfpDo->project_docking,'int'):0;
-        $resume_provision = $yjfpDo->resume_provision?hlw_lib_BaseUtils::getStr($yjfpDo->resume_provision,'int'):0;
-        $intention_communicate = $yjfpDo->intention_communicate?hlw_lib_BaseUtils::getStr($yjfpDo->intention_communicate,'int'):0;
-        $interview_follow = $yjfpDo->interview_follow?hlw_lib_BaseUtils::getStr($yjfpDo->interview_follow,'int'):0;
-        $offer_negotiate = $yjfpDo->offer_negotiate?hlw_lib_BaseUtils::getStr($yjfpDo->offer_negotiate,'int'):0;
-        $reference_check = $yjfpDo->reference_check?hlw_lib_BaseUtils::getStr($yjfpDo->reference_check,'int'):0;
+        $effective_clue = $yjfpDo->effective_clue?hlw_lib_BaseUtils::getStr($yjfpDo->effective_clue,'float'):0;
+        $contract_sign = $yjfpDo->contract_sign?hlw_lib_BaseUtils::getStr($yjfpDo->contract_sign,'float'):0;
+        $receivable = $yjfpDo->receivable?hlw_lib_BaseUtils::getStr($yjfpDo->receivable,'float'):0;
+        $project_docking = $yjfpDo->project_docking?hlw_lib_BaseUtils::getStr($yjfpDo->project_docking,'float'):0;
+        $resume_provision = $yjfpDo->resume_provision?hlw_lib_BaseUtils::getStr($yjfpDo->resume_provision,'float'):0;
+        $intention_communicate = $yjfpDo->intention_communicate?hlw_lib_BaseUtils::getStr($yjfpDo->intention_communicate,'float'):0;
+        $interview_follow = $yjfpDo->interview_follow?hlw_lib_BaseUtils::getStr($yjfpDo->interview_follow,'float'):0;
+        $offer_negotiate = $yjfpDo->offer_negotiate?hlw_lib_BaseUtils::getStr($yjfpDo->offer_negotiate,'float'):0;
+        $reference_check = $yjfpDo->reference_check?hlw_lib_BaseUtils::getStr($yjfpDo->reference_check,'float'):0;
         $ResultDO = new YjfpResultDTO();
         if (!$pro_types) {
             $ResultDO->code = 500;
@@ -85,8 +85,13 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
         //计算总和，要等于100
         $s = json_decode(json_encode($yjfpDo),true);
         unset($s['pro_types']);
-        $sum = array_sum($s);
-        if($sum >0 && $sum !=100){
+        /*$sum = array_sum($s);*/
+        $sum = $effective_clue + $contract_sign + $receivable + $project_docking + $resume_provision + $intention_communicate + $interview_follow + $offer_negotiate + $reference_check;
+        /*$ResultDO->code = 500;
+        $ResultDO->success = FALSE;
+        $ResultDO->message = $sum.' =$sum | 断点测试$yjfpDo = '.json_encode($yjfpDo);
+        return $ResultDO;*/
+        if($sum >=0 && $sum !=100){
             $ResultDO->code = 500;
             $ResultDO->success = FALSE;
             $ResultDO->message = '各项数值之和不足100%，请修改';
@@ -365,12 +370,6 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
         try{
             $this->model_achievement->beginTransaction();
             $this->model_achievement->query($sql_str);
-            $in_first_id = $this->model_achievement->lastInsertId();//插入的第一个id
-            $contu = count($sql_data);
-            $in_max_id = $in_first_id+$contu-1;
-            $stur = '精确时间到秒看看time='.time().' | msectime='.$this->msectime();
-            hlw_lib_BaseUtils::addLog($stur,'error.log','/www/wwwroot/service.hellocrab.cn/log/');
-            self::writeFile($this->msectime(),'db_sql.log','/www/wwwroot/service.hellocrab.cn/log/');
             $this->model_achievement->commit();
             $this->ResultDO->success = true;
             $this->ResultDO->code = 200;
@@ -378,7 +377,7 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
             return $this->ResultDO;
         }catch (Exception $ex) {
             $this->model_achievement->rollBack();
-            self::writeFile('500','db_sql.log','/www/wwwroot/service.hellocrab.cn/log/');
+            
         }
 
     }
