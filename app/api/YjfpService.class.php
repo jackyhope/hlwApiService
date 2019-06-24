@@ -372,7 +372,7 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
             return $this->ResultDO;
         }catch (Exception $ex) {
             $this->model_achievement->rollBack();
-            self::writeFile('500','db_sql.log','/www/wwwroot/service.hellocrab.cn/log/');
+            
         }
 
     }
