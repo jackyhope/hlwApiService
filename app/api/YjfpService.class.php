@@ -87,10 +87,10 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
         unset($s['pro_types']);
         /*$sum = array_sum($s);*/
         $sum = $effective_clue + $contract_sign + $receivable + $project_docking + $resume_provision + $intention_communicate + $interview_follow + $offer_negotiate + $reference_check;
-        $ResultDO->code = 500;
+        /*$ResultDO->code = 500;
         $ResultDO->success = FALSE;
         $ResultDO->message = $sum.' =$sum | 断点测试$yjfpDo = '.json_encode($yjfpDo);
-        return $ResultDO;
+        return $ResultDO;*/
         if($sum >=0 && $sum !=100){
             $ResultDO->code = 500;
             $ResultDO->success = FALSE;
