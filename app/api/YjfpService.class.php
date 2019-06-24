@@ -365,12 +365,6 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
         try{
             $this->model_achievement->beginTransaction();
             $this->model_achievement->query($sql_str);
-            $in_first_id = $this->model_achievement->lastInsertId();//插入的第一个id
-            $contu = count($sql_data);
-            $in_max_id = $in_first_id+$contu-1;
-            $stur = '精确时间到秒看看time='.time().' | msectime='.$this->msectime();
-            hlw_lib_BaseUtils::addLog($stur,'error.log','/www/wwwroot/service.hellocrab.cn/log/');
-            self::writeFile($this->msectime(),'db_sql.log','/www/wwwroot/service.hellocrab.cn/log/');
             $this->model_achievement->commit();
             $this->ResultDO->success = true;
             $this->ResultDO->code = 200;
