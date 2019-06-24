@@ -85,8 +85,9 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
         //计算总和，要等于100
         $s = json_decode(json_encode($yjfpDo),true);
         unset($s['pro_types']);
-        $sum = array_sum($s);
-        if($sum >0 && $sum !=100){
+        /*$sum = array_sum($s);*/
+        $sum = $effective_clue + $contract_sign + $receivable + $project_docking + $resume_provision + $intention_communicate + $interview_follow + $offer_negotiate + $reference_check;
+        if($sum >=0 && $sum !=100){
             $ResultDO->code = 500;
             $ResultDO->success = FALSE;
             $ResultDO->message = '各项数值之和不足100%，请修改';
