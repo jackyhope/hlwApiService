@@ -14,7 +14,7 @@ if(ENV == 'local'){
 
 ApiCore::init('app', 'hlwApiSdk');
 
-if (strpos($_SERVER['SERVER_ADDR'], '192.168.0.250') !== FALSE) {//测试环境1
+if (strpos($_SERVER['SERVER_ADDR'], '192.168.0.248') !== FALSE) {//测试环境1
     SDb::setConfigFile(__DIR__ . '/app/conf/db.test.php');
 }else if (strpos($_SERVER['SERVER_ADDR'], '192.168') !== FALSE || strpos($_SERVER['SERVER_ADDR'], '127.0') !== FALSE) { //本地环境
     SDb::setConfigFile(__DIR__ . '/app/conf/db.local.php');
