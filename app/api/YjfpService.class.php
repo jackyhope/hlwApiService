@@ -472,6 +472,7 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
         $id_achie_list = array_column($achie_list,NULL,'id');
         $id_achie_list = $id_achie_list[$check_id];
         $check_data = [
+            'invoice_id' => $invoice_data['invoice_id'],
             'user_id' => $id_achie_list['user_id'],
             'type' => $id_achie_list['type'],
             'integral' => -$post_data[$check_id]['money'],
