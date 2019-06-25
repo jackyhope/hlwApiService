@@ -4,6 +4,7 @@ use com\hlw\huilie\dataobject\yjfp\RefundDTO;
 use com\hlw\huilie\interfaces\YjfpServiceIf;
 use com\hlw\huilie\dataobject\yjfp\YjfpResultDTO;
 use com\hlw\huilie\dataobject\yjfp\YjfpPrimResultDTO;
+use com\hlw\huilie\dataobject\yjfp\ChkGetDTO;
 use com\hlw\common\dataobject\common\ResultDO;
 
 class api_YjfpService extends api_Abstract implements YjfpServiceIf
@@ -60,6 +61,25 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
             'delivery'=>'候选人简历提供,候选人意向沟通简历报告制作,候选人推荐面试跟进,候选人薪酬offer谈判,候选人背景调查入职跟进',
         ];
 
+    }
+
+    public function chkData(\com\hlw\huilie\dataobject\yjfp\SetOneDTO $oneDo)
+    {
+        // TODO: Implement chkData() method.
+        $pro_types = $oneDo->id?hlw_lib_BaseUtils::getStr($oneDo->id,'int'):0;
+        $ResultDO= new ChkGetDTO();
+        if($pro_types<=0){
+            $ResultDO->code = 500;
+            $ResultDO->success = FALSE;
+            $ResultDO->message = '请选择业务类型';
+            return $ResultDO;
+        }
+        $re = $this->model->selectOne(['pro_types'=>$pro_types]);
+        $ResultDO->code = 200;
+        $ResultDO->success = TRUE;
+        $ResultDO->message = '获取成功';
+        $ResultDO->data = $re;
+        return $ResultDO;
     }
 
     public function editData(\com\hlw\huilie\dataobject\yjfp\YjfpRequestDTO $yjfpDo)
@@ -491,7 +511,7 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
             return $this->ResultDO;
         }
         //↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑
-        
+
         //ping sql
         $insert_sql = "INSERT INTO `mx_achievement` (`invoice_id`,`user_id`, `type`, `integral`, `commission`, `tikect_type`, `com_id`, `project_id`, `resume_id`, `arrivetime`, `addtime`) VALUES";
         foreach ($achie_list as $sk=>$sv){
