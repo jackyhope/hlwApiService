@@ -159,17 +159,16 @@ class api_LeadsService extends api_Abstract implements LeadsServiceIf
     function deletefile($id)
     {
         // TODO: Implement deletefile() method.
-//        $resultDO = new ResultDO();
-//
-//        $resultDO->success = false;
-//        $resultDO->code = 400;
-//        $resultDO->message = '删除失败';
-//
+        $resultDO = new ResultDO();
+
+        $resultDO->success = false;
+        $resultDO->code = 400;
+        $resultDO->message = '删除失败';
+
         $file_model = new model_pinping_file();
         $data = $file_model->selectOne(['file_id'=>$id]);
         @unlink($data['file_path']);
-        $is_deleted = $file_model->delete(['file_id'=>13]);
-        var_dump($is_deleted);die;
+        $is_deleted = $file_model->delete(['file_id'=>$id]);
         if($is_deleted !== false ){
             $resultDO->success = true;
             $resultDO->code = 200;
