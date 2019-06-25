@@ -491,8 +491,7 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
             return $this->ResultDO;
         }
         //↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑
-        $this->ResultDO->message = $ids.' = $ids | $achie_list = '.json_encode($achie_list);
-        return $this->ResultDO;
+        
         //ping sql
         $insert_sql = "INSERT INTO `mx_achievement` (`invoice_id`,`user_id`, `type`, `integral`, `commission`, `tikect_type`, `com_id`, `project_id`, `resume_id`, `arrivetime`, `addtime`) VALUES";
         foreach ($achie_list as $sk=>$sv){
@@ -512,8 +511,8 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
                 $this->ResultDO->message = '发票信息更新失败，请稍候再试';
                 return $this->ResultDO;
             }
-            $this->ResultDO->message = $ids.' = $ids | $insert_sql = '.$insert_sql;
-            return $this->ResultDO;
+            /*$this->ResultDO->message = $ids.' = $ids | $insert_sql = '.$insert_sql;
+            return $this->ResultDO;*/
             $this->model_achievement->beginTransaction();
             $this->model_achievement->query($insert_sql);
             $this->model_achievement->commit();
