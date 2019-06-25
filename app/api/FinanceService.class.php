@@ -100,6 +100,9 @@ class api_FinanceService extends api_Abstract implements ReachServiceIf
             $attendData = array_values($attendData);
             $attendanceMode = new model_pinping_userAttendance();
             $res = $attendanceMode->addAll($attendData);
+            if(!$res){
+                throw new \Exception("月数据只能导一次");
+            }
 
         } catch (\Exception $e) {
             $resultDo->message = $e->getMessage();

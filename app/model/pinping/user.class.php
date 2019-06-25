@@ -142,6 +142,7 @@ class model_pinping_user extends hlw_components_basemodel
             $departs[$departmentId]['count'] += 1; //人数
             $departs[$departmentId]['sum'] += $info['achievement']; //实际业绩
             $departs[$departmentId]['discount'] += $info['discount']; //折扣业绩
+            $departs[$departmentId]['target'] += $info['target']; //期望业绩
             $departs[$departmentId]['achievement_rate'] = round($departs[$departmentId]['sum'] / $departs[$departmentId]['discount']); //部门达成率
             $departs[$departmentId]['average'] = round($departs[$departmentId]['sum'] / $departs[$departmentId]['count']); //人均产值
             $departs[$departmentId]['list'][] = $info;
@@ -164,6 +165,7 @@ class model_pinping_user extends hlw_components_basemodel
             $pList[$pId]['count'] += $pInfo['count'];
             $pList[$pId]['sum'] += $pInfo['sum'];
             $pList[$pId]['discount'] += $pInfo['discount'];
+            $pList[$pId]['target'] += $pInfo['target'];
             $pList[$pId]['achievement_rate'] += round($pList[$pId]['sum'] / $pList[$pId]['discount']);
             $pList[$pId]['average'] = round($pList[$pId]['sum'] / $pList[$pId]['count']);
             $pList[$pId]['list'][] = $pInfo;
