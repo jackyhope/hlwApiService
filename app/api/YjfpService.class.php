@@ -362,9 +362,9 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
         //↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑
         //重组sql_data
 
-        $sql_str = "INSERT INTO `mx_achievement` (`user_id`, `type`, `integral`, `commission`, `tikect_type`, `com_id`, `project_id`, `resume_id`, `arrivetime`, `addtime`) VALUES";
+        $sql_str = "INSERT INTO `mx_achievement` (`invoice_id`,`user_id`, `type`, `integral`, `commission`, `tikect_type`, `com_id`, `project_id`, `resume_id`, `arrivetime`, `addtime`) VALUES";
         foreach ($sql_data as $sk=>$sv){
-            $sql_str .= "(".$sv['user_id'].",'".$invoice['project_type']."',".$sv['money'].",0,'".$com_title[$sk]."',".$invoice['customer_id'].",".$invoice['project_id'].",".$invoice['resume_id'].",0,".time()."),";
+            $sql_str .= "(".$invoice_id.",".$sv['user_id'].",'".$invoice['project_type']."',".$sv['money'].",0,'".$com_title[$sk]."',".$invoice['customer_id'].",".$invoice['project_id'].",".$invoice['resume_id'].",0,".time()."),";
         }
 
         $sql_str = rtrim($sql_str,',');
