@@ -1,5 +1,6 @@
 <?php
 
+use com\hlw\huilie\dataobject\yjfp\RefundDTO;
 use com\hlw\huilie\interfaces\YjfpServiceIf;
 use com\hlw\huilie\dataobject\yjfp\YjfpResultDTO;
 use com\hlw\huilie\dataobject\yjfp\YjfpPrimResultDTO;
@@ -380,6 +381,148 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
             
         }
 
+    }
+
+    /**
+     * @param \com\hlw\huilie\dataobject\yjfp\YjfpPrimDTO $refunDo
+     * @return RefundDTO
+     * 退款表单页面
+     */
+    public function refundData(\com\hlw\huilie\dataobject\yjfp\YjfpPrimDTO $refunDo)
+    {
+        // TODO: Implement refundData() method.
+        $ResultDO = new RefundDTO();
+        $ResultDO->code = 500;
+        $ResultDO->success = FALSE;
+        $invoice_id = $refunDo->invoice_id?hlw_lib_BaseUtils::getStr($refunDo->invoice_id,'int'):0;
+        if($invoice_id<=0){
+            $ResultDO->message = '发票参数不正确';
+        }
+        /*$achie_list = $this->model_achievement->select(['invoice_id'=>$invoice_id],'id,integral,tikect_type,user_id','user_id');
+        $achie_list = json_decode(json_encode($achie_list),true);
+        $achie_list = $achie_list['items'];*/
+
+        $achie_list = $this->model_achievement->query('select id,SUM(integral) integral,tikect_type,user_id from mx_achievement where invoice_id='.$invoice_id.' group by user_id');
+        if(count($achie_list)<=0){
+            $ResultDO->message = '对不起，没有查到该发票对应的业绩分配记录！';
+            return $ResultDO;
+        }
+
+        /*$user_id_arr = array_column($achie_list,NULL,'id');//把二维数组键名改为二维内部数组的某一键值*/
+        //找人
+        $user_id_arr = array_column($achie_list,'user_id');//取值
+        $user_id_arr = array_unique($user_id_arr);//去重
+        $user_id_arr = implode(',',$user_id_arr);//组in的字符串
+        $users_msg = $this->model_user->select(['user_id in('.$user_id_arr.')'],'user_id,full_name');
+        $users_msg = json_decode(json_encode($users_msg),true);
+        $users_msg = $users_msg['items'];
+        $new_umsg = [];
+        foreach ($users_msg as $uv){
+            $new_umsg[$uv['user_id']] = $uv['full_name'];
+        }
+        $res_list = [];
+        foreach ($achie_list as $vak=>$val){
+            $res_list[$val['id']]['full_name'] = $new_umsg[$val['user_id']];
+            $res_list[$val['id']]['id'] = $val['id'];
+            $res_list[$val['id']]['integral'] = $val['integral'];
+            $res_list[$val['id']]['tikect_type'] = $val['tikect_type'];
+        }
+        unset($achie_list);
+        unset($users_msg);
+        unset($new_umsg);
+        $ResultDO->code = 200;
+        $ResultDO->success = TRUE;
+        $ResultDO->message = '获取成功';
+        $ResultDO->data = $res_list;
+        return $ResultDO;
+    }
+
+    /**
+     * 主要包括 发票表  退款时间 + 退款备注   业绩表  新增退款记录，金额为负数，表示退款
+     * 退款表单提交地址
+     */
+    public function refundUpData(\com\hlw\huilie\dataobject\yjfp\RefundUpperDTO $upperDo)
+    {
+        // TODO: Implement refundUpData() method.
+        $this->ResultDO->code=500;
+        $this->ResultDO->success=FALSE;
+        //收数据
+        $post_data = $upperDo->datas;
+        $ids = $post_data;
+        $invoice_data = $post_data['data'];
+        unset($ids['data']);
+        $ids = array_keys($ids);
+        $check_id = $ids[0];//取一个值出来，后面做检测用-0625
+        $ids = implode(',',$ids);
+        //根据主键id查询其他相关值，然后就是钱不一样，钱是传过来的数字然后变成负数，表示统计的时候减去，组成更新数组，pin更新sql，重新插入
+        $achie_list = $this->model_achievement->select(['id in('.$ids.')'],'id,invoice_id,user_id,type,commission,integral,tikect_type,com_id,project_id,resume_id,arrivetime');
+        $achie_list = json_decode(json_encode($achie_list),true);
+        $achie_list = $achie_list['items'];
+        //比较退款金额是否大于可退款金额
+        $old_achie_list = $this->model_achievement->query('select id,SUM(integral) integral from mx_achievement where invoice_id='.$invoice_data['invoice_id'].' group by user_id');
+        /*$id_achie_list = array_column($achie_list,NULL,'id');//把二维数组键名改为二维内部数组的某一键值-此处不需要0625 */
+        //有一条不对，全部打回，重新填写 06-25
+        foreach ($old_achie_list as $idk=>$idv){
+            if($post_data[$idv['id']]['money']>$idv['integral']){
+                $this->ResultDO->message='实际退款金额大于可退款金额，请重新填写！';
+                return $this->ResultDO;
+                break;
+            }
+        }
+        $id_achie_list = array_column($achie_list,NULL,'id');
+        $id_achie_list = $id_achie_list[$check_id];
+        $check_data = [
+            'user_id' => $id_achie_list['user_id'],
+            'type' => $id_achie_list['type'],
+            'integral' => -$post_data[$check_id]['money'],
+            'tikect_type' => $id_achie_list['tikect_type'],
+            'com_id' => $id_achie_list['com_id'],
+            'project_id' => $id_achie_list['project_id'],
+            'resume_id' => $id_achie_list['resume_id'],
+            'addtime' => $invoice_data['up_time']
+        ];
+        //检测的至关重要的条件就是这个前端可选的传值的 时间字段，同一个time，即 同一秒不能产生大鱼1条的相同数据，解决反复扣出现一笔金额的退款的误判
+        $is_has = $this->model_achievement->selectOne($check_data,'id');
+        if(is_array($is_has) && count($is_has)==1){
+            $this->ResultDO->success = TRUE;
+            $this->ResultDO->code = 200;
+            $this->ResultDO->message = '操作成功';
+            return $this->ResultDO;
+        }
+        //↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑
+        /*$this->ResultDO->message = $ids.' = $ids | $achie_list = '.json_encode($achie_list);
+        return $this->ResultDO;*/
+        //ping sql
+        $insert_sql = "INSERT INTO `mx_achievement` (`invoice_id`,`user_id`, `type`, `integral`, `commission`, `tikect_type`, `com_id`, `project_id`, `resume_id`, `arrivetime`, `addtime`) VALUES";
+        foreach ($achie_list as $sk=>$sv){
+            $insert_sql .= "(".$invoice_data['invoice_id'].",".$sv['user_id'].",'".$sv['type']."',-".$post_data[$sv['id']]['money'].",".$sv['commission'].",'".$sv['tikect_type']."',".$sv['com_id'].",".$sv['project_id'].",".$sv['resume_id'].",".$sv['arrivetime'].",".$invoice_data['up_time']."),";
+        }
+        $insert_sql = rtrim($insert_sql,',');
+        try{
+            //还有一步改动，提交到发票表里面  invoice表是 MYISAM 不支持事务，写外面0625
+            //添加退款备注，更新时间
+            $invoice_refund_data = [
+                'refund_content'=>$invoice_data['msg'],
+                'update_time' =>$invoice_data['up_time']
+            ];
+
+            $re_up = $this->model_invoice->update(['invoice_id'=>$invoice_data['invoice_id']],$invoice_refund_data);
+            if($re_up===false){
+                $this->ResultDO->message = '发票信息更新失败，请稍候再试';
+                return $this->ResultDO;
+            }
+            /*$this->ResultDO->message = $ids.' = $ids | $insert_sql = '.$insert_sql;
+            return $this->ResultDO;*/
+            $this->model_achievement->beginTransaction();
+            $this->model_achievement->query($insert_sql);
+            $this->model_achievement->commit();
+            $this->ResultDO->success = true;
+            $this->ResultDO->code = 200;
+            $this->ResultDO->message = '操作成功';
+            return $this->ResultDO;
+        }catch (Exception $ex) {
+            $this->model_achievement->rollBack();
+        }
     }
 
     /**
