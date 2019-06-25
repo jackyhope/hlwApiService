@@ -86,7 +86,7 @@ class api_LeadsService extends api_Abstract implements LeadsServiceIf
                 $rankTarget_model->update(['typeId'=>$type,'rankId'=>intval($idC4['id'])],['target'=>$C4]);
                 $idC5 = $jobrank_model->selectOne(['name'=>'C5'],'id');
                 $rankTarget_model->update(['typeId'=>$type,'rankId'=>intval($idC5['id'])],['target'=>$C5]);
-                $idC6 = $jobrank_model->selectOne(['name'=>'C5'],'id');
+                $idC6 = $jobrank_model->selectOne(['name'=>'C6'],'id');
                 $rankTarget_model->update(['typeId'=>$type,'rankId'=>intval($idC6['id'])],['target'=>$C6]);
                 $idD9 = $jobrank_model->selectOne(['name'=>'D9'],'id');
                 $rankTarget_model->update(['typeId'=>$type,'rankId'=>intval($idD9['id'])],['target'=>$D9]);
