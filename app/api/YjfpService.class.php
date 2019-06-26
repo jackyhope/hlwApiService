@@ -225,7 +225,7 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
             if(count($jf_rz['items'])>0){
                 $merge_all = array_merge($merge_all,$jf_rz['items']);
             }
-            
+
             $merge_all = array_unique($merge_all,SORT_REGULAR); //去重
             $merge_all = array_filter($merge_all);//去掉无效值|  == false  的值
             $merge_clear = [];
@@ -299,13 +299,17 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
             //4、立项需求表企业项目对接
             $re2[3] = $re[2];
             $re2[3]['title'] = ['demand',$com_title2['demand']];
-            //5、候选人简历提供
-            $re2[4] = $uid_arr_final[$jl_tg['items'][0]['role_id']];
+            //5、候选人简历提供                             取CC第一个
+            if(count($jf_cc['items'])>0){
+                $re2[4] = $uid_arr_final[$jf_cc['items'][0]['role_id']];
+            }
             $re2[4]['bli'] = intval($sys['resume_provision']);
             $re2[4]['money'] = $re2[4]['bli'] * floatval($invoice['money']) * 0.01;
             $re2[4]['title'] = ['resume',$com_title2['resume']];
-            //6、顾问面试  候选人意向沟通、简历报告制作 $this->model_fineprojectadviser
-            $re2[5] = $uid_arr_final[$jl_tg['items'][0]['role_id']];
+            //6、顾问面试  候选人意向沟通、简历报告制作        取CC第一个
+            if(count($jf_cc['items'])>0){
+                $re2[5] = $uid_arr_final[$jf_cc['items'][0]['role_id']];
+            }
             $re2[5]['bli'] = intval($sys['intention_communicate']);
             $re2[5]['money'] = $re2[5]['bli'] * floatval($invoice['money']) * 0.01;
             $re2[5]['title'] = ['intention',$com_title2['intention']];
