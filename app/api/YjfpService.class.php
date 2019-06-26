@@ -183,29 +183,49 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
         if($pro_types > 0){
             //有值，
             //找人： 交付人的查找  --start-- ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+            $merge_all=[];//初始化
             //候选人简历提供
             $jl_tg = $this->model_fineproject->select(['id'=>$invoice['fine_id']],'callist_role_id role_id');
             $jl_tg = json_decode(json_encode($jl_tg),true);
+            //0626-基于简历提供这一项一定不为空，开始重组$merge_all
+            $merge_all = $jl_tg['items'];//第一个
             //CC备注
             $jf_cc = $this->model_fineprojectcc->select(['fine_id'=>$invoice['fine_id']],'role_id');
             $jf_cc = json_decode(json_encode($jf_cc),true);
+            if(count($jf_cc['items'])>0){
+                $merge_all = array_merge($merge_all,$jf_cc['items']);
+            }
             //推荐
             $jf_tj = $this->model_fineproject->select(['id'=>$invoice['fine_id'],'tjaddtime'=>['gt',0]],'tj_role_id role_id');
             $jf_tj = json_decode(json_encode($jf_tj),true);
+            if(count($jf_tj['items'])>0){
+                $merge_all = array_merge($merge_all,$jf_tj['items']);
+            }
             //顾问面试
             $gw_adv = $this->model_fineprojectadviser->select(['id'=>$invoice['fine_id']],'role_id');
             $gw_adv = json_decode(json_encode($gw_adv),true);
+            if(count($gw_adv['items'])>0){
+                $merge_all = array_merge($merge_all,$gw_adv['items']);
+            }
             //面试(此处理解为客户面试，并非顾问面试)
             $jf_ms = $this->model_fineprojectinterview->select(['fine_id'=>$invoice['fine_id']],'role_id');
             $jf_ms = json_decode(json_encode($jf_ms),true);
+            if(count($jf_ms['items'])>0){
+                $merge_all = array_merge($merge_all,$jf_ms['items']);
+            }
             //offer
             $jf_offer = $this->model_fineprojectoffer->select(['fine_id'=>$invoice['fine_id']],'role_id');
             $jf_offer = json_decode(json_encode($jf_offer),true);
+            if(count($jf_offer['items'])>0){
+                $merge_all = array_merge($merge_all,$jf_offer['items']);
+            }
             //入职
             $jf_rz = $this->model_fineprojectenter->select(['fine_id'=>$invoice['fine_id']],'role_id');
             $jf_rz = json_decode(json_encode($jf_rz),true);
-            $merge_all = array_merge($jf_cc['items'],$jf_tj['items'],$jf_ms['items'],$jf_offer['items'],$jf_rz['items'],$gw_adv['items'],$jl_tg['items']);//拼接合并
-
+            if(count($jf_rz['items'])>0){
+                $merge_all = array_merge($merge_all,$jf_rz['items']);
+            }
+            
             $merge_all = array_unique($merge_all,SORT_REGULAR); //去重
             $merge_all = array_filter($merge_all);//去掉无效值|  == false  的值
             $merge_clear = [];
