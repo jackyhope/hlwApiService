@@ -416,6 +416,8 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
         try{
             $this->model_achievement->beginTransaction();
             $this->model_achievement->query($sql_str);
+            //已分配的发票需要改状态   type= distribution
+            $this->model_invoice->update(['invoice_id'=>$invoice_id],['type'=>'distribution']);
             $this->model_achievement->commit();
             $this->ResultDO->success = true;
             $this->ResultDO->code = 200;
