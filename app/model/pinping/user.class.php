@@ -50,7 +50,7 @@ class model_pinping_user extends hlw_components_basemodel
      * @return array
      */
     public function userReachList($day, $name, $type, $department) {
-        $where = "status = 1";
+        $where = "status = 1 and profession_type in (1,2,3,4,5)";
         //获取部门员工IDs
         $roles = '';
         $department > 0 && $roles = $this->departmentRoles($department);
@@ -132,7 +132,7 @@ class model_pinping_user extends hlw_components_basemodel
         foreach ($list as &$info) {
             //部门数据
             $departmentId = $info['department_id'];
-            if(!$departmentId){
+            if (!$departmentId) {
                 continue;
             }
             $departs[$departmentId]['name'] = $info['department_name'];
@@ -155,7 +155,7 @@ class model_pinping_user extends hlw_components_basemodel
         $pList = [];
         foreach ($departs as $pInfo) {
             $pId = $pInfo['p_id'];
-            if(!$pId){
+            if (!$pId) {
                 continue;
             }
             $pList[$pId]['name'] = $pInfo['p_name'];
