@@ -183,28 +183,48 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
         if($pro_types > 0){
             //有值，
             //找人： 交付人的查找  --start-- ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+            $merge_all=[];//初始化
             //候选人简历提供
             $jl_tg = $this->model_fineproject->select(['id'=>$invoice['fine_id']],'callist_role_id role_id');
             $jl_tg = json_decode(json_encode($jl_tg),true);
+            //0626-基于简历提供这一项一定不为空，开始重组$merge_all
+            $merge_all = $jl_tg['items'];//第一个
             //CC备注
             $jf_cc = $this->model_fineprojectcc->select(['fine_id'=>$invoice['fine_id']],'role_id');
             $jf_cc = json_decode(json_encode($jf_cc),true);
+            if(count($jf_cc['items'])>0){
+                $merge_all = array_merge($merge_all,$jf_cc['items']);
+            }
             //推荐
             $jf_tj = $this->model_fineproject->select(['id'=>$invoice['fine_id'],'tjaddtime'=>['gt',0]],'tj_role_id role_id');
             $jf_tj = json_decode(json_encode($jf_tj),true);
+            if(count($jf_tj['items'])>0){
+                $merge_all = array_merge($merge_all,$jf_tj['items']);
+            }
             //顾问面试
             $gw_adv = $this->model_fineprojectadviser->select(['id'=>$invoice['fine_id']],'role_id');
             $gw_adv = json_decode(json_encode($gw_adv),true);
+            if(count($gw_adv['items'])>0){
+                $merge_all = array_merge($merge_all,$gw_adv['items']);
+            }
             //面试(此处理解为客户面试，并非顾问面试)
             $jf_ms = $this->model_fineprojectinterview->select(['fine_id'=>$invoice['fine_id']],'role_id');
             $jf_ms = json_decode(json_encode($jf_ms),true);
+            if(count($jf_ms['items'])>0){
+                $merge_all = array_merge($merge_all,$jf_ms['items']);
+            }
             //offer
             $jf_offer = $this->model_fineprojectoffer->select(['fine_id'=>$invoice['fine_id']],'role_id');
             $jf_offer = json_decode(json_encode($jf_offer),true);
+            if(count($jf_offer['items'])>0){
+                $merge_all = array_merge($merge_all,$jf_offer['items']);
+            }
             //入职
             $jf_rz = $this->model_fineprojectenter->select(['fine_id'=>$invoice['fine_id']],'role_id');
             $jf_rz = json_decode(json_encode($jf_rz),true);
-            $merge_all = array_merge($jf_cc['items'],$jf_tj['items'],$jf_ms['items'],$jf_offer['items'],$jf_rz['items'],$gw_adv['items'],$jl_tg['items']);//拼接合并
+            if(count($jf_rz['items'])>0){
+                $merge_all = array_merge($merge_all,$jf_rz['items']);
+            }
 
             $merge_all = array_unique($merge_all,SORT_REGULAR); //去重
             $merge_all = array_filter($merge_all);//去掉无效值|  == false  的值
@@ -279,28 +299,49 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
             //4、立项需求表企业项目对接
             $re2[3] = $re[2];
             $re2[3]['title'] = ['demand',$com_title2['demand']];
-            //5、候选人简历提供
-            $re2[4] = $uid_arr_final[$jl_tg['items']['role_id']];
+            //5、候选人简历提供                             取CC第一个
+            if(count($jf_cc['items'])>0){
+                $re2[4] = $uid_arr_final[$jf_cc['items'][0]['role_id']];
+            }
             $re2[4]['bli'] = intval($sys['resume_provision']);
             $re2[4]['money'] = $re2[4]['bli'] * floatval($invoice['money']) * 0.01;
             $re2[4]['title'] = ['resume',$com_title2['resume']];
-            //6、顾问面试  候选人意向沟通、简历报告制作 $this->model_fineprojectadviser
-            $re2[5] = $uid_arr_final[$jl_tg['items']['role_id']];
+            //6、顾问面试  候选人意向沟通、简历报告制作        取CC第一个
+            if(count($jf_cc['items'])>0){
+                $re2[5] = $uid_arr_final[$jf_cc['items'][0]['role_id']];
+            }
             $re2[5]['bli'] = intval($sys['intention_communicate']);
             $re2[5]['money'] = $re2[5]['bli'] * floatval($invoice['money']) * 0.01;
             $re2[5]['title'] = ['intention',$com_title2['intention']];
+            /*******************************************************************/
+            //当cc备注人超过2个的时候，2个不同人
+            $n_jf_cc = $n_nest = [];
+            foreach ($jf_cc['items'] as $kcc=>$vcc){
+                $n_jf_cc[] = $vcc['role_id'];
+            }
+            $n_jf_cc = array_unique($n_jf_cc);
+            if(count($n_jf_cc)>1){
+                //当cc备注人超过2个人
+                foreach($n_jf_cc as $kuu=>$vuu){
+                    $n_nest[]= $uid_arr_final[$vuu];
+                }
+                $re2[5]['more'] = $re2[4]['more'] = $n_nest;
+            }
+            unset($n_jf_cc);
+            unset($n_nest);
+            /*******************************************************************/
             //7、候选人推荐及面试更进
-            $re2[6] = $uid_arr_final[$jf_tj['items']['role_id']];
+            $re2[6] = $uid_arr_final[$jf_tj['items'][0]['role_id']];
             $re2[6]['bli'] = intval($sys['interview_follow']);
             $re2[6]['money'] = $re2[6]['bli'] * floatval($invoice['money']) * 0.01;
             $re2[6]['title'] = ['recommend',$com_title2['recommend']];
             //8、薪酬offer谈判
-            $re2[7] = $uid_arr_final[$jf_offer['items']['role_id']];
+            $re2[7] = $uid_arr_final[$jf_offer['items'][0]['role_id']];
             $re2[7]['bli'] = intval($sys['offer_negotiate']);
             $re2[7]['money'] = $re2[7]['bli'] * floatval($invoice['money']) * 0.01;
             $re2[7]['title'] = ['offer',$com_title2['offer']];
             //7、候选人背景调查 入职跟进
-            $re2[8] = $uid_arr_final[$jf_rz['items']['role_id']];
+            $re2[8] = $uid_arr_final[$jf_rz['items'][0]['role_id']];
             $re2[8]['bli'] = intval($sys['reference_check']);
             $re2[8]['money'] = $re2[8]['bli'] * floatval($invoice['money']) * 0.01;
             $re2[8]['title'] = ['entry',$com_title2['entry']];
@@ -357,21 +398,22 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
         //↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓
         //阻断式--屏蔽连续重复写入相同结果
         /**
-         * 过程：用到client端和service端传输数据的默认关联，得到键名  clue  ，写查询语句，屏蔽重复写入相同数据
+         * 过程：用到client端和service端传输数据的默认关联，得到一个有效键名  $key_one = key($sql_data);  ，写查询语句，屏蔽重复写入相同数据
          * 优势：解决重复请求写入相同数据
          * 劣势：每次均重复连续访问2次接口的问题依然没解决
          */
-            $search_where = [
-                'user_id' => $sql_data['clue']['user_id'],
-                'type' => $invoice['project_type'],
-                'integral' => $sql_data['clue']['money'],
-                'commission' => 0,
-                'tikect_type' => $com_title['clue'],
-                'com_id' => $invoice['customer_id'],
-                'project_id' => $invoice['project_id'],
-                'resume_id' => $invoice['resume_id'],
-                'arrivetime' => 0
-                ];
+        $key_one = key($sql_data);
+        $search_where = [
+            'user_id' => $sql_data[$key_one]['user_id'],
+            'type' => $invoice['project_type'],
+            'integral' => $sql_data[$key_one]['money'],
+            'commission' => 0,
+            'tikect_type' => $com_title[$key_one],
+            'com_id' => $invoice['customer_id'],
+            'project_id' => $invoice['project_id'],
+            'resume_id' => $invoice['resume_id'],
+            'arrivetime' => 0
+        ];
         $is_has = $this->model_achievement->selectOne($search_where,'id');
         if(is_array($is_has) && count($is_has)==1){
             $this->ResultDO->success = true;
@@ -391,6 +433,8 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
         try{
             $this->model_achievement->beginTransaction();
             $this->model_achievement->query($sql_str);
+            //已分配的发票需要改状态   type= distribution
+            $this->model_invoice->update(['invoice_id'=>$invoice_id],['type'=>'distribution']);
             $this->model_achievement->commit();
             $this->ResultDO->success = true;
             $this->ResultDO->code = 200;
