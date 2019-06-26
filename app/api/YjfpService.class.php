@@ -381,21 +381,22 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
         //↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓
         //阻断式--屏蔽连续重复写入相同结果
         /**
-         * 过程：用到client端和service端传输数据的默认关联，得到键名  clue  ，写查询语句，屏蔽重复写入相同数据
+         * 过程：用到client端和service端传输数据的默认关联，得到一个有效键名  $key_one = key($sql_data);  ，写查询语句，屏蔽重复写入相同数据
          * 优势：解决重复请求写入相同数据
          * 劣势：每次均重复连续访问2次接口的问题依然没解决
          */
-            $search_where = [
-                'user_id' => $sql_data['clue']['user_id'],
-                'type' => $invoice['project_type'],
-                'integral' => $sql_data['clue']['money'],
-                'commission' => 0,
-                'tikect_type' => $com_title['clue'],
-                'com_id' => $invoice['customer_id'],
-                'project_id' => $invoice['project_id'],
-                'resume_id' => $invoice['resume_id'],
-                'arrivetime' => 0
-                ];
+        $key_one = key($sql_data);
+        $search_where = [
+            'user_id' => $sql_data[$key_one]['user_id'],
+            'type' => $invoice['project_type'],
+            'integral' => $sql_data[$key_one]['money'],
+            'commission' => 0,
+            'tikect_type' => $com_title[$key_one],
+            'com_id' => $invoice['customer_id'],
+            'project_id' => $invoice['project_id'],
+            'resume_id' => $invoice['resume_id'],
+            'arrivetime' => 0
+        ];
         $is_has = $this->model_achievement->selectOne($search_where,'id');
         if(is_array($is_has) && count($is_has)==1){
             $this->ResultDO->success = true;
