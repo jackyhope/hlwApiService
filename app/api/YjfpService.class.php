@@ -313,6 +313,23 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
             $re2[5]['bli'] = intval($sys['intention_communicate']);
             $re2[5]['money'] = $re2[5]['bli'] * floatval($invoice['money']) * 0.01;
             $re2[5]['title'] = ['intention',$com_title2['intention']];
+            /*******************************************************************/
+            //当cc备注人超过2个的时候，2个不同人
+            $n_jf_cc = $n_nest = [];
+            foreach ($jf_cc['items'] as $kcc=>$vcc){
+                $n_jf_cc[] = $vcc['role_id'];
+            }
+            $n_jf_cc = array_unique($n_jf_cc);
+            if(count($n_jf_cc)>1){
+                //当cc备注人超过2个人
+                foreach($n_jf_cc as $kuu=>$vuu){
+                    $n_nest[]= $uid_arr_final[$vuu];
+                }
+                $re2[5]['more'] = $re2[4]['more'] = $n_nest;
+            }
+            unset($n_jf_cc);
+            unset($n_nest);
+            /*******************************************************************/
             //7、候选人推荐及面试更进
             $re2[6] = $uid_arr_final[$jf_tj['items'][0]['role_id']];
             $re2[6]['bli'] = intval($sys['interview_follow']);
