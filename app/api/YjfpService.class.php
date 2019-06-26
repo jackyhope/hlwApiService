@@ -331,7 +331,33 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
             unset($n_nest);
             /*******************************************************************/
             //7、候选人推荐及面试更进
-            $re2[6] = $uid_arr_final[$jf_tj['items'][0]['role_id']];
+            //  推荐 $jf_tj    面试 $jf_ms
+            $n_jf_cc = $n_jf_clear = $n_nest = [];
+            //除开null
+            $n_jf_cc = $jf_tj['items'];//初始设定一个
+            if(count($jf_ms['items'])>0){
+                if(count($n_jf_cc)>0){
+                    $n_jf_cc = array_merge($n_jf_cc,$jf_ms['items']);
+                    $re2[6] = $uid_arr_final[$jf_tj['items'][0]['role_id']];
+                }else{
+                    $n_jf_cc = $jf_ms['items'];
+                    $re2[6] = $uid_arr_final[$jf_ms['items'][0]['role_id']];
+                }
+            }
+            if(count($n_jf_cc)>0){
+                foreach ($n_jf_cc as $k=>$v){
+                    $n_jf_clear[]=$v['role_id'];
+                }
+                $n_jf_clear = array_unique($n_jf_clear);
+                if(count($n_jf_clear)>1){
+                    //当 推荐 +  面试  超过2个人操作
+                    foreach($n_jf_clear as $vcu){
+                        $n_nest[]= $uid_arr_final[$vcu];
+                    }
+                    $re2[6]['more'] = $n_nest;
+                }
+
+            }
             $re2[6]['bli'] = intval($sys['interview_follow']);
             $re2[6]['money'] = $re2[6]['bli'] * floatval($invoice['money']) * 0.01;
             $re2[6]['title'] = ['recommend',$com_title2['recommend']];
@@ -386,15 +412,21 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
             return $this->ResultDO;
         }
         $invoice = $this->model_invoice->selectOne(['invoice_id'=>$invoice_id]);
-        /////////////////////////////////////
-//        $ddas = [$invoice];
-//        $this->ResultDO->success = true;
-//        $this->ResultDO->code = 233333;
-//        $this->ResultDO->message = '测试查询的数组$invoice='.json_encode($invoice);
-//        $this->ResultDO->data = ['lii'=>[1,2,3]];
-//        $this->ResultDO->datas = $ddas;
-        //return $this->ResultDO;
-        /////////////////////////////////////
+        /*** 重组 $sql_data   由于前端传过来的 user_id实际是 role_id ，则需要转换成 user_id    start 0626 1710*/
+        //第一步 取出传值过来的 user_id 重组成role_id数组
+        $true_arr_role_id = array_column($sql_data, 'user_id');
+        //转为字符串 逗号间隔
+        $true_arr_role_id = implode(',',$true_arr_role_id);
+        //查询结果
+        $uu_id_arr = $this->model_user->select(["role_id in(".$true_arr_role_id.")"],'user_id,role_id');
+        $uu_id_arr = json_decode(json_encode($uu_id_arr),true);
+        $uu_id_arr = $uu_id_arr['items'];
+        $uu_id_arr = array_column($uu_id_arr, null, 'role_id');
+        foreach ($sql_data as $k=>$v){
+            $sql_data[$k]['user_id'] = $uu_id_arr[$v['user_id']]['user_id'];
+        }
+        /*** 重组 $sql_data   由于前端传过来的 user_id实际是 role_id ，则需要转换成 user_id    end 0626 1710*/
+
         //↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓
         //阻断式--屏蔽连续重复写入相同结果
         /**
