@@ -34,6 +34,8 @@ class api_FinanceService extends api_Abstract implements ReachServiceIf
         $department = hlw_lib_BaseUtils::getStr($reachRequestDTO->department, 'int');
         $page = hlw_lib_BaseUtils::getStr($reachRequestDTO->page, 'int');
         $pageSize = hlw_lib_BaseUtils::getStr($reachRequestDTO->pageSize, 'int');
+        $roleIds = hlw_lib_BaseUtils::getStr($reachRequestDTO->roleIds);
+
         if (!$day) {
             $resultDo->success = true;
             $resultDo->code = 500;
@@ -43,7 +45,7 @@ class api_FinanceService extends api_Abstract implements ReachServiceIf
         $this->userMode->setCount(true);
         $this->userMode->setPage($page);
         $this->userMode->setLimit($pageSize);
-        $list = $this->userMode->userReachList($day, $name, $type, $department);
+        $list = $this->userMode->userReachList($day, $name, $type, $department,$roleIds);
         $resultDo->success = '';
         $resultDo->code = 200;
         $resultDo->message = json_encode($list);
@@ -66,7 +68,6 @@ class api_FinanceService extends api_Abstract implements ReachServiceIf
             $resultDo->message = '缺少必传参数';
             return $resultDo;
         }
-
         try {
             $sExcel = new SExcel();
             $data = $sExcel->importExcel($path);
@@ -74,12 +75,16 @@ class api_FinanceService extends api_Abstract implements ReachServiceIf
                 throw new \Exception('EXCEL 数据错误');
             }
             $users = $this->userMode->users(['status' => 1]);
+            $attendanceMode = new model_pinping_userAttendance();
             $attendData = [];
             foreach ($data as $key => $userInfo) {
                 if ($key == 0) {
                     continue;
                 }
                 $userName = trim($userInfo['姓名']);
+                if (!$userName) {
+                    continue;
+                }
                 $userId = array_search($userName, $users);
                 $userId = $userId ? $userId : 0;
                 if (!$userId) {
@@ -95,22 +100,34 @@ class api_FinanceService extends api_Abstract implements ReachServiceIf
                     'file_id' => $fileId,
                     'create_time' => time(),
                 ];
-                $attendData[$userId] = $info;
+                if($info['attendance_days'] > $info['work_days']){
+                    throw new \Exception("员工：{$userName} 的 {$this->excelTitle['attendance_days']} 不能高于 {$this->excelTitle['work_days']}");
+                }
+                $attendWhere = ['role_id' => $userId, 'month' => strtotime($date)];
+
+                $isEsit = $attendanceMode->info($attendWhere);
+                if ($isEsit) {
+                    $attendanceMode->updateInfo($attendWhere, $info);
+                } else {
+                    $attendData[$userId] = $info;
+                }
+
             }
             $attendData = array_values($attendData);
-            $attendanceMode = new model_pinping_userAttendance();
-            $res = $attendanceMode->addAll($attendData);
-            if(!$res){
-                throw new \Exception("月数据只能导一次");
+            if ($attendData) {
+                $res = $attendanceMode->addAll($attendData);
+                if (!$res) {
+                    throw new \Exception("数据导入失败");
+                }
             }
 
         } catch (\Exception $e) {
             $resultDo->message = $e->getMessage();
             return $resultDo;
         }
-        $resultDo->success = $res ? true : false;
-        $resultDo->code = $res ? 200 : 500;
-        $resultDo->message = $res ? '成功' : $attendanceMode->getDbError();
+        $resultDo->success = true;
+        $resultDo->code = 200;
+        $resultDo->message = '成功';
         return $resultDo;
     }
 

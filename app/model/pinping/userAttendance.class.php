@@ -32,7 +32,7 @@ class model_pinping_userAttendance extends hlw_components_basemodel
             $currentMoth = strtotime(date("Y-m-01 00:00:00", time()));
             $where['month'] = $currentMoth;
         } else {
-            $where['month'] = strtotime(date("Y-m-01 00:00:00",strtotime($day)));
+            $where['month'] = strtotime(date("Y-m-01 00:00:00", strtotime($day)));
         }
         $list = $this->select($where, '*', '', ['id' => 'desc']);
         $list = isset($list->items) ? $list->items : [];
@@ -41,6 +41,15 @@ class model_pinping_userAttendance extends hlw_components_basemodel
             $data[$info['role_id']] = ['attend_day' => $info['attendance_days'], 'work_days' => $info['work_days']];
         }
         return $data;
+    }
+
+    public function info($where) {
+        $info = $this->selectOne($where);
+        return $info;
+    }
+
+    public function updateInfo($condition = "", $item = "") {
+       return $this->update($condition, $item);
     }
 
 }

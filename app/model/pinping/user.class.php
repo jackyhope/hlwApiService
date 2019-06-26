@@ -47,9 +47,10 @@ class model_pinping_user extends hlw_components_basemodel
      * @param $name string 查询字段名字
      * @param $type number 员工业态
      * @param $department number 上级部门ID
+     * @param $roleIds string 权限IDS
      * @return array
      */
-    public function userReachList($day, $name, $type, $department) {
+    public function userReachList($day, $name, $type, $department,$roleIds) {
         $where = "status = 1 and profession_type in (1,2,3,4,5)";
         //获取部门员工IDs
         $roles = '';
@@ -57,6 +58,7 @@ class model_pinping_user extends hlw_components_basemodel
         $roles && $where .= " and role_id in ({$roles})";
         $name && $where .= " and full_name like '%{$name}%' ";
         $type && $where .= " and profession_type = {$type} ";
+        $roleIds && $where .= " and role_id in ({$roleIds}) ";
 
         $item = "user_id,full_name,role_id,status,type,job_rank,profession_type,name,full_name,entry,graduation_time";
         $list = $this->select($where, $item, '', "order by user_id desc");
