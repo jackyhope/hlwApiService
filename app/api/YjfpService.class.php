@@ -479,6 +479,29 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
 
     }
 
+
+    /**
+     * @param \com\hlw\huilie\dataobject\yjfp\SetOneDTO $shoDo
+     * 查询已分配好的几条数据，根据发票id查询
+     */
+    public function showData(\com\hlw\huilie\dataobject\yjfp\SetOneDTO $shoDo)
+    {
+        $invoice_id = $shoDo->id?hlw_lib_BaseUtils::getStr($shoDo->id,'int'):0;
+        $ResultDO= new ChkGetDTO();
+        if($invoice_id<=0){
+            $ResultDO->code = 500;
+            $ResultDO->success = FALSE;
+            $ResultDO->message = '发票参数值错误';
+            return $ResultDO;
+        }
+        $sql = "SELECT user_id,SUM(integral) integral FROM mx_achievement WHERE invoice_id = ".$invoice_id." GROUP BY user_id";
+        $re = $this->model_achievement->query($sql);
+        $ResultDO->code = 200;
+        $ResultDO->success = TRUE;
+        $ResultDO->message = '获取成功'.json_encode($re);
+        $ResultDO->datas = $re;
+        return $ResultDO;
+    }
     /**
      * @param \com\hlw\huilie\dataobject\yjfp\YjfpPrimDTO $refunDo
      * @return RefundDTO
