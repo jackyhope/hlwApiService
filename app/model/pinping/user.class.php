@@ -60,7 +60,6 @@ class model_pinping_user extends hlw_components_basemodel
 
         $item = "user_id,full_name,role_id,status,type,job_rank,profession_type,name,full_name,entry,graduation_time";
         $list = $this->select($where, $item, '', "order by user_id desc");
-        return $where;
         $counts = $list->totalSize;
         $currentPage = $list->page;
         $pageSize = $list->pageSize;
