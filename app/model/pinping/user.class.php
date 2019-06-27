@@ -102,7 +102,7 @@ class model_pinping_user extends hlw_components_basemodel
             //是否豁免期内
             $isTraining = $this->isTraining($graduationTime, $professionType);
             //3、出勤
-            $info['work_day'] = $attendDay[$roleId]['attend_day'] ? $attendDay[$roleId]['attend_day'] : 0;
+            $info['work_day'] = $attendDay[$roleId]['work_days'] ? $attendDay[$roleId]['work_days'] : 0;
             //4、原始业绩
             $info['target'] = isset($target[$targetKey]) ? $target[$targetKey] : '';
             //5、折算业绩
