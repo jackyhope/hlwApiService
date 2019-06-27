@@ -254,22 +254,22 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
             //  ['bd',$com_title['bd']]    ['pm',$com_title['pm']]     ['delivery',$com_title['delivery']]
             //线索提供人 = 有效线索提供
             $re[0] = $uid_arr_final[$invoice['line_role']];
-            $re[0]['bli'] = intval($sys['effective_clue']);
+            $re[0]['bli'] = floatval($sys['effective_clue']);
             $re[0]['money'] = $re[0]['bli'] * floatval($invoice['money']) * 0.01;
             $re[0]['title'] = ['clue',$com_title['clue']];
             //BD = 合同签订 + 回款
             $re[1] = $uid_arr_final[$invoice['bd_role']];
-            $re[1]['bli'] = intval($sys['contract_sign']) + intval($sys['receivable']);
+            $re[1]['bli'] = floatval($sys['contract_sign']) + intval($sys['receivable']);
             $re[1]['money'] = $re[1]['bli'] * floatval($invoice['money']) * 0.01;
             $re[1]['title'] = ['bd',$com_title['bd']];
             //项目经理 = 立项需求表、企业项目对接
             $re[2] = $uid_arr_final[$invoice['project_role']];
-            $re[2]['bli'] = intval($sys['project_docking']);
+            $re[2]['bli'] = floatval($sys['project_docking']);
             $re[2]['money'] = $re[2]['bli'] * floatval($invoice['money']) * 0.01;
             $re[2]['title'] = ['pm',$com_title['pm']];
             //交付人 = 候选人简历 + 候选人意向沟通、简历报告制作 + 候选人推荐及面试更进 + 候选人薪酬及offer谈判 + 候选人背景调查、入职更进
             $re[3] = $uid_arr_final[$merge_clear[0]];
-            $re[3]['bli'] = intval($sys['resume_provision']) + intval($sys['intention_communicate']) + intval($sys['interview_follow']) + intval($sys['offer_negotiate']) + intval($sys['reference_check']);
+            $re[3]['bli'] = floatval($sys['resume_provision']) + floatval($sys['intention_communicate']) + floatval($sys['interview_follow']) + floatval($sys['offer_negotiate']) + floatval($sys['reference_check']);
             $re[3]['money'] = $re[3]['bli'] * floatval($invoice['money']) * 0.01;
             $re[3]['title'] = ['delivery',$com_title['delivery']];
             if(count($merge_clear)>1){
@@ -288,12 +288,12 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
             $re2[0]['title'] = ['clue',$com_title2['clue']];
             //2、BD--合同签订
             $re2[1] = $uid_arr_final[$invoice['bd_role']];
-            $re2[1]['bli'] = intval($sys['contract_sign']);
+            $re2[1]['bli'] = floatval($sys['contract_sign']);
             $re2[1]['money'] = $re2[1]['bli'] * floatval($invoice['money']) * 0.01;
             $re2[1]['title'] = ['contract',$com_title2['contract']];
             //3、回款
             $re2[2] = $uid_arr_final[$invoice['bd_role']];
-            $re2[2]['bli'] = intval($sys['receivable']);
+            $re2[2]['bli'] = floatval($sys['receivable']);
             $re2[2]['money'] = $re2[2]['bli'] * floatval($invoice['money']) * 0.01;
             $re2[2]['title'] = ['receivable',$com_title2['receivable']];
             //4、立项需求表企业项目对接
@@ -303,14 +303,14 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
             if(count($jf_cc['items'])>0){
                 $re2[4] = $uid_arr_final[$jf_cc['items'][0]['role_id']];
             }
-            $re2[4]['bli'] = intval($sys['resume_provision']);
+            $re2[4]['bli'] = floatval($sys['resume_provision']);
             $re2[4]['money'] = $re2[4]['bli'] * floatval($invoice['money']) * 0.01;
             $re2[4]['title'] = ['resume',$com_title2['resume']];
             //6、顾问面试  候选人意向沟通、简历报告制作        取CC第一个
             if(count($jf_cc['items'])>0){
                 $re2[5] = $uid_arr_final[$jf_cc['items'][0]['role_id']];
             }
-            $re2[5]['bli'] = intval($sys['intention_communicate']);
+            $re2[5]['bli'] = floatval($sys['intention_communicate']);
             $re2[5]['money'] = $re2[5]['bli'] * floatval($invoice['money']) * 0.01;
             $re2[5]['title'] = ['intention',$com_title2['intention']];
             /*******************************************************************/
@@ -331,18 +331,44 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
             unset($n_nest);
             /*******************************************************************/
             //7、候选人推荐及面试更进
-            $re2[6] = $uid_arr_final[$jf_tj['items'][0]['role_id']];
-            $re2[6]['bli'] = intval($sys['interview_follow']);
+            //  推荐 $jf_tj    面试 $jf_ms
+            $n_jf_cc = $n_jf_clear = $n_nest = [];
+            //除开null
+            $n_jf_cc = $jf_tj['items'];//初始设定一个
+            if(count($jf_ms['items'])>0){
+                if(count($n_jf_cc)>0){
+                    $n_jf_cc = array_merge($n_jf_cc,$jf_ms['items']);
+                    $re2[6] = $uid_arr_final[$jf_tj['items'][0]['role_id']];
+                }else{
+                    $n_jf_cc = $jf_ms['items'];
+                    $re2[6] = $uid_arr_final[$jf_ms['items'][0]['role_id']];
+                }
+            }
+            if(count($n_jf_cc)>0){
+                foreach ($n_jf_cc as $k=>$v){
+                    $n_jf_clear[]=$v['role_id'];
+                }
+                $n_jf_clear = array_unique($n_jf_clear);
+                if(count($n_jf_clear)>1){
+                    //当 推荐 +  面试  超过2个人操作
+                    foreach($n_jf_clear as $vcu){
+                        $n_nest[]= $uid_arr_final[$vcu];
+                    }
+                    $re2[6]['more'] = $n_nest;
+                }
+
+            }
+            $re2[6]['bli'] = floatval($sys['interview_follow']);
             $re2[6]['money'] = $re2[6]['bli'] * floatval($invoice['money']) * 0.01;
             $re2[6]['title'] = ['recommend',$com_title2['recommend']];
             //8、薪酬offer谈判
             $re2[7] = $uid_arr_final[$jf_offer['items'][0]['role_id']];
-            $re2[7]['bli'] = intval($sys['offer_negotiate']);
+            $re2[7]['bli'] = floatval($sys['offer_negotiate']);
             $re2[7]['money'] = $re2[7]['bli'] * floatval($invoice['money']) * 0.01;
             $re2[7]['title'] = ['offer',$com_title2['offer']];
             //7、候选人背景调查 入职跟进
             $re2[8] = $uid_arr_final[$jf_rz['items'][0]['role_id']];
-            $re2[8]['bli'] = intval($sys['reference_check']);
+            $re2[8]['bli'] = floatval($sys['reference_check']);
             $re2[8]['money'] = $re2[8]['bli'] * floatval($invoice['money']) * 0.01;
             $re2[8]['title'] = ['entry',$com_title2['entry']];
             $invoice['info']['process'] = $re2;
@@ -386,15 +412,21 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
             return $this->ResultDO;
         }
         $invoice = $this->model_invoice->selectOne(['invoice_id'=>$invoice_id]);
-        /////////////////////////////////////
-//        $ddas = [$invoice];
-//        $this->ResultDO->success = true;
-//        $this->ResultDO->code = 233333;
-//        $this->ResultDO->message = '测试查询的数组$invoice='.json_encode($invoice);
-//        $this->ResultDO->data = ['lii'=>[1,2,3]];
-//        $this->ResultDO->datas = $ddas;
-        //return $this->ResultDO;
-        /////////////////////////////////////
+        /*** 重组 $sql_data   由于前端传过来的 user_id实际是 role_id ，则需要转换成 user_id    start 0626 1710*/
+        //第一步 取出传值过来的 user_id 重组成role_id数组
+        $true_arr_role_id = array_column($sql_data, 'user_id');
+        //转为字符串 逗号间隔
+        $true_arr_role_id = implode(',',$true_arr_role_id);
+        //查询结果
+        $uu_id_arr = $this->model_user->select(["role_id in(".$true_arr_role_id.")"],'user_id,role_id');
+        $uu_id_arr = json_decode(json_encode($uu_id_arr),true);
+        $uu_id_arr = $uu_id_arr['items'];
+        $uu_id_arr = array_column($uu_id_arr, null, 'role_id');
+        foreach ($sql_data as $k=>$v){
+            $sql_data[$k]['user_id'] = $uu_id_arr[$v['user_id']]['user_id'];
+        }
+        /*** 重组 $sql_data   由于前端传过来的 user_id实际是 role_id ，则需要转换成 user_id    end 0626 1710*/
+
         //↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓
         //阻断式--屏蔽连续重复写入相同结果
         /**
@@ -447,6 +479,37 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
 
     }
 
+
+    /**
+     * @param \com\hlw\huilie\dataobject\yjfp\SetOneDTO $shoDo
+     * 查询已分配好的几条数据，根据发票id查询
+     */
+    public function showData(\com\hlw\huilie\dataobject\yjfp\SetOneDTO $shoDo)
+    {
+        $invoice_id = $shoDo->id?hlw_lib_BaseUtils::getStr($shoDo->id,'int'):0;
+        $ResultDO= new ChkGetDTO();
+        if($invoice_id<=0){
+            $ResultDO->code = 500;
+            $ResultDO->success = FALSE;
+            $ResultDO->message = '发票参数值错误';
+            return $ResultDO;
+        }
+        $sql = "SELECT user_id,SUM(integral) integral FROM mx_achievement WHERE invoice_id = ".$invoice_id." GROUP BY user_id";
+        $re = $this->model_achievement->query($sql);
+        //差个人名
+        $umsg_arr = $this->model_user->select("user_id in (".$uid_arr.")",'user_id,full_name');
+        $umsg_arr = json_decode(json_encode($umsg_arr),true);
+        $umsg_arr = $umsg_arr['items'];
+        $umsg_arr = array_column($umsg_arr,null,'user_id');//注意三个参数的具体值指向和值
+        foreach ($re as $rek=>$rev){
+            $re[$rek]['full_name']=$umsg_arr[$rev['user_id']]['full_name'];
+        }
+        $ResultDO->code = 200;
+        $ResultDO->success = TRUE;
+        $ResultDO->message = '获取成功';
+        $ResultDO->datas = $re;
+        return $ResultDO;
+    }
     /**
      * @param \com\hlw\huilie\dataobject\yjfp\YjfpPrimDTO $refunDo
      * @return RefundDTO
