@@ -50,7 +50,7 @@ class model_pinping_user extends hlw_components_basemodel
      * @param $roleIds string 权限IDS
      * @return array
      */
-    public function userReachList($day, $name, $type, $department,$roleIds) {
+    public function userReachList($day, $name, $type, $department, $roleIds) {
         $where = "status = 1 and profession_type in (1,2,3,4,5)";
         //获取部门员工IDs
         $roles = '';
@@ -145,8 +145,8 @@ class model_pinping_user extends hlw_components_basemodel
             $departs[$departmentId]['sum'] += $info['achievement']; //实际业绩
             $departs[$departmentId]['discount'] += $info['discount']; //折扣业绩
             $departs[$departmentId]['target'] += $info['target']; //期望业绩
-            $departs[$departmentId]['achievement_rate'] = round($departs[$departmentId]['sum'] / $departs[$departmentId]['discount']); //部门达成率
-            $departs[$departmentId]['average'] = round($departs[$departmentId]['sum'] / $departs[$departmentId]['count']); //人均产值
+            $departs[$departmentId]['achievement_rate'] = round($departs[$departmentId]['sum'] / $departs[$departmentId]['discount'], 2); //部门达成率
+            $departs[$departmentId]['average'] = round($departs[$departmentId]['sum'] / $departs[$departmentId]['count'], 2); //人均产值
             $departs[$departmentId]['list'][] = $info;
         }
 
@@ -168,8 +168,8 @@ class model_pinping_user extends hlw_components_basemodel
             $pList[$pId]['sum'] += $pInfo['sum'];
             $pList[$pId]['discount'] += $pInfo['discount'];
             $pList[$pId]['target'] += $pInfo['target'];
-            $pList[$pId]['achievement_rate'] += round($pList[$pId]['sum'] / $pList[$pId]['discount']);
-            $pList[$pId]['average'] = round($pList[$pId]['sum'] / $pList[$pId]['count']);
+            $pList[$pId]['achievement_rate'] += round($pList[$pId]['sum'] / $pList[$pId]['discount'], 2);
+            $pList[$pId]['average'] = round($pList[$pId]['sum'] / $pList[$pId]['count'], 2);
             $pList[$pId]['list'][] = $pInfo;
         }
         return array_values($pList);
@@ -187,7 +187,7 @@ class model_pinping_user extends hlw_components_basemodel
         if ($isTraining) {
             return '豁免期';
         }
-        $rate = $achievement / $discount;
+        $rate = round($achievement / $discount, 2);
         return $rate ? $rate : 0;
 
     }
@@ -267,7 +267,7 @@ class model_pinping_user extends hlw_components_basemodel
         if (!$attendDays || !$workDays) {
             return 0;
         }
-        return $target * ($workDays / $attendDays);
+        return $target * round($workDays / $attendDays, 2);
     }
 
     /**
