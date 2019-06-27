@@ -196,7 +196,7 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
                 $merge_all = array_merge($merge_all,$jf_cc['items']);
             }
             //推荐
-            $jf_tj = $this->model_fineproject->select(['id'=>$invoice['fine_id'],'tjaddtime'=>['gt',0]],'tj_role_id role_id');
+            $jf_tj = $this->model_fineproject->select(['id'=>$invoice['fine_id']],'tj_role_id role_id');
             $jf_tj = json_decode(json_encode($jf_tj),true);
             if(count($jf_tj['items'])>0){
                 $merge_all = array_merge($merge_all,$jf_tj['items']);
