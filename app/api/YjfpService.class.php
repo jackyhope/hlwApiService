@@ -500,7 +500,7 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
         $umsg_arr = $this->model_user->select("user_id in (".$uid_arr.")",'user_id,full_name');
         $umsg_arr = json_decode(json_encode($umsg_arr),true);
         $umsg_arr = $umsg_arr['items'];
-        $umsg_arr = array_column($umsg_arr,null,'user_id')//注意三个参数的具体值指向和值
+        $umsg_arr = array_column($umsg_arr,null,'user_id');//注意三个参数的具体值指向和值
         foreach ($re as $rek=>$rev){
             $re[$rek]['full_name']=$umsg_arr[$rev['user_id']]['full_name'];
         }
