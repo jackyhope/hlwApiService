@@ -549,10 +549,10 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
         }
         $res_list = [];
         foreach ($achie_list as $vak=>$val){
-            $res_list[$val['id']]['full_name'] = $new_umsg[$val['user_id']];
-            $res_list[$val['id']]['id'] = $val['id'];
-            $res_list[$val['id']]['integral'] = $val['integral'];
-            $res_list[$val['id']]['tikect_type'] = $val['tikect_type'];
+            $res_list[$vak]['full_name'] = $new_umsg[$val['user_id']];
+            $res_list[$vak]['id'] = $val['id'];
+            $res_list[$vak]['integral'] = $val['integral'];
+            $res_list[$vak]['tikect_type'] = $val['tikect_type'];
         }
         unset($achie_list);
         unset($users_msg);
