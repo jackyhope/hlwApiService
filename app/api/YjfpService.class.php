@@ -496,6 +496,14 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
         }
         $sql = "SELECT user_id,SUM(integral) integral FROM mx_achievement WHERE invoice_id = ".$invoice_id." GROUP BY user_id";
         $re = $this->model_achievement->query($sql);
+        //差个人名
+        $umsg_arr = $this->model_user->select("user_id in (".$uid_arr.")",'user_id,full_name');
+        $umsg_arr = json_decode(json_encode($umsg_arr),true);
+        $umsg_arr = $umsg_arr['items'];
+        $umsg_arr = array_column($umsg_arr,null,'user_id')//注意三个参数的具体值指向和值
+        foreach ($re as $rek=>$rev){
+            $re[$rek]['full_name']=$umsg_arr[$rev['user_id']]['full_name'];
+        }
         $ResultDO->code = 200;
         $ResultDO->success = TRUE;
         $ResultDO->message = '获取成功';
