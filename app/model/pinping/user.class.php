@@ -262,12 +262,12 @@ class model_pinping_user extends hlw_components_basemodel
         if ($isTrain) {
             return 0;
         }
-        $attendDays = $attendDay['attend_day'];//实际出勤天数
-        $workDays = $attendDay['work_days'];
+        $attendDays = $attendDay['attend_day'];//应出勤天数 工作日
+        $workDays = $attendDay['work_days']; //实际出勤天数
         if (!$attendDays || !$workDays) {
             return 0;
         }
-        return $target * ($attendDays / $workDays);
+        return $target * ($workDays / $attendDays);
     }
 
     /**
