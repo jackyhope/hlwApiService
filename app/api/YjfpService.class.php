@@ -498,7 +498,7 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
         $re = $this->model_achievement->query($sql);
         $ResultDO->code = 200;
         $ResultDO->success = TRUE;
-        $ResultDO->message = '获取成功'.json_encode($re);
+        $ResultDO->message = '获取成功';
         $ResultDO->datas = $re;
         return $ResultDO;
     }
