@@ -100,8 +100,8 @@ class api_FinanceService extends api_Abstract implements ReachServiceIf
                     'file_id' => $fileId,
                     'create_time' => time(),
                 ];
-                if($info['attendance_days'] > $info['work_days']){
-                    throw new \Exception("员工：{$userName} 的 {$this->excelTitle['attendance_days']} 不能高于 {$this->excelTitle['work_days']}");
+                if($info['attendance_days'] < $info['work_days']){
+                    throw new \Exception("员工：{$userName} 的 {$this->excelTitle['work_days']} 不能高于 {$this->excelTitle['attendance_days']}");
                 }
                 $attendWhere = ['role_id' => $userId, 'month' => strtotime($date)];
 
