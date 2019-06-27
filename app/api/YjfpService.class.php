@@ -497,6 +497,8 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
         $sql = "SELECT user_id,SUM(integral) integral FROM mx_achievement WHERE invoice_id = ".$invoice_id." GROUP BY user_id";
         $re = $this->model_achievement->query($sql);
         //差个人名
+        $uid_arr = array_column($re,'user_id');
+        $uid_arr = implode(',',$uid_arr);
         $umsg_arr = $this->model_user->select("user_id in (".$uid_arr.")",'user_id,full_name');
         $umsg_arr = json_decode(json_encode($umsg_arr),true);
         $umsg_arr = $umsg_arr['items'];
