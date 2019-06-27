@@ -272,15 +272,19 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
             $re[3]['bli'] = floatval($sys['resume_provision']) + floatval($sys['intention_communicate']) + floatval($sys['interview_follow']) + floatval($sys['offer_negotiate']) + floatval($sys['reference_check']);
             $re[3]['money'] = $re[3]['bli'] * floatval($invoice['money']) * 0.01;
             $re[3]['title'] = ['delivery',$com_title['delivery']];
+            $uus = $merge_clear[0]['full_name'];
             if(count($merge_clear)>1){
                 //交付人有多个,目前找到了具体那些人，对应的哪些位置暂时没查【cc备注，推荐简历，面试(此处理解为客户面试，并非顾问面试)，offer,入职】，后期需要再加 06-19
+                $uus = '';
                 foreach ($merge_clear as $kk=>$vv){
-                    $re[3]['users'][$kk] = $uid_arr_final[$vv];
+                    $uus .= $uid_arr_final[$vv]['full_name'].',';
                 }
+                $uus = rtrim($uus,',');
             }
             $invoice['info']['role'] = $invoice['info']['process'] = [];
-
+            $invoice['info']['role_message'] = '';
             $invoice['info']['role'] = $re;
+            $invoice['info']['role_message'] = $com_title['delivery'].'流程参与人有：'.$uus;
                 //第二种：流程排序，每一步  一个人，一个数组
             //
             //1、线索提供
@@ -314,8 +318,9 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
             $re2[5]['money'] = $re2[5]['bli'] * floatval($invoice['money']) * 0.01;
             $re2[5]['title'] = ['intention',$com_title2['intention']];
             /*******************************************************************/
+            $invoice['info']['process_message'] = '';
             //当cc备注人超过2个的时候，2个不同人
-            $n_jf_cc = $n_nest = [];
+            $n_jf_cc = [];$n_nest = '';
             foreach ($jf_cc['items'] as $kcc=>$vcc){
                 $n_jf_cc[] = $vcc['role_id'];
             }
@@ -323,16 +328,17 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
             if(count($n_jf_cc)>1){
                 //当cc备注人超过2个人
                 foreach($n_jf_cc as $kuu=>$vuu){
-                    $n_nest[]= $uid_arr_final[$vuu];
+                    $n_nest .= $uid_arr_final[$vuu]['full_name'].',';
                 }
-                $re2[5]['more'] = $re2[4]['more'] = $n_nest;
+                $invoice['info']['process_message'] .= $com_title2['resume'].'流程 和'.$com_title2['intention'].'流程参与人有：'.rtrim($n_nest,',').'；';
             }
             unset($n_jf_cc);
             unset($n_nest);
             /*******************************************************************/
             //7、候选人推荐及面试更进
             //  推荐 $jf_tj    面试 $jf_ms
-            $n_jf_cc = $n_jf_clear = $n_nest = [];
+            $n_jf_cc = $n_jf_clear = [];
+            $n_nest = '';
             //除开null
             $n_jf_cc = $jf_tj['items'];//初始设定一个
             if(count($jf_ms['items'])>0){
@@ -349,12 +355,13 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
                     $n_jf_clear[]=$v['role_id'];
                 }
                 $n_jf_clear = array_unique($n_jf_clear);
+
                 if(count($n_jf_clear)>1){
                     //当 推荐 +  面试  超过2个人操作
                     foreach($n_jf_clear as $vcu){
-                        $n_nest[]= $uid_arr_final[$vcu];
+                        $n_nest .= $uid_arr_final[$vcu]['full_name'].',';
                     }
-                    $re2[6]['more'] = $n_nest;
+                    $invoice['info']['process_message'] .= $com_title2['recommend'].'流程参与人有：'.rtrim($n_nest,',').'。';
                 }
 
             }
