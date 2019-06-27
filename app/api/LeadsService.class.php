@@ -148,7 +148,7 @@ class api_LeadsService extends api_Abstract implements LeadsServiceIf
         $forcount = $file_model->select(['file_type'=>1]);
         $file_model->setLimit($listrows);
         $file_model->setPage($p);
-        $data = $file_model->select(['file_type'=>1],'*')->items;
+        $data = $file_model->select(['file_type'=>1],'*','','order by create_date desc')->items;
         $data[]['totalcount'] = $forcount->pageSize;
         $resultDO->datas = $data;
         $resultDO->code = 200;
