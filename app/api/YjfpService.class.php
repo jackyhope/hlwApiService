@@ -284,7 +284,7 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
             $invoice['info']['role'] = $invoice['info']['process'] = [];
             $invoice['info']['role_message'] = '';
             $invoice['info']['role'] = $re;
-            $invoice['info']['role_message'] = $com_title['delivery'].'流程参与人有：'.$uus;
+            $invoice['info']['role_message'] = '交付流程有多个参与人，请切换到流程界面进行分配，参与人有：'.$uus;
                 //第二种：流程排序，每一步  一个人，一个数组
             //
             //1、线索提供
