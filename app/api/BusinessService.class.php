@@ -17,6 +17,7 @@ class api_BusinessService extends api_Abstract implements  BusinessServiceIf
         $resultDo = new ResultDO();
         $id = $businessDo->id;
         $name = $businessDo->name;
+        $eid = $businessDo->eid;
         if(!$id && !$name){
             $resultDo->success = true;
             $resultDo->code = 500;
@@ -42,7 +43,10 @@ class api_BusinessService extends api_Abstract implements  BusinessServiceIf
             $eid_arr = implode(',',$eid_arr);
             $data = $fine_model->select('status = 1 and project_id = '.$id.' and resume_id in ('.$eid_arr.')','','','order by addtime desc')->items;
         }else{
-             $data = $fine_model->select('status = 1 and project_id = '.$id,'','','order by addtime desc')->items;
+            if($eid)
+                $data = $fine_model->select('status = 1 and project_id = '.$id.' and resume_id = '.$eid,'','','order by addtime desc')->items;
+            else
+                $data = $fine_model->select('status = 1 and project_id = '.$id,'','','order by addtime desc')->items;
         }
         $status_arr = array();
         $tracker_arr = array();
