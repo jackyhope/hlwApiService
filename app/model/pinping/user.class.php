@@ -61,7 +61,10 @@ class model_pinping_user extends hlw_components_basemodel
         $name && $where .= " and full_name like '%{$name}%' ";
         $type && $where .= " and profession_type = {$type} ";
         $roleIds && $where .= " and role_id in ({$roleIds}) ";
-
+        if(is_string($day)){
+           $dayTime = date('Y-m-d',strtotime($day));
+           $where .= " and entry <= '{$dayTime}' ";
+        }
         $item = "user_id,full_name,role_id,status,type,job_rank,profession_type,name,full_name,entry,graduation_time";
         $list = $this->select($where, $item, '', "order by user_id desc");
         $counts = $list->totalSize;
