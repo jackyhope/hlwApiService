@@ -54,8 +54,10 @@ class model_pinping_user extends hlw_components_basemodel
         $where = "status = 1 and profession_type in (1,2,3,4,5)";
         //获取部门员工IDs
         $roles = '';
-        $department > 0 && $roles = $this->departmentRoles($department);
-        $roles && $where .= " and role_id in ({$roles})";
+        if($department > 0){
+            $roles = $this->departmentRoles($department);
+            $where .= " and role_id in ({$roles})";
+        }
         $name && $where .= " and full_name like '%{$name}%' ";
         $type && $where .= " and profession_type = {$type} ";
         $roleIds && $where .= " and role_id in ({$roleIds}) ";
@@ -114,10 +116,10 @@ class model_pinping_user extends hlw_components_basemodel
         }
         $list = $this->buildData($list);
         return [
-            'list' => $list,
-            'current_page' => $currentPage,
-            'counts' => $counts,
-            'listrows' => $pageSize
+            'list' => $list ? $list : [],
+            'current_page' => $currentPage ? $currentPage : 1,
+            'counts' => $counts ? $counts : 0 ,
+            'listrows' => $pageSize ? $pageSize : 15
         ];
     }
 
