@@ -272,7 +272,7 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
             $re[3]['bli'] = floatval($sys['resume_provision']) + floatval($sys['intention_communicate']) + floatval($sys['interview_follow']) + floatval($sys['offer_negotiate']) + floatval($sys['reference_check']);
             $re[3]['money'] = $re[3]['bli'] * floatval($invoice['money']) * 0.01;
             $re[3]['title'] = ['delivery',$com_title['delivery']];
-            $uus = $merge_clear[0]['full_name'];
+            $uus = $uid_arr_final[$merge_clear[0]]['full_name'];
             if(count($merge_clear)>1){
                 //交付人有多个,目前找到了具体那些人，对应的哪些位置暂时没查【cc备注，推荐简历，面试(此处理解为客户面试，并非顾问面试)，offer,入职】，后期需要再加 06-19
                 $uus = '';
