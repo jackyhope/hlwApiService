@@ -117,11 +117,11 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
             $ResultDO->success = FALSE;
             $ResultDO->message = '各项数值之和不足100%，请修改';
             if($sum>100)
-            $ResultDO->message = '各项数值之和已经超过100%，请修改';
+                $ResultDO->message = '各项数值之和已经超过100%，请修改';
 
             return $ResultDO;
         }
-            $model = $this->model;
+        $model = $this->model;
         try {
             $this->model->beginTransaction();
             $is_exist = $this->model->selectOne(['pro_types'=>$pro_types],'id');
@@ -184,23 +184,23 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
             //有值，
             //找人： 交付人的查找  --start-- ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
             $merge_all=[];//初始化
-            //候选人简历提供
-            $jl_tg = $this->model_fineproject->select(['id'=>$invoice['fine_id']],'callist_role_id role_id');
-            $jl_tg = json_decode(json_encode($jl_tg),true);
-            //0626-基于简历提供这一项一定不为空，开始重组$merge_all
-            $merge_all = $jl_tg['items'];//第一个
+            //推荐 推荐必定存在，必须要推荐了 才会有面试  面试通过后续，才会有开发票
+            $jf_tj = $this->model_fineproject->select(['id'=>$invoice['fine_id']],'tj_role_id role_id');
+            $jf_tj = json_decode(json_encode($jf_tj),true);
+            if(count($jf_tj['items'])>0){
+                $merge_all = array_merge($merge_all,$jf_tj['items']);
+            }else{
+                $merge_all=[];
+            }
+
             //CC备注
             $jf_cc = $this->model_fineprojectcc->select(['fine_id'=>$invoice['fine_id']],'role_id');
             $jf_cc = json_decode(json_encode($jf_cc),true);
             if(count($jf_cc['items'])>0){
                 $merge_all = array_merge($merge_all,$jf_cc['items']);
             }
-            //推荐
-            $jf_tj = $this->model_fineproject->select(['id'=>$invoice['fine_id']],'tj_role_id role_id');
-            $jf_tj = json_decode(json_encode($jf_tj),true);
-            if(count($jf_tj['items'])>0){
-                $merge_all = array_merge($merge_all,$jf_tj['items']);
-            }
+
+
             //顾问面试
             $gw_adv = $this->model_fineprojectadviser->select(['id'=>$invoice['fine_id']],'role_id');
             $gw_adv = json_decode(json_encode($gw_adv),true);
@@ -285,7 +285,7 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
             $invoice['info']['role_message'] = '';
             $invoice['info']['role'] = $re;
             $invoice['info']['role_message'] = '交付流程有多个参与人，请切换到流程界面进行分配，参与人有：'.$uus;
-                //第二种：流程排序，每一步  一个人，一个数组
+            //第二种：流程排序，每一步  一个人，一个数组
             //
             //1、线索提供
             $re2[0] = $re[0];
@@ -399,7 +399,7 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
 
         $this->ResultDO->success = FALSE;
         $this->ResultDO->code = 500;
-            //把传值组成sql，保存；
+        //把传值组成sql，保存；
         $sql_data = json_decode($formDo->invoice_data,true);
 
         //type判断
@@ -481,7 +481,7 @@ class api_YjfpService extends api_Abstract implements YjfpServiceIf
             return $this->ResultDO;
         }catch (Exception $ex) {
             $this->model_achievement->rollBack();
-            
+
         }
 
     }
