@@ -363,6 +363,9 @@ class model_pinping_user extends hlw_components_basemodel
         if ($graduationTime) {
             return;
         }
+        if($enterTime == '0000-00-00'){
+            return ;
+        }
         if (!is_numeric($enterTime)) {
             $enterTime = strtotime($enterTime);
         }
