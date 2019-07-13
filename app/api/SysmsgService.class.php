@@ -23,6 +23,7 @@ class api_SysmsgService extends api_Abstract implements SysmsgServiceIf
     protected $content;
     protected $subject;
     protected $sysmsgDo;
+    protected $userName;
 
     public function __construct() {
         $this->resultDo = new ResultDO();
@@ -37,14 +38,31 @@ class api_SysmsgService extends api_Abstract implements SysmsgServiceIf
         $this->sysmsgDo = $sysmsgDo;
         $this->phone = hlw_lib_BaseUtils::getStr($sysmsgDo->phone); //电话
         $this->content = hlw_lib_BaseUtils::getStr($sysmsgDo->content); //发送内容
-        if (!$this->phone || !$this->content) {
-            $this->resultDo->success = true;
-            $this->resultDo->code = 500;
-            $this->resultDo->message = '请至少传递一个参数';
+        $this->user_id = hlw_lib_BaseUtils::getStr($sysmsgDo->uid); //发送内容
+        $this->userName = hlw_lib_BaseUtils::getStr($sysmsgDo->name); //发送内容
+        $this->resultDo->success = false;
+        $this->resultDo->code = 500;
+        if (!$this->phone || !$this->content || !$this->user_id || !$this->userName) {
+            $this->resultDo->message = 'phone、content、uid、name缺失';
             return $this->resultDo;
         }
         //@todo 短信发送
-
+        $data = [
+            'uid' => $this->user_id,
+            'name' => $this->userName,
+            'cname' => '系统',
+            'mobile' => $this->phone,
+            'content' => $this->content,
+            'ctime' => time(),
+            'state' => 1
+        ];
+        $mobileModel = new model_huiliewang_mobilemsg();
+        $mobileModel->insert($data);
+        $id = $mobileModel->lastInsertId();
+        $id && $this->resultDo->success = true;
+        $id && $this->resultDo->code = 200;
+        $this->resultDo->message = $id ? '发送成功' : '发送失败';
+        return $this->resultDo;
     }
 
     /**
@@ -86,7 +104,7 @@ class api_SysmsgService extends api_Abstract implements SysmsgServiceIf
     public function sendSystemMess(sysmsgRequestDTO $sysmsgDo) {
         $this->sysmsgDo = $sysmsgDo;
         $this->company_id = hlw_lib_BaseUtils::getStr($sysmsgDo->company_id, 'int'); //公司ID
-        $this->user_id = hlw_lib_BaseUtils::getStr($sysmsgDo->user_id, 'int'); //用户ID
+        $this->user_id = hlw_lib_BaseUtils::getStr($sysmsgDo->uid, 'int'); //用户ID
         $this->user_type = hlw_lib_BaseUtils::getStr($sysmsgDo->user_type, 'int'); //用户类型
         $this->content = hlw_lib_BaseUtils::getStr($sysmsgDo->content); //内容
         if (!$this->company_id && !$this->user_id && !$this->user_type) {
