@@ -2,18 +2,18 @@
 
 /**
  *++++++++++++++++++++++++++++++++++++++++++++++++++
- * DESC: company
+ * DESC: 电信消息记录
+ * User:
  * Date: 2019/7/13
  *+++++++++++++++++++++++++++++++++++++++++++++++++++
  */
-class model_huiliewang_company extends hlw_components_basemodel
+class model_huiliewang_mobilemsg extends hlw_components_basemodel
 {
-
     public function primarykey() {
-        return 'uid';
+        return 'id';
     }
 
     public function tableName() {
-        return 'phpyun_company';
+        return 'phpyun_moblie_msg';
     }
 }

@@ -1,6 +1,11 @@
 <?php
 
-
+/**
+ *++++++++++++++++++++++++++++++++++++++++++++++++++
+ * DESC: 用户
+ * Date: 2019/7/13
+ *+++++++++++++++++++++++++++++++++++++++++++++++++++
+ */
 class model_huiliewang_member extends hlw_components_basemodel
 {
 
