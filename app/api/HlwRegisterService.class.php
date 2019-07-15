@@ -35,6 +35,8 @@ class api_HlwRegisterService extends api_Abstract implements \com\hlw\huiliewang
         // TODO: Implement regist() method.
         $resultDo = new ResultDO();
         $member = new model_huiliewang_member();
+        $company = new model_huiliewang_company();
+        $user = new model_pinping_user();
 
         if (!$requestDO->tel) {
             $resultDo->code = 500;
@@ -68,6 +70,11 @@ class api_HlwRegisterService extends api_Abstract implements \com\hlw\huiliewang
             $arr['passtext'] = $invite;
             $status = $member->insert($arr);
             $member_id = $member->lastInsertId();
+            //接有邀请码的 有company保存BD信息
+            if(!empty($invite)){
+                $data = $user->selectOne(['identity'=>1,'invitecode'=>intval($invite)],'role_id,full_name');
+                $company->update(['uid'=>$member_id],['con_oa_userroleid'=>intval($data['role_id']),'con_oa_username'=>$data['full_name']]);
+            }
             if($status){
                 $customer = new model_pinping_customer();
                 $customer_data = new model_pinping_customerdata();
