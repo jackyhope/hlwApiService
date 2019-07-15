@@ -67,7 +67,41 @@ class api_HlwRegisterService extends api_Abstract implements \com\hlw\huiliewang
             $arr['usertype'] = 2;
             $arr['passtext'] = $invite;
             $status = $member->insert($arr);
+            $member_id = $member->lastInsertId();
             if($status){
+                $customer = new model_pinping_customer();
+                $customer_data = new model_pinping_customerdata();
+                $customer_ins = [
+                    'cooperation_code' => '',
+                    'name' => $tel,
+                    'industry' => '',
+                    'hr_company_logo' => '',
+                    'short_name' => '',
+                    'customer_owner_name' => '',
+                    'customer_owner_en_name' => '',
+                    'create_time' => time(),
+                    'update_time' => 0,
+                    'is_deleted' => 0,
+                    'is_locked' => 0,
+                    'owner_role_id' => 0,
+                    'delete_role_id' => 0,
+                    'location' => '',
+                    'telephone' => $tel,
+                    'introduce' => ''
+                ];
+                $customer->insert($customer_ins);
+                $customer_id = $customer->lastInsertId();
+                $member->update(['uid'=>$member_id],['tb_customer_id'=>$customer_id]);
+                $customer_data_ins = [
+                    'customer_id' => $customer_id,
+                    'money' => '',
+                    'zip' => '',
+                    'busstops' => '',
+                    'sdate' => '',
+                    'website' => '',
+                    'scale' => ''
+                ];
+                $customer_data->insert($customer_data_ins);
                 $resultDo->success = true;
                 $resultDo->code = 200;
                 $resultDo->message = '注册成功！';
