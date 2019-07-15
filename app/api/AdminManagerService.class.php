@@ -56,6 +56,10 @@ class api_AdminManagerService extends api_Abstract implements com\hlw\huiliewang
                     $resultDo->code = 200;
                     $resultDo->message = '分配成功';
                     $resultDo->success = true;
+                }else{
+                    $resultDo->code = 500;
+                    $resultDo->message = '分配失败,该BD已被分配';
+                    $resultDo->success = false;
                 }
             }else{
                 $resultDo->code = 500;
