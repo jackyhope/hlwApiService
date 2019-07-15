@@ -24,6 +24,7 @@ class api_SysmsgService extends api_Abstract implements SysmsgServiceIf
     protected $subject;
     protected $sysmsgDo;
     protected $userName;
+    protected $templateId;
 
     public function __construct() {
         $this->resultDo = new ResultDO();
@@ -40,15 +41,23 @@ class api_SysmsgService extends api_Abstract implements SysmsgServiceIf
         $this->content = hlw_lib_BaseUtils::getStr($sysmsgDo->content); //发送内容
         $this->user_id = hlw_lib_BaseUtils::getStr($sysmsgDo->uid); //发送内容
         $this->userName = hlw_lib_BaseUtils::getStr($sysmsgDo->name); //发送内容
+        $this->templateId = hlw_lib_BaseUtils::getStr($sysmsgDo->templateId); //发送内容
         $this->resultDo->success = false;
         $this->resultDo->code = 500;
         if (!$this->phone || !$this->content || !$this->user_id || !$this->userName) {
             $this->resultDo->message = 'phone、content、uid、name缺失';
             return $this->resultDo;
         }
+        $this->content = json_decode($this->content, true);
+        if (!isset($this->content) || !isset($this->content[0])) {
+            $this->resultDo->message = '短信json内容错误';
+            return $this->resultDo;
+        }
         //短信发送
         try {
-            $smsObj = new STxSms();
+            $config = [];
+            $this->templateId && $config['templateId'] = $this->templateId;
+            $smsObj = new STxSms($config);
             $smsRes = $smsObj->sentTemOne($this->phone, $this->content);
             if (!$smsRes) {
                 $this->resultDo->message = $smsObj->getError();
