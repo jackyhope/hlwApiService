@@ -91,7 +91,6 @@ class api_HlwRegisterService extends api_Abstract implements \com\hlw\huiliewang
                 ];
                 $customer->insert($customer_ins);
                 $customer_id = $customer->lastInsertId();
-                $member->update(['uid'=>$member_id],['tb_customer_id'=>$customer_id]);
                 $customer_data_ins = [
                     'customer_id' => $customer_id,
                     'money' => '',
@@ -102,6 +101,7 @@ class api_HlwRegisterService extends api_Abstract implements \com\hlw\huiliewang
                     'scale' => ''
                 ];
                 $customer_data->insert($customer_data_ins);
+                $member->update(['uid'=>$member_id],['tb_customer_id'=>$customer_id]);
                 $resultDo->success = true;
                 $resultDo->code = 200;
                 $resultDo->message = '注册成功！';
