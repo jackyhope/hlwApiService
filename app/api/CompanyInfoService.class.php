@@ -55,6 +55,7 @@ class api_CompanyInfoService extends api_Abstract implements CompanyInfoServiceI
         $mun = hlw_lib_BaseUtils::getStr($infoRequestDo->mun, 'int');//firmpic
         $linkjob = hlw_lib_BaseUtils::getStr($infoRequestDo->linkjob);//linkjob
         $money = hlw_lib_BaseUtils::getStr($infoRequestDo->money, 'int');//money
+        $welfare = hlw_lib_BaseUtils::getStr($infoRequestDo->welfare, 'int');//福利待遇
         $link_phone = '';
 
         $this->resultDo->success = false;
@@ -123,7 +124,7 @@ class api_CompanyInfoService extends api_Abstract implements CompanyInfoServiceI
             ($phonethree && $phonetwo != '分机号') && $linkPhone[] = $phonethree;
             $link_phone = @implode('-', $linkPhone);
         }
-        ($linktel == "" || $link_phone == '') && $this->resultDo->message = "联系手机和固定电话任填一项！";
+        ($linktel == "" && $link_phone == '') && $this->resultDo->message = "联系手机和固定电话任填一项！";
         if ($this->resultDo->message) {
             $this->resultDo->message = iconv("UTF-8", "GB2312//IGNORE", $this->resultDo->message);
             return $this->resultDo;
@@ -157,6 +158,7 @@ class api_CompanyInfoService extends api_Abstract implements CompanyInfoServiceI
             'infostatus' => $infostatus ? $infostatus : 0,
             'moneytype' => $moneytype ? $moneytype : '',
             'comqcode' => $comqcode ? $comqcode : '',
+            'welfare' => $welfare ? $welfare : '',
             'lastupdate' => time(),
         ];
         try {
