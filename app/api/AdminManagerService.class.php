@@ -37,7 +37,7 @@ class api_AdminManagerService extends api_Abstract implements com\hlw\huiliewang
     }
 
     //BD分配
-    public function addBD($uid, $time, $rid)
+    public function addBD($uid, $time, $rid, $rname)
     {
         // TODO: Implement addBD() method.
         $resultDo = new ResultDO();
@@ -45,15 +45,26 @@ class api_AdminManagerService extends api_Abstract implements com\hlw\huiliewang
         $company = new model_huiliewang_company();
         $customer = new model_pinping_customer();
         $customerdata = new model_pinping_customerdata();
-        $res = $company->update(['uid'=>$uid],['addtime'=>$time,'conid'=>$rid]);
+        $res = $company->update(['uid'=>$uid],['addtime'=>$time,'conid'=>$rid,'con_oa_username'=>$rname]);
         if($res){
-            $data = $member->selectOne(['uid'=>$uid],'username,email,moblie,address');
-            $da = $customer->insert(['customer_owner_id'=>$rid,'owner_role_id'=>$rid,'name'=>$data['username'],'creator_role_id'=>$rid,'origin'=>'线下慧简历','is_locked'=>1,'introduce'=>'adsfa','location'=>'dafsa','crm_vfagxj'=>'dsaf']);
-            $dataid = $customerdata->insert(['customer_id'=>intval($da)]);
-            if($dataid){
-                $resultDo->code = 200;
-                $resultDo->message = '分配成功';
-                $resultDo->success = true;
+            $data = $company->selectOne(['uid'=>$uid],'name');
+//            $da = $customer->insert(['customer_owner_id'=>$rid,'owner_role_id'=>$rid,'name'=>$data['username'],'creator_role_id'=>$rid,'origin'=>'线下慧简历','is_locked'=>1,'introduce'=>'adsfa','location'=>'dafsa','crm_vfagxj'=>'dsaf']);
+//            $dataid = $customerdata->insert(['customer_id'=>intval($da)]);
+            if(!empty($data['name'])){
+                $re = $customer->update(['name'=>$data['name']],['customer_owner_id'=>$rid,'owner_role_id'=>$rid,'is_locked'=>1]);
+                if($re){
+                    $resultDo->code = 200;
+                    $resultDo->message = '分配成功';
+                    $resultDo->success = true;
+                }else{
+                    $resultDo->code = 500;
+                    $resultDo->message = '分配失败,该BD已被分配';
+                    $resultDo->success = false;
+                }
+            }else{
+                $resultDo->code = 500;
+                $resultDo->message = '分配失败,需完整客户名称等资料';
+                $resultDo->success = false;
             }
         }else{
             $resultDo->code = 500;
