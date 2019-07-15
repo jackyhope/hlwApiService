@@ -46,7 +46,18 @@ class api_SysmsgService extends api_Abstract implements SysmsgServiceIf
             $this->resultDo->message = 'phone、content、uid、name缺失';
             return $this->resultDo;
         }
-        //@todo 短信发送
+        //短信发送
+        try {
+            $smsObj = new STxSms();
+            $smsRes = $smsObj->sentTemOne($this->phone, $this->content);
+            if (!$smsRes) {
+                $this->resultDo->message = $smsObj->getError();
+                return $this->resultDo;
+            }
+        } catch (\Exception $e) {
+            $this->resultDo->message = $e->getMessage();
+            return $this->resultDo;
+        }
         $data = [
             'uid' => $this->user_id,
             'name' => $this->userName,
