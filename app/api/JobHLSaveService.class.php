@@ -49,26 +49,25 @@ class api_JobHLSaveService extends api_Abstract implements JobAddServiceIf
         $jobId = hlw_lib_BaseUtils::getStr($addRequestDo->jobId, 'int');
         $edate = hlw_lib_BaseUtils::getStr($addRequestDo->edate, 'int');
 
-//        file_put_contents("F:\www\pc.huiliewang.com\App\Runtime\\test.html",var_export($addRequestDo,true).PHP_EOL,FILE_APPEND);
         $result->code = 500;
         $result->success = false;
         $result->message = '';
         if (!$uId || !$name) {
             $result->message = '参数错误';
-//            return $result;
+            return $result;
         }
         //检查职位名是否存在
         $jobInfo = $this->jobModel->selectOne(['uid' => $uId, 'name' => $name]);
         if ($jobInfo && $jobInfo['uid'] !== $uId) {
             $result->message = '职位名已经存在';
-//            return $result;
+            return $result;
         }
         //检查职位是否存在
         if ($jobId > 0) {
             $jobInfo = $this->jobModel->selectOne(['id' => $jobId]);
             if (!$jobInfo) {
                 $result->message = '职位信息获取失败';
-//                return $result;
+                return $result;
             }
         }
         //企业信息
@@ -106,14 +105,15 @@ class api_JobHLSaveService extends api_Abstract implements JobAddServiceIf
             'did' => 0,
             'edate' => $edate,
             'detail_dept_id' => '',
+            'state' => 1,
         ];
 
         if ($jobPost) {
             $data['job_post'] = $jobPost;
-            $row1 = $this->jobClass->selectOne(['id' => intval($_POST['job_post'])], 'keyid');
+            $row1 = $this->jobClass->selectOne(['id' => intval($jobPost)], 'keyid');
             $row2 = $this->jobClass->selectOne(['id' => $row1['keyid']], 'keyid');
             if ($row2['keyid'] == '0') {
-                $data['job1_son'] = $_POST['job_post'];
+                $data['job1_son'] = $jobPost;
                 $data['job1'] = $row1['keyid'];
                 unset($data['job_post']);
             } else {

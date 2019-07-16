@@ -4,7 +4,8 @@ use com\hlw\huilie\interfaces\JobServiceIf;
 use com\hlw\huilie\dataobject\job\JobRequestDTO;
 use com\hlw\common\dataobject\common\ResultDO;
 
-class api_JobService extends api_Abstract implements JobServiceIf {
+class api_JobService extends api_Abstract implements JobServiceIf
+{
 
     public function saveJob(JobRequestDTO $saveJobDo) {
         $resultDo = new ResultDO();
@@ -109,6 +110,11 @@ class api_JobService extends api_Abstract implements JobServiceIf {
 
             //查询公司相关信息
             $customer_info = $model_customer->selectOne(['name' => $customer_name], 'customer_id,contacts_id');
+            //判断是否已经同步
+            $businessInfo = $model_business->selectOne(['huilie_job_id' => $business_job_id, 'is_deleted' => 0], 'business_id,huilie_job_id');
+            if($businessInfo){
+                $business_mode = 'update';
+            }
 
             $model_business->beginTransaction();
             if ($business_mode == 'add') {
@@ -154,12 +160,12 @@ class api_JobService extends api_Abstract implements JobServiceIf {
                 $business_data_ins = [
                     'business_id' => $business_id,
                     'description' => '汇报对象:' . $business_detail_report . ';下属人数:' . $business_detail_subordinate . ';招聘人数:' . $business_number . ';到岗时间:' . $report,
-                    'enddate' =>$business_edate,
+                    'enddate' => $business_edate,
                     'language' => $business_language,
                     'sex_require' => $sex
                 ];
                 $model_business_data->insert($business_data_ins);
-                
+
                 //添加business_contacts关系
                 $businesscontacts_ins = [
                     'business_id' => $business_id,
