@@ -73,4 +73,25 @@ class api_AdminManagerService extends api_Abstract implements com\hlw\huiliewang
         }
         return $resultDo;
     }
+
+    /**
+     * @desc 客户修改手机号
+     */
+    public function modifyphone($uid, $phone)
+    {
+        // TODO: Implement modifyphone() method.
+        $resultDO = new ResultDO();
+        $member = new model_huiliewang_member();
+        $res = $member->update(['uid'=>$uid],['moblie'=>$phone]);
+        if($res){
+            $resultDO->code = 200;
+            $resultDO->success = true;
+            $resultDO->message = '修改成功！';
+        }else{
+            $resultDO->code = 500;
+            $resultDO->success = false;
+            $resultDO->message = '修改失败！';
+        }
+        return $resultDO;
+    }
 }

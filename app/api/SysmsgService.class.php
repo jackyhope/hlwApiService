@@ -31,6 +31,62 @@ class api_SysmsgService extends api_Abstract implements SysmsgServiceIf
     }
 
     /**
+     * @desc  发送原手机短信
+     * @param sysmsgRequestDTO $sysmsgDO
+     * @return ResultDO
+     */
+    public function sendMSG(sysmsgRequestDTO $sysmsgDo)
+    {
+        // TODO: Implement sendMSG() method.
+        $this->sysmsgDo = $sysmsgDo;
+        $this->phone = hlw_lib_BaseUtils::getStr($sysmsgDo->phone); //电话
+        $this->content = hlw_lib_BaseUtils::getStr($sysmsgDo->content); //发送内容
+        $this->user_id = hlw_lib_BaseUtils::getStr($sysmsgDo->uid); //发送内容
+        $this->userName = hlw_lib_BaseUtils::getStr($sysmsgDo->name); //发送内容
+        $this->resultDo->success = false;
+        $this->resultDo->code = 500;
+        if (!$this->phone || !$this->content || !$this->user_id || !$this->userName) {
+            $this->resultDo->message = 'phone、content、uid、name缺失';
+            return $this->resultDo;
+        }
+        var_dump($this->content);die;
+        $this->content = json_decode($this->content, true);
+        if (!isset($this->content) || !isset($this->content[0])) {
+            $this->resultDo->message = '短信json内容错误';
+            return $this->resultDo;
+        }
+        //单条短信发送
+        try{
+            $smsObj = new STxSms();
+            $smsRes = $smsObj->sentOne($this->phone,$this->content);
+            if (!$smsRes) {
+                $this->resultDo->message = $smsObj->getError();
+                return $this->resultDo;
+            }
+        }catch (\Exception $e){
+            $this->resultDo->message = $e->getMessage();
+            return $this->resultDo;
+        }
+        //记录短信记录
+        $data = [
+            'uid' => $this->user_id,
+            'name' => $this->userName,
+            'cname' => '系统',
+            'mobile' => $this->phone,
+            'content' => $this->content,
+            'ctime' => time(),
+            'state' => 1
+        ];
+        $mobileModel = new model_huiliewang_mobilemsg();
+        $mobileModel->insert($data);
+        $id = $mobileModel->lastInsertId();
+        $id && $this->resultDo->success = true;
+        $id && $this->resultDo->code = 200;
+        $this->resultDo->message = $id ? '发送成功' : '发送失败';
+        return $this->resultDo;
+    }
+
+    /**
      * @desc  发送短信
      * @param sysmsgRequestDTO $sysmsgDo
      * @return ResultDO

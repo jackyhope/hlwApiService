@@ -15,8 +15,8 @@ class api_HlwRegisterService extends api_Abstract implements \com\hlw\huiliewang
     {
         // TODO: Implement checkTel() method.
         $resultDo = new ResultDO();
-        $company = new model_huiliewang_company();
-        $data = $company->selectOne('linktel = '.$tel);
+        $company = new model_huiliewang_member();
+        $data = $company->selectOne(['moblie'=>$tel]);
         if(empty($data)){
             $resultDo->success = true;
             $resultDo->code = 200;
@@ -35,6 +35,8 @@ class api_HlwRegisterService extends api_Abstract implements \com\hlw\huiliewang
         // TODO: Implement regist() method.
         $resultDo = new ResultDO();
         $member = new model_huiliewang_member();
+        $company = new model_huiliewang_company();
+        $user = new model_pinping_user();
 
         if (!$requestDO->tel) {
             $resultDo->code = 500;
@@ -67,7 +69,60 @@ class api_HlwRegisterService extends api_Abstract implements \com\hlw\huiliewang
             $arr['usertype'] = 2;
             $arr['passtext'] = $invite;
             $status = $member->insert($arr);
+            $member_id = $member->lastInsertId();
+
             if($status){
+                $customer = new model_pinping_customer();
+                $customer_data = new model_pinping_customerdata();
+                $customer_ins = [
+                    'cooperation_code' => '',
+                    'name' => $tel,
+                    'industry' => '',
+                    'hr_company_logo' => '',
+                    'short_name' => '',
+                    'customer_owner_name' => '',
+                    'customer_owner_en_name' => '',
+                    'create_time' => time(),
+                    'update_time' => 0,
+                    'is_deleted' => 0,
+                    'is_locked' => 0,
+                    'owner_role_id' => 0,
+                    'delete_role_id' => 0,
+                    'location' => '',
+                    'telephone' => $tel,
+                    'introduce' => ''
+                ];
+                $customer->insert($customer_ins);
+                $customer_id = $customer->lastInsertId();
+                if(!empty($invite)){ //接有邀请码的 company保存BD信息
+                    $data = $user->selectOne(['identity'=>1,'invitecode'=>intval($invite)],'role_id,full_name');
+                    $arr_com = [
+                        'con_oa_userroleid'=>intval($data['role_id']),
+                        'con_oa_username'=>$data['full_name'],
+                        'tb_customer_id'=>$customer_id,
+                        'uid'=>$member_id,
+                        'linktel'=>$tel
+                    ];
+                    $company->insert($arr_com);
+                }else{
+                    $arr_com = [
+                        'tb_customer_id'=>$customer_id,
+                        'uid'=>$member_id,
+                        'linktel'=>$tel
+                    ];
+                    $company->insert($arr_com);
+                }
+                $customer_data_ins = [
+                    'customer_id' => $customer_id,
+                    'money' => '',
+                    'zip' => '',
+                    'busstops' => '',
+                    'sdate' => '',
+                    'website' => '',
+                    'scale' => ''
+                ];
+                $customer_data->insert($customer_data_ins);
+                $member->update(['uid'=>$member_id],['tb_customer_id'=>$customer_id]);
                 $resultDo->success = true;
                 $resultDo->code = 200;
                 $resultDo->message = '注册成功！';
