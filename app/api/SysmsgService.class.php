@@ -25,6 +25,7 @@ class api_SysmsgService extends api_Abstract implements SysmsgServiceIf
     protected $sysmsgDo;
     protected $userName;
     protected $templateId;
+    protected $from; //1：pc 0:慧猎
 
     public function __construct() {
         $this->resultDo = new ResultDO();
@@ -35,8 +36,7 @@ class api_SysmsgService extends api_Abstract implements SysmsgServiceIf
      * @param sysmsgRequestDTO $sysmsgDO
      * @return ResultDO
      */
-    public function sendMSG(sysmsgRequestDTO $sysmsgDo)
-    {
+    public function sendMSG(sysmsgRequestDTO $sysmsgDo) {
         // TODO: Implement sendMSG() method.
         $this->sysmsgDo = $sysmsgDo;
         $this->phone = hlw_lib_BaseUtils::getStr($sysmsgDo->phone); //电话
@@ -49,21 +49,22 @@ class api_SysmsgService extends api_Abstract implements SysmsgServiceIf
             $this->resultDo->message = 'phone、content、uid、name缺失';
             return $this->resultDo;
         }
-        var_dump($this->content);die;
+        var_dump($this->content);
+        die;
         $this->content = json_decode($this->content, true);
         if (!isset($this->content) || !isset($this->content[0])) {
             $this->resultDo->message = '短信json内容错误';
             return $this->resultDo;
         }
         //单条短信发送
-        try{
+        try {
             $smsObj = new STxSms();
-            $smsRes = $smsObj->sentOne($this->phone,$this->content);
+            $smsRes = $smsObj->sentOne($this->phone, $this->content);
             if (!$smsRes) {
                 $this->resultDo->message = $smsObj->getError();
                 return $this->resultDo;
             }
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
             $this->resultDo->message = $e->getMessage();
             return $this->resultDo;
         }
@@ -98,6 +99,15 @@ class api_SysmsgService extends api_Abstract implements SysmsgServiceIf
         $this->user_id = hlw_lib_BaseUtils::getStr($sysmsgDo->uid); //发送内容
         $this->userName = hlw_lib_BaseUtils::getStr($sysmsgDo->name); //发送内容
         $this->templateId = hlw_lib_BaseUtils::getStr($sysmsgDo->templateId); //发送内容
+        $this->from = hlw_lib_BaseUtils::getStr($sysmsgDo->fromId); //发送内容
+        if ($this->from && $this->from == 1) {
+            //OA的ID转换成慧猎的ID
+            $companyModel = new model_huiliewang_company();
+            $companyInfo = $companyModel->selectOne(['tb_customer_id' => $this->user_id], 'uid');
+            if ($companyInfo && $companyInfo['uid']) {
+                $this->user_id = $companyInfo['uid'];
+            }
+        }
         $this->resultDo->success = false;
         $this->resultDo->code = 500;
         if (!$this->phone || !$this->content || !$this->user_id || !$this->userName) {
@@ -188,6 +198,15 @@ class api_SysmsgService extends api_Abstract implements SysmsgServiceIf
             $this->resultDo->code = 500;
             $this->resultDo->message = '请至少传递一个参数';
             return $this->resultDo;
+        }
+        $this->from = hlw_lib_BaseUtils::getStr($sysmsgDo->fromId); //发送内容
+        if ($this->from && $this->from == 1) {
+            //OA的ID转换成慧猎的ID
+            $companyModel = new model_huiliewang_company();
+            $companyInfo = $companyModel->selectOne(['tb_customer_id' => $this->user_id], 'uid');
+            if ($companyInfo && $companyInfo['uid']) {
+                $this->user_id = $companyInfo['uid'];
+            }
         }
         $this->resultDo->success = true;
         $this->resultDo->code = 200;
