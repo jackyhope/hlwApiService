@@ -51,19 +51,19 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
         $username = isset($post_data['mobile']) ? hlw_lib_BaseUtils::getStr($post_data['mobile'],'string','') : '';//手机号
         $code = isset($post_data['code']) ? hlw_lib_BaseUtils::getStr($post_data['code'],'string',''):'';//验证码/密码
         /***********************************/
-        /*$Result->code=400;
+        /*$Result->code=500;
         $Result->message='测试数据';
         $Result->data=$post_data;
         return $Result;*/
         /***********************************/
         if($l_type<=0){
-            $Result->code=400;
+            $Result->code=500;
             $Result->message='登录类型必填';
             return $Result;
         }
 
         if(empty($username)){
-            $Result->code=400;
+            $Result->code=500;
             $Result->message='手机号必填';
             return $Result;
         }
@@ -71,12 +71,12 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
         if(empty($code)){
             $l_type==1 && $Result->message='验证码必填';
             $l_type==2 && $Result->message='登录密码必填';
-            $Result->code=400;
+            $Result->code=500;
             return $Result;
         }
 
         if(!$this->CheckMoblie($username)){
-            $Result->code=400;
+            $Result->code=500;
             $Result->message='手机号码不正确';
             return $Result;
         }
@@ -84,7 +84,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
         $member_msg = $this->model_member->selectOne(['moblie'=>$username]);
 
         if(empty($member_msg)){
-            $Result->code=400;
+            $Result->code=500;
             $Result->message='用户不存在';
             return $Result;
         }
@@ -100,7 +100,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
             $pass = $this->return_encript($code,$member_msg['salt']);//密码加密
 
             if($pass != $member_msg['password']){
-                $Result->code=400;
+                $Result->code=500;
                 $Result->message=$code.' =$code 账号密码不正确，请重新填写| '.$pass;
                 return $Result;
             }
@@ -141,7 +141,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
 
             return $Result;
         }catch (Exception $ex) {
-            $Result->code=400;
+            $Result->code=500;
             $Result->message='数据处理失败';
             return $Result;
         }
@@ -160,31 +160,31 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
         $recode= isset($post_data['recode']) ? hlw_lib_BaseUtils::getStr($post_data['recode'],'string',''):'';//重复新密码
 
         if(empty($username)){
-            $Result->code=400;
+            $Result->code=500;
             $Result->message='手机号必填';
             return $Result;
         }
 
         if($verify<=0){
-            $Result->code=400;
+            $Result->code=500;
             $Result->message='短信验证码必填';
             return $Result;
         }
 
         if(empty($code)){
-            $Result->code=400;
+            $Result->code=500;
             $Result->message='新密码必填';
             return $Result;
         }
 
         if(empty($recode)){
-            $Result->code=400;
+            $Result->code=500;
             $Result->message='重复密码必填';
             return $Result;
         }
 
         if($code != $recode){
-            $Result->code=400;
+            $Result->code=500;
             $Result->message='两次密码不一致';
             return $Result;
         }
@@ -211,7 +211,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
             $Result->message='操作成功';
             return $Result;
         }catch (Exception $ex) {
-            $Result->code=400;
+            $Result->code=500;
             $Result->message='数据处理失败';
             return $Result;
         }
@@ -225,7 +225,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
     public function certifyData(\com\hlw\huiliewang\dataobject\frontLogin\FrontRequestDTO $certifyDo)
     {
         $Result = new FrontResultDTO();
-        $Result->code=400;
+        $Result->code=500;
         $Result->success=false;
         //接收数据
         $post_data = $certifyDo->post_data;
@@ -296,7 +296,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                         $Result->message = '您提交资料将在一个工作日内完成审核，请您耐心等待';
                         return $Result;
                     }catch (Exception $ex) {
-                        $Result->code=400;
+                        $Result->code=500;
                         $Result->message='数据处理失败';
                         return $Result;
                     }
@@ -365,7 +365,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
     public function changeData(\com\hlw\huiliewang\dataobject\frontLogin\FrontRequestDTO $changeDo)
     {
         $Result = new FrontResultDTO();
-        $Result->code=400;
+        $Result->code=500;
         $Result->success=false;
         $Result->message='操作失败';
         $allow = [1];//允许的c_type值范围   下面判断用的
@@ -403,7 +403,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
             return $Result;
 
         }else{
-            $Result->code=400;
+            $Result->code=500;
             $Result->message='没做操作，ctype为'.$post_data['c_type'];
         }
     }
@@ -411,7 +411,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
     public function jobShowData(\com\hlw\huiliewang\dataobject\frontLogin\FrontRequestDTO $jobsDo)
     {
         $Result = new FrontResultDTO();
-        $Result->code=400;
+        $Result->code=500;
         $Result->success=false;
         $Result->message='操作失败';
         $post_data = $jobsDo->post_data;
