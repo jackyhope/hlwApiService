@@ -479,7 +479,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
             }
             $Result->code=200;
             $Result->success=true;
-            $Result->message='看看guwen'.json_encode($guwen);
+            $Result->message='获取成功';
             $Result->data = $j1;
             $Result->datas = $list;
             return $Result;
