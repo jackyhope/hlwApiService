@@ -19,7 +19,7 @@ class api_CompanyService extends api_Abstract implements com\hlw\huiliewang\inte
         $resume = new model_pinping_resume();
         $basedata = $resume->selectOne(['eid'=>$eid],['name,sex,edu,birthYear,marital_status,hlocation']);
 
-        $str = '111请校验完善简历姓名、性别、学历、出生日期、婚姻状况、籍贯等基本信息';
+        $str = '请校验完善简历姓名、性别、学历、出生日期、婚姻状况、籍贯等基本信息';
         if(empty($basedata['name'])){
             $resultDO->message = $str;
             $resultDO->code = 500;
@@ -49,22 +49,22 @@ class api_CompanyService extends api_Abstract implements com\hlw\huiliewang\inte
         $edudata = $resumeedu->selectOne(['eid'=>$eid],'starttime');
         if(empty($edudata)){
             $resultDO->code = 500;
-            $resultDO->message = '212请完善教育经历资料';
+            $resultDO->message = '请完善教育经历资料';
             return $resultDO;
         }elseif (empty($edudata['starttime'])){
             $resultDO->code = 500;
-            $resultDO->message = '222请完善教育经历资料';
+            $resultDO->message = '请完善教育经历资料';
             return $resultDO;
         }
 
         $workdata = $resumework->selectOne(['eid'=>$eid],'starttime');
         if(empty($workdata)){
             $resultDO->code = 500;
-            $resultDO->message = '313请完善工作经历资料';
+            $resultDO->message = '请完善工作经历资料';
             return $resultDO;
         }elseif (empty($workdata['starttime'])){
             $resultDO->code = 500;
-            $resultDO->message = '323请完善工作经历资料';
+            $resultDO->message = '请完善工作经历资料';
             return $resultDO;
         }
 
@@ -84,11 +84,13 @@ class api_CompanyService extends api_Abstract implements com\hlw\huiliewang\inte
         $resultDO =  new ResultDO();
         $fineproject = new model_pinping_fineproject();
         $resume = new model_pinping_resume();
+        $business = new model_pinping_business();
         $member = new model_huiliewang_member();
         $resumeexpect = new model_huiliewang_resumeexpect();
         //id->com_id   resume_id
-        $datafin =  $fineproject->selectOne(['id'=>$pid],'com_id,resume_id');
+        $datafin =  $fineproject->selectOne(['id'=>$pid],'com_id,resume_id,project_id');
         $dataresume = $resume->selectOne(['eid'=>intval($datafin['resume_id'])],'*');
+        $datajobid = $business->selectOne(['business_id'=>intval($datafin['project_id'])],'huilie_job_id');
         $datamem = $member->selectOne(['tb_customer_id'=>intval($datafin['com_id'])],'uid');
         if(empty($datamem)){
             $resultDO->code = 500;
@@ -100,6 +102,7 @@ class api_CompanyService extends api_Abstract implements com\hlw\huiliewang\inte
             'uid'=> intval($datamem['uid']),
             'oa_resumeid'=> intval($dataresume['eid']),
             'oa_fineid' =>$pid,
+            'huilie_job_id' =>intval($datajobid['huilie_job_id']),
             'name' => $dataresume['name'],
             'linktel' =>$dataresume['telephone'],
             'email' => $dataresume['email'],
@@ -144,6 +147,24 @@ class api_CompanyService extends api_Abstract implements com\hlw\huiliewang\inte
         }else{
             $resultDO->success = false;
         }
+        return $resultDO;
+    }
+
+    /**
+     * @desc  被推荐的简历列表
+     * @param $uid
+     * @param $jobid
+     * @return ResultDO
+     */
+    public function productList($uid, $jobid)
+    {
+        // TODO: Implement productList() method.
+        $resultDO = new ResultDO();
+        $resumeexpect = new model_huiliewang_resumeexpect();
+        $data = $resumeexpect->select(['uid'=>$uid,'huilie_job_id'=>$jobid],'*')->items;
+        $resultDO->success = true;
+        $resultDO->code = 200;
+        $resultDO->data = $data;
         return $resultDO;
     }
 }
