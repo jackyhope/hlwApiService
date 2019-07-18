@@ -8,6 +8,10 @@ class api_JobService extends api_Abstract implements JobServiceIf
 {
 
     protected $oaUser = 1;
+    protected $proTypeMap = [
+        0 => '4',
+        1 => '8'
+    ];
 
     public function saveJob(JobRequestDTO $saveJobDo) {
         $resultDo = new ResultDO();
@@ -96,6 +100,8 @@ class api_JobService extends api_Abstract implements JobServiceIf
             $business_sex = $saveJobDo->sex ? hlw_lib_BaseUtils::getStr($saveJobDo->sex) : '';
             $business_hy = $saveJobDo->hy ? hlw_lib_BaseUtils::getStr($saveJobDo->hy) : '';
             $business_sdate = $saveJobDo->sdate ? hlw_lib_BaseUtils::getStr($saveJobDo->sdate) : '';
+            $service_type = $saveJobDo->service_type ? hlw_lib_BaseUtils::getStr($saveJobDo->service_type) : '0';
+            $proType = isset($this->proTypeMap[$service_type]) ? $this->proTypeMap[$service_type] : 4;
 
 
             $exp_arr = hlw_conf_constant::$huilie_to_oa_exp[$business_exp];
@@ -153,7 +159,7 @@ class api_JobService extends api_Abstract implements JobServiceIf
                     'status_type_id' => 1,
                     'grade' => '5',
                     'isshare' => '',
-                    'pro_type' => '4'
+                    'pro_type' => $proType
                 ];
                 $model_business->insert($business_ins);
                 $business_id = $model_business->lastInsertId();
