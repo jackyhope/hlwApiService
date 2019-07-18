@@ -7,6 +7,8 @@ use com\hlw\common\dataobject\common\ResultDO;
 class api_JobService extends api_Abstract implements JobServiceIf
 {
 
+    protected $oaUser = 1;
+
     public function saveJob(JobRequestDTO $saveJobDo) {
         $resultDo = new ResultDO();
 
@@ -112,7 +114,7 @@ class api_JobService extends api_Abstract implements JobServiceIf
             $customer_info = $model_customer->selectOne(['name' => $customer_name], 'customer_id,contacts_id');
             //判断是否已经同步
             $businessInfo = $model_business->selectOne(['huilie_job_id' => $business_job_id, 'is_deleted' => 0], 'business_id,huilie_job_id');
-            if($businessInfo){
+            if ($businessInfo) {
                 $business_mode = 'update';
             }
 
@@ -133,8 +135,8 @@ class api_JobService extends api_Abstract implements JobServiceIf
                     'startdate' => $business_sdate,
                     'prefixion' => 'M_',
                     'customer_id' => $customer_info['customer_id'],
-                    'creator_role_id' => '1',
-                    'owner_role_id' => '1',
+                    'creator_role_id' => $this->oaUser,
+                    'owner_role_id' => $this->oaUser,
                     'total_amount' => 0,
                     'total_subtotal_val' => 0,
                     'final_discount_rate' => 0,
