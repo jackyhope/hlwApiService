@@ -4,7 +4,14 @@ use com\hlw\huilie\interfaces\JobServiceIf;
 use com\hlw\huilie\dataobject\job\JobRequestDTO;
 use com\hlw\common\dataobject\common\ResultDO;
 
-class api_JobService extends api_Abstract implements JobServiceIf {
+class api_JobService extends api_Abstract implements JobServiceIf
+{
+
+    protected $oaUser = 1;
+    protected $proTypeMap = [
+        0 => '4',
+        1 => '8'
+    ];
 
     public function saveJob(JobRequestDTO $saveJobDo) {
         $resultDo = new ResultDO();
@@ -93,6 +100,8 @@ class api_JobService extends api_Abstract implements JobServiceIf {
             $business_sex = $saveJobDo->sex ? hlw_lib_BaseUtils::getStr($saveJobDo->sex) : '';
             $business_hy = $saveJobDo->hy ? hlw_lib_BaseUtils::getStr($saveJobDo->hy) : '';
             $business_sdate = $saveJobDo->sdate ? hlw_lib_BaseUtils::getStr($saveJobDo->sdate) : '';
+            $service_type = $saveJobDo->service_type ? hlw_lib_BaseUtils::getStr($saveJobDo->service_type) : '0';
+            $proType = isset($this->proTypeMap[$service_type]) ? $this->proTypeMap[$service_type] : 4;
 
 
             $exp_arr = hlw_conf_constant::$huilie_to_oa_exp[$business_exp];
@@ -109,6 +118,11 @@ class api_JobService extends api_Abstract implements JobServiceIf {
 
             //查询公司相关信息
             $customer_info = $model_customer->selectOne(['name' => $customer_name], 'customer_id,contacts_id');
+            //判断是否已经同步
+            $businessInfo = $model_business->selectOne(['huilie_job_id' => $business_job_id, 'is_deleted' => 0], 'business_id,huilie_job_id');
+            if ($businessInfo) {
+                $business_mode = 'update';
+            }
 
             $model_business->beginTransaction();
             if ($business_mode == 'add') {
@@ -127,8 +141,8 @@ class api_JobService extends api_Abstract implements JobServiceIf {
                     'startdate' => $business_sdate,
                     'prefixion' => 'M_',
                     'customer_id' => $customer_info['customer_id'],
-                    'creator_role_id' => '1',
-                    'owner_role_id' => '1',
+                    'creator_role_id' => $this->oaUser,
+                    'owner_role_id' => $this->oaUser,
                     'total_amount' => 0,
                     'total_subtotal_val' => 0,
                     'final_discount_rate' => 0,
@@ -145,7 +159,7 @@ class api_JobService extends api_Abstract implements JobServiceIf {
                     'status_type_id' => 1,
                     'grade' => '5',
                     'isshare' => '',
-                    'pro_type' => '4'
+                    'pro_type' => $proType
                 ];
                 $model_business->insert($business_ins);
                 $business_id = $model_business->lastInsertId();
@@ -154,12 +168,12 @@ class api_JobService extends api_Abstract implements JobServiceIf {
                 $business_data_ins = [
                     'business_id' => $business_id,
                     'description' => '汇报对象:' . $business_detail_report . ';下属人数:' . $business_detail_subordinate . ';招聘人数:' . $business_number . ';到岗时间:' . $report,
-                    'enddate' =>$business_edate,
+                    'enddate' => $business_edate,
                     'language' => $business_language,
                     'sex_require' => $sex
                 ];
                 $model_business_data->insert($business_data_ins);
-                
+
                 //添加business_contacts关系
                 $businesscontacts_ins = [
                     'business_id' => $business_id,
