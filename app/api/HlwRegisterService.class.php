@@ -10,6 +10,15 @@ use com\hlw\common\dataobject\common\ResultDO;
 
 class api_HlwRegisterService extends api_Abstract implements \com\hlw\huiliewang\interfaces\HlwRegisterServiceIf
 {
+
+    public function sendMSG($tel, $code)
+    {
+        // TODO: Implement sendMSG() method.
+        $resultDO = new ResultDO();
+
+        return $resultDO;
+    }
+
     //判定手机是否存在
     public function checkTel($tel)
     {
@@ -125,6 +134,7 @@ class api_HlwRegisterService extends api_Abstract implements \com\hlw\huiliewang
                 $member->update(['uid'=>$member_id],['tb_customer_id'=>$customer_id]);
                 $resultDo->success = true;
                 $resultDo->code = 200;
+                $resultDo->data = [0=>['uid'=>$member_id]];
                 $resultDo->message = '注册成功！';
             }else{
                 $resultDo->success = false;
