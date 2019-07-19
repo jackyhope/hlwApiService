@@ -140,7 +140,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                 $this->model_member->update(['uid'=>$member_msg['uid']],$member_update);
             }
 
-            $Result->code=200333;
+            $Result->code=200;
             $Result->message='登录成功';
             $Result->data=$member_msg;
 
