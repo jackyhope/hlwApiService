@@ -308,7 +308,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                     break;
                 case 'search':
                     //编辑页面返回查找，为 search的时候，post_data数组里面只有 uid和 type，根据uid查询
-                    $company_msg = $this->model_member->selectOne(['uid'=>$post_data['uid']]);
+                    $company_msg = $this->model_company->selectOne(['uid'=>$post_data['uid']]);
                     $Result->code=200;
                     $Result->success=true;
                     $Result->message = '查询成功';
