@@ -261,7 +261,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                                 //允许更新status
                                 $company_data = $post_data;
                                 unset($company_data['status']);
-                                unset($company_data['wt_yy_photo']);
+
                                 $this->model_company->update(['uid'=>$post_data['uid']],$company_data);//更新到公司表
                                 //status状态，username 登录名--同步更
                                 $member_data = [
