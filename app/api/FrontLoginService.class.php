@@ -19,6 +19,8 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
     protected $model_business;
     protected $model_customer;
     protected $model_companyjob;
+    protected $model_fineproject;
+    protected $model_resume;
 
     /**
      * api_FrontLoginService constructor.
@@ -28,12 +30,15 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
     {
         $this->ResultDO = new ResultDO();//common 公共result
         $this->model_member = new model_huiliewang_member();
-        $this->model_loginlog= new model_huiliewang_loginlog();
-        $this->model_company= new model_huiliewang_company();
-        $this->model_companycert= new model_huiliewang_companycert();
-        $this->model_business= new model_pinping_business();
-        $this->model_customer= new model_pinping_customer();
-        $this->model_companyjob= new model_huiliewang_companyjob();
+        $this->model_loginlog = new model_huiliewang_loginlog();
+        $this->model_company = new model_huiliewang_company();
+        $this->model_companycert = new model_huiliewang_companycert();
+        $this->model_companyjob = new model_huiliewang_companyjob();
+
+        $this->model_business = new model_pinping_business();
+        $this->model_customer = new model_pinping_customer();
+        $this->model_fineproject = new model_pinping_fineproject();
+        $this->model_resume = new model_pinping_resume();
     }
 
     /*
@@ -229,8 +234,8 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
         $Result->success=false;
         //接收数据
         $post_data = $certifyDo->post_data;
-        //第二步：判定type，type=add，那就是新增  ||  type=search 就是渲染编辑页面，只需要查询返回  ||  type=update  那就是编辑修改提交更新
-        if(isset($post_data['c_type']) && in_array($post_data['c_type'],['add','search','synchronous'])){
+        //第二步：判定type，type=save，那就是新增+更新  ||  type=search 就是渲染编辑页面，只需要查询返回  ||  type=update  那就是编辑修改提交更新
+        if(isset($post_data['c_type']) && in_array($post_data['c_type'],['save','search','synchronous'])){
 
             switch ($post_data['c_type']){
                 case 'save':
@@ -308,6 +313,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                     $Result->success=true;
                     $Result->message = '查询成功';
                     $Result->data = $company_msg;
+                    return $Result;
                     break;
                 case 'synchronous':
                     hlw_lib_BaseUtils::addLog(time(),'sys.log999.txt','/www/wwwroot/service.hellocrab.cn/log/');
@@ -357,8 +363,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
 
     /*
      * 更改某些表的状态字段
-     * *  c_type 修改状态类型对比：    1 职位上下架
-     *
+     * *  c_type 修改状态类型对比：   1 职位上下架
      * @param  $changeDo
      *
      */
@@ -427,7 +432,6 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
         }else{
             array_push($where,$post_data['where']);
         }
-//        $where = ['uid>0'];//仅供测试时候使用，查所有数据，调试数据
         $this->model_companyjob->setCount(true);
         $this->model_companyjob->setPage($page);//当前第几页
         $this->model_companyjob->setLimit($pageSize);//每页几个
@@ -485,6 +489,74 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
             return $Result;
 
         }
+    }
+
+    /**
+     * uid一定有，job_id可能为0， job_id=0 按uid查询所有职位对应的所有简历  || job_id >0  按job_id 查询对应简历
+     */
+    public function resumeShowData(\com\hlw\huiliewang\dataobject\frontLogin\FrontRequestDTO $resumesDo)
+    {
+        $Result = new FrontResultDTO();
+        $Result->code=500;
+        $Result->success=false;
+        $Result->message='操作失败';
+        $post_data = $resumesDo->post_data;
+        $uid = hlw_lib_BaseUtils::getStr($post_data['uid'],'int',0);
+        $job_id = hlw_lib_BaseUtils::getStr($post_data['job_id'],'int',0);
+        $page = hlw_lib_BaseUtils::getStr($post_data['page'],'int',1);//当前页
+        $pageSize = hlw_lib_BaseUtils::getStr($post_data['size'],'int',10);//每页显示个数
+        if($uid<=0){
+            $Result->message='uid不能为空！';
+        }
+        $where=[];
+        /*if(!isset($post_data['where']) || empty($post_data['where'])){
+
+        }else{
+            array_push($where,$post_data['where']);
+        }*/
+        if($job_id>0){
+            //未完成   07-18-21：02分
+            array_push($where,'huilie_job_id = '.$job_id);
+            //有职位id，直接查business_id
+            $bid = $this->model_business->selectOne(['huilie_job_id'=>$job_id],'business_id,joiner,joiner_name');
+            if(count($bid)>=1){
+                //判断是否有值
+                $this->model_fineproject->setCount(true);
+                $this->model_fineproject->setPage($page);//当前第几页
+                $this->model_fineproject->setLimit($pageSize);//每页几个
+                //$sql = "select a.huilie_status,a.`tjaddtime`,b.* from mx_fine_project a left join mx_resume b on a.resume_id=b.eid where a.project_id=".$bid['business_id']."";
+                //$out_res = $this->model_fineproject->query($sql);
+                $f_data = $this->model_fineproject->select(['project_id'=>$bid['business_id']],'huilie_status,`tjaddtime`,resume_id');
+                $f_data = json_decode(json_encode($f_data),true);
+                $one_data = $f_data;unset($one_data['items']);
+                $re_arr2 = $f_data['items']; unset($f_data);
+                $re_arr2 = array_column($re_arr2,null,'resume_id');//07-19不考虑 resueme_id是否重复，留注释后期调bug
+                $resume_condition = array_column($re_arr2,'resume_id');
+                $resume_condition = implode(',',$resume_condition);
+                $cur_resume = $this->model_resume->select(["eid in(".$resume_condition.")"]);
+                $cur_resume = json_decode(json_encode($cur_resume),true);
+                $cur_resume = array_column($cur_resume['items'],null,'eid');
+                foreach ($re_arr2 as $rk=>$rv){
+                    unset($rv['resume_id']);
+                    $re_arr2[$rk] = array_merge($rv,$cur_resume[$rk]);
+                }
+                $Result->message = '获取简历成功';
+                $Result->data = $one_data;
+                $Result->datas = $re_arr2;
+                return $Result;
+            }else{
+                $Result->message='OA系统没有找到该职位(项目)';
+                return $Result;
+            }
+        }else{
+           array_push($where,'uid = '.$uid);
+        }
+
+
+
+
+        //求简历
+
     }
 
     private function CheckMoblie($moblie){
