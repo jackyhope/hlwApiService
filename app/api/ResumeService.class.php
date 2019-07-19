@@ -384,19 +384,27 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
      * @return array|bool
      */
     private function getResume($resumeId, $isBuy = false) {
-        $resumeInfo = $this->resumeModel->selectOne(['eid' => $resumeId]);
+        $filed = "eid,name,email,telephone,industry,job_class,sex,edu,location,wantsalary,curSalary,startWorkyear,birthday,birthYear,marital_status,curCompany,curPosition,intentCity,curStatus";
+        $resumeInfo = $this->resumeModel->selectOne(['eid' => $resumeId], $filed);
         if (!$resumeInfo) {
             $this->errMsg = '简历获取失败';
             return false;
         }
         //隐藏联系信息
         if (!$isBuy) {
-            $resumeInfo['telephone'] = '*';
-            $resumeInfo['email'] = '*';
-            $resumeInfo['wechat_number'] = '*';
-            $resumeInfo['wechat_qr'] = '*';
-            $resumeInfo['qq_number'] = '*';
+            $resumeInfo['telephone'] = '************';
+            $resumeInfo['email'] = '************';
         }
+        $sexs = [1 => '男', 2 => '女', 0 => '未知'];
+        $maritals = [1 => '未婚', 2 => '已婚', 3 => '保密', 0 => '未知'];
+        $resumeInfo['sex'] = $sexs[$resumeInfo['sex']];
+        $resumeInfo['marital_status'] = $maritals[$resumeInfo['marital_status']];
+        $resumeInfo['work_year'] = $resumeInfo['startWorkyear'] > 0 ? date('Y') - $resumeInfo['startWorkyear'] : 0;
+        $resumeInfo['age'] = $resumeInfo['birthYear'] > 0 ? date('Y') - $resumeInfo['birthYear'] : 0;
+        $resumeInfo['industry'] = $this->industryName($resumeInfo['industry']);
+        $resumeInfo['job_class'] = $this->jobclassName($resumeInfo['job_class']);
+        $resumeInfo['intentCity'] = $this->cityName($resumeInfo['intentCity']);
+        $resumeInfo['location'] = $this->cityName($resumeInfo['location']);
 
         $where = ['eid' => $resumeId];
         //项目经验
@@ -408,11 +416,14 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         //教育经验
         $eduModel = new model_pinping_resumeedu();
         $eduList = $eduModel->select($where, '*', '', 'order by id desc');
+        $school = end($eduList->items);
+        $schoolName = isset($school['schoolName']) ? $school['schoolName'] : '';
+        $resumeInfo['school_name'] = $schoolName;
         return [
             'info' => $resumeInfo,
-            'project' => $projectList ? $projectList : [],
-            'work' => $workList ? $workList : [],
-            'edu' => $eduList ? $eduList : []
+            'project' => $projectList ? $projectList->items : [],
+            'work' => $workList ? $workList->items : [],
+            'edu' => $eduList ? $eduList->items : [],
         ];
     }
 
@@ -504,5 +515,38 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $userModel = new model_pinping_user();
         $userInfo = $userModel->selectOne(['role_id' => $roleId], 'role_id,user_id,full_name');
         return $userInfo ? $userInfo : [];
+    }
+
+    /**
+     * @desc  城市信息
+     * @param $code
+     * @return string
+     */
+    private function cityName($code) {
+        $city = new model_pinping_city();
+        $cityInfo = $city->selectOne(['city_id' => $code], 'name');
+        return $cityInfo['name'] ? $cityInfo['name'] : '';
+    }
+
+    /**
+     * @desc 行业
+     * @param $code
+     * @return string
+     */
+    private function industryName($code) {
+        $industry = new model_pinping_industry();
+        $industryInfo = $industry->selectOne(['industry_id' => $code], 'name');
+        return $industryInfo['name'] ? $industryInfo['name'] : '';
+    }
+
+    /**
+     * @desc 职能
+     * @param $code
+     * @return string
+     */
+    private function jobclassName($code) {
+        $jobClass = new model_pinping_jobclass();
+        $jobInfo = $jobClass->selectOne(['job_id' => $code], 'name');
+        return $jobInfo['name'] ? $jobInfo['name'] : '';
     }
 }
