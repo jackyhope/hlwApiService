@@ -207,9 +207,10 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $fineId = $fineInfo['id'];
         $tracker = $fineInfo['tj_role_id'] ? $fineInfo['tj_role_id'] : $fineInfo['tracker'];
         $interviewModel = new model_pinping_fineprojectinterview();
-        if ($interviewModel->selectOne(['fine_id' => $fineId, 'interview' => 1])) {
+        if ($interviewModel->selectOne(['fine_id' => $fineId, 'interview' => 1, 'is_from_hr' => 1])) {
             $resultDo->code = 200;
             $resultDo->message = '提交成功';
+            return $resultDo;
         }
         $data = [
             'fine_id' => $fineId,
@@ -229,8 +230,8 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             $interviewModel->beginTransaction();
             $interviewModel->insert($data);
             $this->statusChange($resumeId, $projectId, 5);
-            $interviewModel->commit();
             $this->sentMess($fineId, 'interview', $this->interviewSmsId);
+            $interviewModel->commit();
             $resultDo->code = 200;
             $resultDo->message = '提交成功';
             return $resultDo;
@@ -456,8 +457,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
      */
     private function sentMess($fineId, $type, $tempId) {
         //
-        return true;
-        $fineInfo = $this->fineProject->selectOne(['id' => $fineId], 'id,tj_role_id,tracker,huilie_status,status,resume_id,com_id,project_id', '', 'id desc');
+        $fineInfo = $this->fineProject->selectOne(['id' => $fineId], 'id,tj_role_id,tracker,huilie_status,status,resume_id,com_id,project_id');
         $roleId = $fineInfo['tj_role_id'] ? $fineInfo['tj_role_id'] : $fineInfo['tracker'];
         $businessId = $fineInfo['project_id'];
         $com_id = $fineInfo['com_id'];
@@ -465,8 +465,12 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
 
         $messageMode = new model_pinping_message();
         $userModel = new model_pinping_user();
+
         $userInfo = $userModel->selectOne(['role_id' => $roleId], 'telephone,full_name');
         $phone = $userInfo['telephone'];
+        $customer = new model_pinping_customer();
+        $customerInfo = $customer->selectOne(['customer_id' => $com_id], "name");
+        $customerName = $customerInfo['name'];
         $smsContent = "";
         if ('interview' == $type) {
             $smsContent = "";
@@ -475,8 +479,9 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $messageData = [
             'to_role_id' => $roleId,
             'send_time' => time(),
+            'from_role_id' => 0,
             'degree' => 1,
-            'content' => "客户《》，选择了预约面试，请跟进"
+            'content' => "慧猎客户《{$customerName}》，选择了预约面试，请跟进"
         ];
         $messageMode->insert($messageData);
         //短信发送
