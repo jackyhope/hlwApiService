@@ -19,6 +19,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
     protected $errMsg;
     protected $interviewSmsId = '';
     protected $eduList = [0 => '未知', 1 => '高中', 2 => '中专', 3 => '大专', 4 => '本科', 5 => '硕士', 6 => '博士', 7 => 'MBA/EMBA', 8 => '博士后'];
+    protected $proType = [4, 8];
 
     public function __construct() {
         $this->resumeModel = new model_pinping_resume();
@@ -42,6 +43,10 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             return $resultDo;
         }
         $projectInfo = $this->fineProjectInfo($resumeId, $projectId);
+        if (!$projectInfo) {
+            $resultDo->message = '项目简历不存在';
+            return $resultDo;
+        }
         $huilieStatus = $projectInfo['huilie_status'];
         $isShowContacts = false;
         if ($huilieStatus == 4 || $huilieStatus == 11) {
@@ -113,7 +118,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $resultDo->success = true;
         $resultDo->code = 500;
         if (!$resumeId || !$projectId) {
-            $resultDo->message = '缺少必传参数: resume_id/projectId/status';
+            $resultDo->message = '缺少必传参数: resume_id/projectId';
             return $resultDo;
         }
         $fineInfo = $this->fineProjectInfo($resumeId, $projectId);
@@ -420,21 +425,32 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $projectModel = new model_pinping_resumeproject();
         $projectList = $projectModel->select($where, '*', '', 'order by id desc');
         $projectList = $projectList ? $projectList->items : [];
+        foreach ($projectList as &$info) {
+            $info['starttime'] && $info['starttime'] = $info['starttime'] > 0 ? date("Y/m", $info['starttime']) : '未知';
+            $info['endtime'] && $info['endtime'] = $info['endtime'] > 0 ? date("Y/m", $info['endtime']) : '至今';
+            $info['starttime'] && $info['project_time'] = $info['starttime'] . '-' . $info['endtime'];
+        }
+
         //工作经验
         $workModel = new model_pinping_resumework();
         $workList = $workModel->select($where, '*', '', 'order by id desc');
         $workList = $workList ? $workList->items : [];
-
+        foreach ($workList as &$info) {
+            $info['starttime'] && $info['starttime'] = $info['starttime'] > 0 ? date("Y/m", $info['starttime']) : '未知';
+            $info['endtime'] && $info['endtime'] = $info['endtime'] > 0 ? date("Y/m", $info['endtime']) : '至今';
+            $info['starttime'] && $info['work_time'] = $info['starttime'] . '-' . $info['endtime'];
+        }
         //教育经验
         $eduModel = new model_pinping_resumeedu();
         $eduList = $eduModel->select($where, '*', '', 'order by id desc');
         $eduList = $eduList ? $eduList->items : [];
         foreach ($eduList as &$info) {
-            $info['starttime'] = $info['starttime'] > 0 ? date("Y/m/d", $info['starttime']) : '未知';
-            $info['endtime'] = $info['endtime'] > 0 ? date("Y/m/d", $info['endtime']) : '未知';
-            $info['degree'] = $this->eduList[$info['degree']] ? $this->eduList[$info['degree']] : '未知';
+            $info['starttime'] && $info['starttime'] = $info['starttime'] > 0 ? date("Y年m月", $info['starttime']) : '未知';
+            $info['endtime'] && $info['endtime'] = $info['endtime'] > 0 ? date("Y年m月", $info['endtime']) : '未知';
+            $info['degree'] && $info['degree'] = $this->eduList[$info['degree']] ? $this->eduList[$info['degree']] : '未知';
+            $info['starttime'] && $info['edu_time'] = $info['starttime'] . '-' . $info['endtime'];
         }
-        $school = end($eduList);
+        $school = $eduList ? $eduList[0] : [];
         $schoolName = isset($school['schoolName']) ? $school['schoolName'] : '';
         $resumeInfo['school_name'] = $schoolName;
         return [
@@ -513,7 +529,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $customerName = $customerInfo['name'];
         $smsContent = "";
         if ('interview' == $type) {
-            $smsContent = "";
+            $smsContent = [123456, 4];
         }
         //发送系统消息
         $messageData = [

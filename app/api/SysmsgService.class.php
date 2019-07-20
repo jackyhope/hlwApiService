@@ -98,14 +98,15 @@ class api_SysmsgService extends api_Abstract implements SysmsgServiceIf
         $this->content = hlw_lib_BaseUtils::getStr($sysmsgDo->content); //发送内容
         $this->user_id = hlw_lib_BaseUtils::getStr($sysmsgDo->uid); //发送内容
         $this->userName = hlw_lib_BaseUtils::getStr($sysmsgDo->name); //发送内容
-        $this->templateId = hlw_lib_BaseUtils::getStr($sysmsgDo->templateId); //发送内容
-        $this->from = hlw_lib_BaseUtils::getStr($sysmsgDo->fromId); //发送内容
+        $this->templateId = hlw_lib_BaseUtils::getStr($sysmsgDo->templateId); //短信模板ID
+        $this->from = hlw_lib_BaseUtils::getStr($sysmsgDo->fromId); //1：pc 0：慧猎
         if ($this->from && $this->from == 1) {
             //OA的ID转换成慧猎的ID
             $companyModel = new model_huiliewang_company();
-            $companyInfo = $companyModel->selectOne(['tb_customer_id' => $this->user_id], 'uid');
+            $companyInfo = $companyModel->selectOne(['tb_customer_id' => $this->user_id], 'uid,name');
             if ($companyInfo && $companyInfo['uid']) {
                 $this->user_id = $companyInfo['uid'];
+                $this->userName = $companyInfo['name'];
             }
         }
         $this->resultDo->success = false;
@@ -138,7 +139,7 @@ class api_SysmsgService extends api_Abstract implements SysmsgServiceIf
             'name' => $this->userName,
             'cname' => '系统',
             'mobile' => $this->phone,
-            'content' => $this->content,
+            'content' => json_encode($this->content),
             'ctime' => time(),
             'state' => 1
         ];
