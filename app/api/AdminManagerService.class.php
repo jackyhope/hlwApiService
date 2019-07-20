@@ -94,4 +94,28 @@ class api_AdminManagerService extends api_Abstract implements com\hlw\huiliewang
         }
         return $resultDO;
     }
+
+    /**
+     * @desc  手机号验证
+     * @param $uid
+     * @param $phone
+     * @return ResultDO
+     */
+    public function checkphone($uid, $phone)
+    {
+        // TODO: Implement checkphone() method.
+        $resultDO = new ResultDO();
+        $member = new model_huiliewang_member();
+        $bphone = $member->selectOne(['uid'=>$uid],'moblie');
+        if($phone == $bphone['moblie']){
+            $resultDO->code = 200;
+            $resultDO->success = true;
+            $resultDO->message = '手机号正确！';
+        }else{
+            $resultDO->code = 500;
+            $resultDO->success = false;
+            $resultDO->message = '你的原手机号不正确！';
+        }
+        return $resultDO;
+    }
 }

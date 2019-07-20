@@ -39,6 +39,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
         $this->model_customer = new model_pinping_customer();
         $this->model_fineproject = new model_pinping_fineproject();
         $this->model_resume = new model_pinping_resume();
+
     }
 
     /*
@@ -87,7 +88,6 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
         }
         //07-13-注意数据库字段拼写   比较妖艳！！！
         $member_msg = $this->model_member->selectOne(['moblie'=>$username]);
-
         if(empty($member_msg)){
             $Result->code=500;
             $Result->message='用户不存在';
