@@ -18,6 +18,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
     protected $fineProject;
     protected $errMsg;
     protected $interviewSmsId = '';
+    protected $eduList = [0 => '未知', 1 => '高中', 2 => '中专', 3 => '大专', 4 => '本科', 5 => '硕士', 6 => '博士', 7 => 'MBA/EMBA', 8 => '博士后'];
 
     public function __construct() {
         $this->resumeModel = new model_pinping_resume();
@@ -67,6 +68,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $resumeId = hlw_lib_BaseUtils::getStr($resumeProjectDo->resume_id, 'int');
         $status = hlw_lib_BaseUtils::getStr($resumeProjectDo->status, 'int');
         $projectId = hlw_lib_BaseUtils::getStr($resumeProjectDo->project_id, 'int');
+        $uid = hlw_lib_BaseUtils::getStr($resumeProjectDo->uid, 'int');
         $resultDo = new ResultDO();
         $resultDo->success = true;
         $resultDo->code = 500;
@@ -83,9 +85,9 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             $res = $this->statusChange($resumeId, $projectId, $status);
             if ($res !== false) {
                 $status == 3 && $this->resumeReject($fineInfo); //简历不合适
-                $status == 4 && $this->resumeBuy($fineInfo); //购买记录记录
-                $status == 11 && $this->present($fineInfo, 1); //到场记录
-                $status == 10 && $this->present($fineInfo, 0); //到场记录
+                $status == 4 && $this->resumeBuy($fineInfo, $uid); //购买记录记录
+                $status == 11 && $this->present($fineInfo, 1, $uid); //到场记录
+                $status == 10 && $this->present($fineInfo, 0, $uid); //到场记录
                 $resultDo->success = true;
                 $resultDo->code = 200;
                 $resultDo->message = '操作成功';
@@ -192,6 +194,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $note = hlw_lib_BaseUtils::getStr($resumeRequestDo->interview_note);
         $address = hlw_lib_BaseUtils::getStr($resumeRequestDo->interview_address);
         $interviewer = hlw_lib_BaseUtils::getStr($resumeRequestDo->interviewer);
+        $uid = hlw_lib_BaseUtils::getStr($resumeRequestDo->uid);
         $fineInfo = $this->fineProjectInfo($resumeId, $projectId);
         $resultDo->success = true;
         $resultDo->code = 500;
@@ -230,7 +233,9 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             $interviewModel->beginTransaction();
             $interviewModel->insert($data);
             $this->statusChange($resumeId, $projectId, 5);
+            $this->companyCoinUp($uid, 2);
             $this->sentMess($fineId, 'interview', $this->interviewSmsId);
+
             $interviewModel->commit();
             $resultDo->code = 200;
             $resultDo->message = '提交成功';
@@ -352,9 +357,10 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
      * @desc  简历购买操作记录
      * @param $fineInfo
      * @param int $coin
+     * @param int $uid
      * @return int
      */
-    private function resumeBuy($fineInfo, $coin = 3) {
+    private function resumeBuy($fineInfo, $uid, $coin = 3) {
         $fineId = $fineInfo['id'];
         $roleId = $fineInfo['tj_role_id'] ? $fineInfo['tj_role_id'] : $fineInfo['tracker'];
         $resumeId = $fineInfo['resume_id'];
@@ -363,6 +369,9 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $info = $resumeBug->selectOne(['fine_id' => $fineId], 'id');
         if ($info) {
             return true;
+        }
+        if (!$this->companyCoinUp($uid, 1, $coin)) {
+            return false;
         }
         $data = [
             'fine_id' => $fineId,
@@ -410,20 +419,29 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         //项目经验
         $projectModel = new model_pinping_resumeproject();
         $projectList = $projectModel->select($where, '*', '', 'order by id desc');
+        $projectList = $projectList ? $projectList->items : [];
         //工作经验
         $workModel = new model_pinping_resumework();
         $workList = $workModel->select($where, '*', '', 'order by id desc');
+        $workList = $workList ? $workList->items : [];
+
         //教育经验
         $eduModel = new model_pinping_resumeedu();
         $eduList = $eduModel->select($where, '*', '', 'order by id desc');
-        $school = end($eduList->items);
+        $eduList = $eduList ? $eduList->items : [];
+        foreach ($eduList as &$info) {
+            $info['starttime'] = $info['starttime'] > 0 ? date("Y/m/d", $info['starttime']) : '未知';
+            $info['endtime'] = $info['endtime'] > 0 ? date("Y/m/d", $info['endtime']) : '未知';
+            $info['degree'] = $this->eduList[$info['degree']] ? $this->eduList[$info['degree']] : '未知';
+        }
+        $school = end($eduList);
         $schoolName = isset($school['schoolName']) ? $school['schoolName'] : '';
         $resumeInfo['school_name'] = $schoolName;
         return [
             'info' => $resumeInfo,
-            'project' => $projectList ? $projectList->items : [],
-            'work' => $workList ? $workList->items : [],
-            'edu' => $eduList ? $eduList->items : [],
+            'project' => $projectList,
+            'work' => $workList,
+            'edu' => $eduList,
         ];
     }
 
@@ -432,9 +450,10 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
      * @param $fineInfo
      * @param int $isPresent
      * @param int $coin
+     * @param int $uid
      * @return bool
      */
-    private function present($fineInfo, $isPresent = 1, $coin = 3) {
+    private function present($fineInfo, $isPresent = 1, $uid, $coin = 3) {
         $fineId = $fineInfo['id'];
         $roleId = $fineInfo['tj_role_id'] ? $fineInfo['tj_role_id'] : $fineInfo['tracker'];
         $resumeId = $fineInfo['resume_id'];
@@ -443,6 +462,16 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $info = $present->selectOne(['fine_id' => $fineId], 'id');
         if ($info) {
             return true;
+        }
+        if ($isPresent) {
+            //d到场
+            if (!$this->companyCoinUp($uid, 3, $coin)) {
+                return false;
+            }
+        } else {
+            if (!$this->companyCoinUp($uid, 4, $coin)) {
+                return false;
+            }
         }
         $data = [
             'fine_id' => $fineId,
@@ -548,5 +577,61 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $jobClass = new model_pinping_jobclass();
         $jobInfo = $jobClass->selectOne(['job_id' => $code], 'name');
         return $jobInfo['name'] ? $jobInfo['name'] : '';
+    }
+
+    /**
+     * @desc 慧币扣除
+     * @param $uid
+     * @param int $type 1;下载 2：面试 3：到场 4:未到场
+     * @param int $coin
+     * @return bool
+     */
+    private function companyCoinUp($uid, $type = 1, $coin = 1) {
+        $compny = new model_huiliewang_company();
+        $where = ['uid' => $uid];
+        $data = [];
+        $companyInfo = $compny->selectOne($where, "resume_payd,interview_payd,interview_payd_expect");
+        if ($type == 1) {
+            //购买简历
+            $downCoin = $companyInfo['resume_payd'];
+            if ($downCoin < $coin) {
+                $this->errMsg = '慧沟通点数不够';
+                return false;
+            }
+            $downCoinNow = $downCoin - $coin;
+            $data = ['resume_payd' => $downCoinNow];
+        }
+        //到场
+        $interview_payd = $companyInfo['interview_payd'];
+        $interview_payd_expect = $companyInfo['interview_payd_expect'];
+        if ($type == 3) {
+            //到场
+            $interview_paydNow = $interview_payd - $coin;
+            $interview_payd_expect = $interview_payd_expect + $coin;
+            $data = [
+                'interview_payd' => intval($interview_paydNow),
+                'interview_payd_expect' => intval($interview_payd_expect)
+            ];
+        }
+        if ($type == 2) {
+            //邀约面试
+            $interview_payd_expect = $interview_payd_expect - $coin;
+            $data = [
+                'interview_payd_expect' => intval($interview_payd_expect)
+            ];
+        }
+        if ($type == 4) {
+            //未到场
+            $interview_payd_expect = $interview_payd_expect + $coin;
+            $data = [
+                'interview_payd_expect' => intval($interview_payd_expect),
+            ];
+        }
+        if ($data) {
+            if ($compny->update($where, $data)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
