@@ -87,6 +87,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             return $resultDo;
         }
         try {
+            $this->fineProject->beginTransaction();
             $res = $this->statusChange($resumeId, $projectId, $status);
             if ($res !== false) {
                 $status == 3 && $this->resumeReject($fineInfo); //简历不合适
@@ -98,7 +99,9 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
                 $resultDo->message = '操作成功';
                 return $resultDo;
             }
+            $this->fineProject->commit();
         } catch (Exception $e) {
+            $this->fineProject->rollBack();
             $resultDo->message = $e->getMessage();
             return $resultDo;
         }
@@ -359,11 +362,12 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
     }
 
     /**
-     * @desc  简历购买操作记录
+     * @desc 简历购买操作记录
      * @param $fineInfo
+     * @param $uid
      * @param int $coin
-     * @param int $uid
-     * @return int
+     * @return bool|int
+     * @throws Exception
      */
     private function resumeBuy($fineInfo, $uid, $coin = 3) {
         $fineId = $fineInfo['id'];
@@ -462,12 +466,13 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
     }
 
     /**
-     * @desc  到场确认
+     * @desc 到场确认
      * @param $fineInfo
      * @param int $isPresent
+     * @param $uid
      * @param int $coin
-     * @param int $uid
-     * @return bool
+     * @return bool|int
+     * @throws Exception
      */
     private function present($fineInfo, $isPresent = 1, $uid, $coin = 3) {
         $fineId = $fineInfo['id'];
@@ -596,11 +601,12 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
     }
 
     /**
-     * @desc 慧币扣除
+     * @desc  慧币扣除
      * @param $uid
-     * @param int $type 1;下载 2：面试 3：到场 4:未到场
+     * @param int $type
      * @param int $coin
      * @return bool
+     * @throws Exception
      */
     private function companyCoinUp($uid, $type = 1, $coin = 1) {
         $compny = new model_huiliewang_company();
@@ -612,6 +618,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             $downCoin = $companyInfo['resume_payd'];
             if ($downCoin < $coin) {
                 $this->errMsg = '慧沟通点数不够';
+                throw new \Exception($this->errMsg);
                 return false;
             }
             $downCoinNow = $downCoin - $coin;
@@ -643,11 +650,9 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
                 'interview_payd_expect' => intval($interview_payd_expect),
             ];
         }
-        if ($data) {
-            if ($compny->update($where, $data)) {
-                return true;
-            }
+        if (!$data) {
+            return false;
         }
-        return false;
+        return $compny->update($where, $data);
     }
 }
