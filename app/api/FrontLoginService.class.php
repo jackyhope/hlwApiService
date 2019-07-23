@@ -19,8 +19,11 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
     protected $model_business;
     protected $model_customer;
     protected $model_companyjob;
+    protected $model_companylog;
+
     protected $model_fineproject;
     protected $model_resume;
+    protected $model_fineprojectpresent;
 
     /**
      * api_FrontLoginService constructor.
@@ -34,12 +37,13 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
         $this->model_company = new model_huiliewang_company();
         $this->model_companycert = new model_huiliewang_companycert();
         $this->model_companyjob = new model_huiliewang_companyjob();
+        $this->model_companylog = new model_huiliewang_companylog();
 
         $this->model_business = new model_pinping_business();
         $this->model_customer = new model_pinping_customer();
         $this->model_fineproject = new model_pinping_fineproject();
         $this->model_resume = new model_pinping_resume();
-
+        $this->model_fineprojectpresent = new model_pinping_fineprojectpresent();
     }
 
     /*
@@ -88,6 +92,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
         }
         //07-13-注意数据库字段拼写   比较妖艳！！！
         $member_msg = $this->model_member->selectOne(['moblie'=>$username]);
+
         if(empty($member_msg)){
             $Result->code=500;
             $Result->message='用户不存在';
@@ -261,7 +266,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                                 //允许更新status
                                 $company_data = $post_data;
                                 unset($company_data['status']);
-
+                                unset($company_data['wt_yy_photo']);
                                 $this->model_company->update(['uid'=>$post_data['uid']],$company_data);//更新到公司表
                                 //status状态，username 登录名--同步更
                                 $member_data = [
@@ -307,7 +312,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                     }
                     break;
                 case 'search':
-                    //编辑页面返回查找，为 search的时候，post_data数组里面只有 uid和 type，根据uid查询
+                    //编辑页面返回查找，为 search 的时候，post_data数组里面只有 uid和 type，根据uid查询
                     $company_msg = $this->model_company->selectOne(['uid'=>$post_data['uid']]);
                     $Result->code=200;
                     $Result->success=true;
@@ -421,78 +426,113 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
         $Result->message='操作失败';
         $post_data = $jobsDo->post_data;
         $uid = hlw_lib_BaseUtils::getStr($post_data['uid'],'int',0);
-        $page = hlw_lib_BaseUtils::getStr($post_data['page'],'int',1);//当前页
-        $pageSize = hlw_lib_BaseUtils::getStr($post_data['size'],'int',10);//每页显示个数
+
+        //当前页
+        if(isset($post_data['page']) && !empty(intval($post_data['page'])) && intval($post_data['page']) > 0){
+            $page = intval($post_data['page']);
+        }else{
+            $page = 1;
+        }
+        //每页显示个数
+        if(isset($post_data['size']) && !empty(intval($post_data['size'])) && intval($post_data['size']) > 0){
+            $pageSize = intval($post_data['size']);
+        }else{
+            $pageSize = 10;
+        }
         if($uid<=0){
-            $Result->message='uid不能为空！';
+            $Result->message='请您先登录！';
         }
         $where = ['uid = '.$uid];
-        if(!isset($post_data['where']) || empty($post_data['where'])){
+        $kwd = hlw_lib_BaseUtils::getStr($post_data['kwd'],'string','');
 
-        }else{
-            array_push($where,$post_data['where']);
+        if(!empty($kwd)){
+            array_push($where,"name like '%".$kwd."%'");
         }
         $this->model_companyjob->setCount(true);
         $this->model_companyjob->setPage($page);//当前第几页
         $this->model_companyjob->setLimit($pageSize);//每页几个
 
         $jobber = $this->model_companyjob->select($where,'id,name,minsalary,maxsalary,ejob_salary_month,edate','','order by id asc');
-        $j1 = json_decode(json_encode($jobber),true);
-        if(count($j1['items'])>0){
-            $job_id_arr = array_column($j1['items'],'id');//job id数组
-            $job_ids = implode(',',$job_id_arr);
+        if(gettype($jobber)=='object'){
+            $j1 = json_decode(json_encode($jobber),true);
+            if(count($j1['items'])>0){
+                $job_id_arr = array_column($j1['items'],'id');//job id数组
+                $job_ids = implode(',',$job_id_arr);
 
-            $guwen = $this->model_business->query("select business_id,huilie_job_id,joiner,joiner_name from mx_business where huilie_job_id in(".$job_ids.")");
-            if(count($guwen)>0){
-                $guwen = array_column($guwen,null,'huilie_job_id');
-            }
-            $sql = "select a.huilie_job_id,b.id,b.huilie_status from mx_business a left join mx_fine_project b on a.business_id=b.project_id where a.huilie_job_id in(".$job_ids.") and b.huilie_status in(0,1,2,3,4,5,6,7,8,9,10,11)";
-            $all_jianli = $this->model_business->query($sql);
-            $new_total = [];
-            if(count($all_jianli)>0){
-                foreach ($job_id_arr as $k1=>$v1){
-                    foreach ($all_jianli as $k2=>$v2){
-                        if($v2['huilie_job_id']==$v1){
-                            $new_total[$v1][]=$v2['huilie_status'];
+                $guwen = $this->model_business->query("select business_id,huilie_job_id,joiner,joiner_name from mx_business where huilie_job_id in(".$job_ids.")");
+                if(count($guwen)>0){
+                    $guwen = array_column($guwen,null,'huilie_job_id');
+                }
+                $sql = "select a.huilie_job_id,b.id,b.huilie_status from mx_business a left join mx_fine_project b on a.business_id=b.project_id where a.huilie_job_id in(".$job_ids.") and b.huilie_status in(0,1,2,3,4,5,6,7,8,9,10,11)";
+                $all_jianli = $this->model_business->query($sql);
+                $new_total = $n2 = [];
+                if(count($all_jianli)>0){
+                    foreach ($job_id_arr as $k1=>$v1){
+                        foreach ($all_jianli as $k2=>$v2){
+                            if($v2['huilie_job_id']==$v1){
+                                $new_total[$v1][]=$v2['huilie_status'];
+                            }
+                        }
+
+                    }
+                    if(count($new_total)>0){
+                        foreach ($new_total as $nk=>$nv){
+                            $new_total[$nk]=array_count_values($nv);
+                            //收到的简历
+                            $new_total[$nk] = array_map('intval',$new_total[$nk]);
+                            $n2[$nk]['all_total'] = array_sum($new_total[$nk]);//总数，收到的简历
+                            //新简历--未查看的 1
+                            $n2[$nk]['new_total'] = array_key_exists(1,$new_total[$nk])?$new_total[$nk][1]:0;
+                            //下载的简历 4
+                            $n2[$nk]['buy_total'] = array_key_exists(4,$new_total[$nk])?$new_total[$nk][4]:0;
                         }
                     }
-
                 }
-            }
-            $new_total2 = $new_total;
-            foreach ($new_total as $nk=>$nv){
-                $new_total[$nk]=array_count_values($nv);
-                //收到的简历
-                $new_total[$nk] = array_map('intval',$new_total[$nk]);
-                $n2[$nk]['all_total'] = array_sum($new_total[$nk]);//总数，收到的简历
-                //新简历--未查看的 1
-                $n2[$nk]['new_total'] = array_key_exists(1,$new_total[$nk])?$new_total[$nk][1]:0;
-                //下载的简历 4
-                $n2[$nk]['buy_total'] = array_key_exists(4,$new_total[$nk])?$new_total[$nk][4]:0;
-            }
-            $list = $j1['items'];
-            unset($j1['items']);
-            foreach ($list as $kj=>$vj){
-                $list[$kj]['minsalary'] = intval($vj['minsalary']) * intval($vj['ejob_salary_month']);
-                $list[$kj]['maxsalary'] = intval($vj['maxsalary']) * intval($vj['ejob_salary_month']);
-                $list[$kj]['all_total']=$n2[$vj['id']]['all_total'];
-                $list[$kj]['new_total']=$n2[$vj['id']]['new_total'];
-                $list[$kj]['buy_total']=$n2[$vj['id']]['buy_total'];
-                $list[$kj]['joiner'] = $guwen[$vj['id']]['joiner'];
-                $list[$kj]['joiner_name'] =$guwen[$vj['id']]['joiner_name'];
-            }
-            $Result->code=200;
-            $Result->success=true;
-            $Result->message='获取成功';
-            $Result->data = $j1;
-            $Result->datas = $list;
-            return $Result;
 
+                $list = $j1['items'];
+                unset($j1['items']);
+                foreach ($list as $kj=>$vj){
+                    $list[$kj]['minsalary'] = intval($vj['minsalary']) * intval($vj['ejob_salary_month']);
+                    $list[$kj]['maxsalary'] = intval($vj['maxsalary']) * intval($vj['ejob_salary_month']);
+                    if(count($guwen)>0 && array_key_exists($vj['id'],$guwen)){
+                        $list[$kj]['joiner'] = array_key_exists('joiner',$guwen[$vj['id']])?$guwen[$vj['id']]['joiner']:0;
+                        $list[$kj]['joiner_name'] =array_key_exists('joiner_name',$guwen[$vj['id']])?$guwen[$vj['id']]['joiner_name']:'无';
+
+                    }else{
+                        $list[$kj]['joiner'] = 0;
+                        $list[$kj]['joiner_name'] = '无';
+                    }
+                    if(count($n2)>0 && array_key_exists($vj['id'],$n2)){
+                        $list[$kj]['all_total']=array_key_exists('all_total',$n2[$vj['id']])?$n2[$vj['id']]['all_total']:0;
+                        $list[$kj]['new_total']=array_key_exists('new_total',$n2[$vj['id']])?$n2[$vj['id']]['new_total']:0;
+                        $list[$kj]['buy_total']=array_key_exists('buy_total',$n2[$vj['id']])?$n2[$vj['id']]['buy_total']:0;
+                    }else{
+                        $list[$kj]['all_total']=0;
+                        $list[$kj]['new_total']=0;
+                        $list[$kj]['buy_total']=0;
+                    }
+                }
+                $Result->code=200;
+                $Result->success=true;
+                $Result->message='获取成功';
+                $Result->data = $j1;
+                $Result->datas = $list;
+                return $Result;
+
+            }else{
+                $Result->message='什么都没找到呢';
+                return $Result;
+            }
+        }else{
+            $Result->message='什么都没找到';
+            return $Result;
         }
     }
 
     /**
+     * 单条件查询   job_id 和  job_type 互斥
      * uid一定有，job_id可能为0， job_id=0 按uid查询所有职位对应的所有简历  || job_id >0  按job_id 查询对应简历
+     *
      */
     public function resumeShowData(\com\hlw\huiliewang\dataobject\frontLogin\FrontRequestDTO $resumesDo)
     {
@@ -501,35 +541,142 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
         $Result->success=false;
         $Result->message='操作失败';
         $post_data = $resumesDo->post_data;
-        $uid = hlw_lib_BaseUtils::getStr($post_data['uid'],'int',0);
-        $job_id = hlw_lib_BaseUtils::getStr($post_data['job_id'],'int',0);
-        $page = hlw_lib_BaseUtils::getStr($post_data['page'],'int',1);//当前页
-        $pageSize = hlw_lib_BaseUtils::getStr($post_data['size'],'int',10);//每页显示个数
-        if($uid<=0){
-            $Result->message='uid不能为空！';
-        }
-        $where=[];
-        /*if(!isset($post_data['where']) || empty($post_data['where'])){
 
+        $uid = hlw_lib_BaseUtils::getStr($post_data['uid'],'int',0);
+
+        if(isset($post_data['job_id']) && !empty(intval($post_data['job_id'])) && intval($post_data['job_id']) > 0){
+            $job_id = intval($post_data['job_id']);
         }else{
-            array_push($where,$post_data['where']);
-        }*/
-        if($job_id>0){
-            //未完成   07-18-21：02分
-            array_push($where,'huilie_job_id = '.$job_id);
+            $job_id = 0;
+        }
+        $kwd = hlw_lib_BaseUtils::getStr($post_data['kwd'],'string','');
+        $is_look = 99;
+        if(isset($post_data['is_look'])){
+            if($post_data['is_look'] === 0
+                || $post_data['is_look'] === '0'
+                || $post_data['is_look'] === 1
+                || $post_data['is_look'] === '1'
+                || $post_data['is_look'] === 2
+                || $post_data['is_look'] === '2'
+                || $post_data['is_look'] === 3
+                || $post_data['is_look'] === '3'
+                || $post_data['is_look'] === 4
+                || $post_data['is_look'] === '4'
+                || $post_data['is_look'] === 5
+                || $post_data['is_look'] === '5'
+                || $post_data['is_look'] === 6
+                || $post_data['is_look'] === '6'
+                || $post_data['is_look'] === 7
+                || $post_data['is_look'] === '7'
+                || $post_data['is_look'] === 8
+                || $post_data['is_look'] === '8'
+                || $post_data['is_look'] === 9
+                || $post_data['is_look'] === '9'
+                || $post_data['is_look'] === 10
+                || $post_data['is_look'] === '10'
+                || $post_data['is_look'] === 11
+                || $post_data['is_look'] === '11')
+            {
+                $is_look = $post_data['is_look'];
+            }
+        }
+        $job_type = 99;
+        if(isset($post_data['job_type'])){
+            if($post_data['job_type'] === 0
+                || $post_data['job_type'] === '0'
+                || $post_data['job_type'] === 1
+                || $post_data['job_type'] === '1')
+            {
+                $job_type = $post_data['job_type'];
+            }
+        }
+
+        //当前页
+        if(isset($post_data['page']) && !empty(intval($post_data['page'])) && intval($post_data['page']) > 0){
+            $page = intval($post_data['page']);
+        }else{
+            $page = 1;
+        }
+        //每页显示个数
+        if(isset($post_data['size']) && !empty(intval($post_data['size'])) && intval($post_data['size']) > 0){
+            $pageSize = intval($post_data['size']);
+        }else{
+            $pageSize = 10;
+        }
+
+        if($uid<=0){
+            $Result->message='uid不能为空！';//代表某个企业，也表示已登录状态
+            return $Result;
+        }
+        $fine_where = [];
+        //查简历，传了职位id
+        if($job_id>0 && !in_array($job_type,[0,1])){
+            //查询可带  是否勾选未查看
+            if($is_look!=99 && in_array($is_look,[0,1,2,3,4,5,6,7,8,9,10,11])){
+                //表示 huilie_status 不为默认值，而且在可控范围内
+                $fine_where = ['huilie_status'=>$is_look];
+            }
             //有职位id，直接查business_id
             $bid = $this->model_business->selectOne(['huilie_job_id'=>$job_id],'business_id,joiner,joiner_name');
             if(count($bid)>=1){
-                //判断是否有值
-                $this->model_fineproject->setCount(true);
-                $this->model_fineproject->setPage($page);//当前第几页
-                $this->model_fineproject->setLimit($pageSize);//每页几个
-                //$sql = "select a.huilie_status,a.`tjaddtime`,b.* from mx_fine_project a left join mx_resume b on a.resume_id=b.eid where a.project_id=".$bid['business_id']."";
-                //$out_res = $this->model_fineproject->query($sql);
-                $f_data = $this->model_fineproject->select(['project_id'=>$bid['business_id']],'huilie_status,`tjaddtime`,resume_id');
-                $f_data = json_decode(json_encode($f_data),true);
-                $one_data = $f_data;unset($one_data['items']);
-                $re_arr2 = $f_data['items']; unset($f_data);
+                //中点： 得到筛选条件 $fine_where;
+                $fine_where['project_id']=$bid['business_id'];
+            }else{
+                $Result->message='OA系统没有找到该职位(项目)';
+                return $Result;
+            }
+        }
+        //没传职位id，传了类型
+        //07-20 service_type 值决定职位类型   uid决定是哪个公司 卡限制 $job_type类型只能是 0 或者 1       0表示慧沟通     1表示慧简历
+        if($job_id<=0){
+            $job_where = ['uid = '.$uid];
+            if($job_type != 99){
+                array_push($job_where,'service_type = '.$job_type);
+            }
+            if(!empty($kwd)){
+                array_push($job_where,"name like '%".$kwd."%'");
+            }
+            $job_id_arr = $this->model_companyjob->select($job_where,'id');
+            if(gettype($job_id_arr)=='object'){
+                $job_id_arr = json_decode(json_encode($job_id_arr),true);
+                $job_id_arr = $job_id_arr['items'];
+                $job_id_arr = array_column($job_id_arr,'id');//取值
+                if(count($job_id_arr)>0){
+                    $job_id_arr = implode(',',$job_id_arr);
+                    //有多个职位id，直接查business_id
+                    $bid_arr = $this->model_business->select(['huilie_job_id in('.$job_id_arr.')'],'business_id,joiner,joiner_name');
+                    if(gettype($bid_arr)=='object'){
+                        $bid_arr = json_decode(json_encode($bid_arr),true);
+                        $bid_arr = $bid_arr['items'];
+                        if(count($bid_arr)>0){
+                            $bid_arr = array_column($bid_arr,null,'business_id');//取business_id为键名
+                            $business_id_arr = array_column($bid_arr,'business_id');//取值
+                            $business_id_arr = implode(',',$business_id_arr);
+                            if($is_look!=99 && in_array($is_look,[0,1,2,3,4,5,6,7,8,9,10,11])){
+                                //表示 huilie_status 不为默认值，而且在可控范围内
+                                $fine_where = ['huilie_status = '.$is_look];
+                            }
+                            $fine_where[]='project_id in('.$business_id_arr.')';
+                        }
+                    }
+                }
+            }
+        }
+
+        //求简历
+        if(count($fine_where)==0){
+            $Result->message='OA系统没有找到该职位(项 目)';
+            return $Result;
+        }
+        $this->model_fineproject->setCount(true);
+        $this->model_fineproject->setPage($page);//当前第几页
+        $this->model_fineproject->setLimit($pageSize);//每页几个
+        $f_data = $this->model_fineproject->select($fine_where,'huilie_status,`tjaddtime`,resume_id');
+        if(gettype($f_data)=='object'){
+            $f_data = json_decode(json_encode($f_data),true);
+            $one_data = $f_data;unset($one_data['items']);
+            $re_arr2 = $f_data['items']; unset($f_data);
+            if(count($re_arr2)>0){
                 $re_arr2 = array_column($re_arr2,null,'resume_id');//07-19不考虑 resueme_id是否重复，留注释后期调bug
                 $resume_condition = array_column($re_arr2,'resume_id');
                 $resume_condition = implode(',',$resume_condition);
@@ -538,27 +685,157 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                 $cur_resume = array_column($cur_resume['items'],null,'eid');
                 foreach ($re_arr2 as $rk=>$rv){
                     unset($rv['resume_id']);
-                    $re_arr2[$rk] = array_merge($rv,$cur_resume[$rk]);
+                    if(count($cur_resume[$rk])>0){
+                        $re_arr2[$rk] = array_merge($rv,$cur_resume[$rk]);
+                    }else{
+                        unset($re_arr2[$rk]);//注销掉 简历库 没有数据的那些
+                    }
                 }
-                $Result->message = '获取简历成功';
+                $Result->message = '获取简历成功'.$resume_condition;
                 $Result->data = $one_data;
                 $Result->datas = $re_arr2;
-                return $Result;
             }else{
-                $Result->message='OA系统没有找到该职位(项目)';
-                return $Result;
+                $Result->message='没有找到相关简历信息';
             }
         }else{
-           array_push($where,'uid = '.$uid);
+            $Result->message='没有找到相关简历列表';
+        }
+        return $Result;
+    }
+
+    /**
+     * $c_type  确认是否到场。到场为 1  未到场为 0
+     * @param $presentDo
+     * @return FrontResultDTO
+     * 分来源：  1、来与huilie端，hr操作的
+     *          2、OA端，顾问操作的
+     * $is_from_hr=0 不是HR干的，   $is_from_hr=1  就是HR干的
+     */
+    public function presentData(\com\hlw\huiliewang\dataobject\frontLogin\FrontRequestDTO $presentDo)
+    {
+        $Result = new FrontResultDTO();
+        $Result->code=500;
+        $Result->success=false;
+        $Result->message='操作失败';
+        $post_data = $presentDo->post_data;
+        $c_type = hlw_lib_BaseUtils::getStr($post_data['c_type'],'int',0);
+        $fine_id = hlw_lib_BaseUtils::getStr($post_data['fine_id'],'int',0);//fine_project表
+        $is_from_hr = hlw_lib_BaseUtils::getStr($post_data['is_from_hr'],'int',0);
+        $ctime = $post_data['ctime'];//传过来的时间
+
+        if($c_type<=0 || $fine_id<=0){
+            $Result->message='数据不正确';
+            return $Result;
+        }
+        //mx_fine_project_present  到场表
+        $fine_proj_arr = $this->model_fineproject->selectOne(['fine_id'=>$fine_id],'resume_id,project_id,tj_role_id');
+        $resume_msg = $this->model_resume->selectOne(['eid'=>$fine_proj_arr['resume_id']],'name');
+        //简历id   fine_id   status状态   huilie_coin 扣点数  add_time   role_id顾问推荐人  is_present 是否到场  is_from_hr 是否hr
+        $up_data = [
+            'resume_id'=>$fine_proj_arr['resume_id'],
+            'resume_name' => $resume_msg['name'],
+            'is_present'=> $c_type,
+            'is_from_hr'=>$is_from_hr,
+            'fine_id' => $fine_id,
+            'role_id' => $fine_proj_arr['tj_role_id'],
+            'status' =>1,
+            'add_time'=>$ctime,
+        ];
+        $chk_data = [
+            'fine_id' => $fine_id,
+            'role_id' => $fine_proj_arr['tj_role_id'],
+            'is_present'=> $c_type
+        ];
+        /*****************************二次访问规避屏蔽重复写入**/
+        $is_has = $this->model_fineprojectpresent->selectOne($chk_data);
+        if(count($is_has) > 0){
+            $Result->code=200;
+            $Result->success=true;
+            $Result->message='操作 成功';
+            return $Result;
+        }
+        /*****************************二次访问规避屏蔽重复写入**/
+
+        $huilie_job = $this->model_business->selectOne(['business_id'=>$fine_proj_arr['project_id']],'huilie_job_id');
+        $company_uid = $this->model_companyjob->selectOne(['id'=>$huilie_job['huilie_job_id']],'uid');
+
+        //仅扣除  预扣金币，实际金币无变化
+        /************订单商品待定，具体扣的数值待定，从哪个表获取所扣待定。先写固定值-07-20*/
+        $start_coin=1;
+        /************订单商品待定，具体扣的数值待定，从哪个表获取所扣待定。先写固定值-07-20*/
+        $log_data = [
+            'uid' => $company_uid['uid'],
+            'job_id' => $huilie_job['huilie_job_id'],
+            'resume_id' => $fine_proj_arr['resume_id'],
+            'payd' => 0,
+            'resume_payd' => 0,
+            'interview_payd' => 0,
+            'interview_payd_expect' => 0,
+            'create_time' => $ctime,
+        ];
+        if($c_type==1){
+            $log_data['interview_payd_expect'] = -$start_coin;//扣除点数记录
+            //扣除 预扣金币和实际金币，2种情况， 一是 hr点了已到场  二是 OA端顾问点了已到场
+            if($is_from_hr==1){
+                //hr 搞事情
+                $log_data['com_id'] = $company_uid['uid'];
+                $log_data['deduct_remark'] = 'HR确认人才已到场';
+            }else{
+                $log_data['com_id'] = $fine_proj_arr['tj_role_id'];
+                $log_data['deduct_remark'] = '顾问确认人才已到场';
+            }
+            //订单 单笔起扣点，  config_sy_orderstart_faceview
+            $up_data['huilie_coin'] = $start_coin;
+            $sql = "update phpyun_company set interview_payd_expect=interview_payd_expect-".$start_coin." where uid=".$company_uid['uid'];
+            $this->model_company->query($sql);unset($sql);//注销sql变量
+            if(empty($this->model_company->getDbError())){
+                //扣除成功,继续写表
+                $this->model_fineprojectpresent->insert($up_data);
+                //写日志 phpyun_company_log
+                $this->companyLog($log_data);
+            }else{
+                //sql执行失败
+            }
+            //已到场
+            $this->model_fineproject->update(['fine_id'=>$fine_id],['huilie_status'=>11]);
+        }
+        if($c_type==0){
+            //未到场，分2种，
+            //1、hr点的未到场，写一条记录即可，不扣除任何
+            $this->moel_fineprojectpresent->insert($up_data);
+            if($is_from_hr==0){
+                $log_data['com_id'] = $fine_proj_arr['tj_role_id'];
+                $log_data['deduct_remark'] = '顾问确认人才未到场';
+                //2、顾问点的未到场, 退还真实金币，扣除预扣金币
+                $sql = "update phpyun_company set interview_payd_expect=interview_payd_expect-".$start_coin.",interview_payd=interview_payd+".$start_coin." where uid=".$company_uid['uid'];
+                $this->model_company->query($sql);unset($sql);//注销sql变量
+                $log_data['interview_payd_expect'] = -$start_coin;//扣除预扣点数记录
+                $log_data['interview_payd'] = $start_coin;//返还真实点数记录
+                //写日志 phpyun_company_log
+                $this->companyLog($log_data);
+                //已到场
+                $this->model_fineproject->update(['fine_id'=>$fine_id],['huilie_status'=>10]);
+            }else{
+                //已到场
+                $this->model_fineproject->update(['fine_id'=>$fine_id],['huilie_status'=>9]);
+            }
         }
 
 
-
-
-        //求简历
-
     }
 
+
+
+
+    /**
+     * 写入companyLog
+     * @param $log_data
+     * @return mixed
+     */
+    private function companyLog($log_data){
+        $this->model_companylog->insert($log_data);
+        return $this->model_companylog->lastInsertId();
+    }
     private function CheckMoblie($moblie){
         return preg_match("/1[345789]{1}\d{9}$/",trim($moblie));
     }
