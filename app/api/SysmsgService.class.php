@@ -138,9 +138,10 @@ class api_SysmsgService extends api_Abstract implements SysmsgServiceIf
             'uid' => $this->user_id,
             'name' => $this->userName,
             'cname' => '系统',
-            'mobile' => $this->phone,
+            'moblie' => $this->phone,
             'content' => json_encode($this->content),
             'ctime' => time(),
+            'template_id' => $this->templateId ? $this->templateId : 0 ,
             'state' => 1
         ];
         $mobileModel = new model_huiliewang_mobilemsg();
