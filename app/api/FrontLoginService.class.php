@@ -276,7 +276,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                                 $this->model_member->update(['uid'=>$post_data['uid']],$member_data);//更新到member会员表
                             }
                         }else{
-                            $this->model_member->add($post_data);
+                            $this->model_member->insert($post_data);
                         }
                         /*********2019-07-15-写入phpyun的company_cert表**/
                         $cert_data = [
