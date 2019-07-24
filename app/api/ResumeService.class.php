@@ -274,11 +274,12 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             $resultDo->message = '获取失败';
             return $resultDo;
         }
-        if ($projectInfo['huilie_status'] != 4) {
-            $resultDo->message = '当前状态不能下载简历';
-            return $resultDo;
+        $isBuy = false;
+        $huilieStatus = $projectInfo['huilie_status'];
+        if ($huilieStatus == 4 || $huilieStatus == 11) {
+            $isBuy = true;
         }
-        $resumeInfo = $this->getResume($resumeId, true);
+        $resumeInfo = $this->getResume($resumeId, $isBuy);
         if (!$resumeInfo) {
             $resultDo->message = $this->errMsg;
             return $resultDo;
@@ -430,8 +431,8 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $projectList = $projectModel->select($where, '*', '', 'order by id desc');
         $projectList = $projectList ? $projectList->items : [];
         foreach ($projectList as &$info) {
-            $info['starttime'] && $info['starttime'] = $info['starttime'] > 0 ? date("Y/m", $info['starttime']) : '未知';
-            $info['endtime'] && $info['endtime'] = $info['endtime'] > 0 ? date("Y/m", $info['endtime']) : '至今';
+            $info['starttime'] && $info['starttime'] = $info['starttime'] > 0 ? date("Y年m月", $info['starttime']) : '未知';
+            $info['endtime'] && $info['endtime'] = $info['endtime'] > 0 ? date("Y年m月", $info['endtime']) : '至今';
             $info['starttime'] && $info['project_time'] = $info['starttime'] . '-' . $info['endtime'];
         }
 
@@ -440,8 +441,8 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $workList = $workModel->select($where, '*', '', 'order by id desc');
         $workList = $workList ? $workList->items : [];
         foreach ($workList as &$info) {
-            $info['starttime'] && $info['starttime'] = $info['starttime'] > 0 ? date("Y/m", $info['starttime']) : '未知';
-            $info['endtime'] && $info['endtime'] = $info['endtime'] > 0 ? date("Y/m", $info['endtime']) : '至今';
+            $info['starttime'] && $info['starttime'] = $info['starttime'] > 0 ? date("Y年m月", $info['starttime']) : '未知';
+            $info['endtime'] && $info['endtime'] = $info['endtime'] > 0 ? date("Y年m月", $info['endtime']) : '至今';
             $info['starttime'] && $info['work_time'] = $info['starttime'] . '-' . $info['endtime'];
         }
         //教育经验
