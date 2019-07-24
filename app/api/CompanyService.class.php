@@ -14,6 +14,7 @@ class api_CompanyService extends api_Abstract implements com\hlw\huiliewang\inte
     {
         // TODO: Implement checkResume() method.
         $resultDO = new ResultDO();
+        $resultDO->data = [0=>['eid'=>$eid]];
         $resumeedu = new model_pinping_resumeedu();
         $resumework = new model_pinping_resumework();
         $resume = new model_pinping_resume();
