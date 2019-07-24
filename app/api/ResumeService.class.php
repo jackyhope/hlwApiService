@@ -710,6 +710,8 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $resumeName = $resumeInfo['name'] ? $resumeInfo['name'] : '';
         $businessInfo = $business->selectOne(['business_id' => $this->projectId], 'name');
         $businessName = $businessInfo['name'] ? $businessInfo['name'] : '';
+        $mark = $type == 0 ? "慧沟通" : '慧面试';
+        $mark .= $status == 3 ? "预扣" : '扣除';
         $data = [
             'resume' => $resumeName,
             'resume_id' => $this->resumeId,
@@ -720,7 +722,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             'pay_time' => time(),
             'pay_state' => $status, // 1成功，2、预扣
             'com_id' => $this->uId,
-            'pay_remark' => '',
+            'pay_remark' => $mark,
             'type' => $type,
             'pay_type' => 0,
         ];
