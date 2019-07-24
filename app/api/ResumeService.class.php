@@ -20,6 +20,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
     protected $interviewSmsId = '';
     protected $eduList = [0 => '未知', 1 => '高中', 2 => '中专', 3 => '大专', 4 => '本科', 5 => '硕士', 6 => '博士', 7 => 'MBA/EMBA', 8 => '博士后'];
     protected $proType = [4, 8];
+    protected $money = 1;
 
     public function __construct() {
         $this->resumeModel = new model_pinping_resume();
@@ -74,6 +75,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $status = hlw_lib_BaseUtils::getStr($resumeProjectDo->status, 'int');
         $projectId = hlw_lib_BaseUtils::getStr($resumeProjectDo->project_id, 'int');
         $uid = hlw_lib_BaseUtils::getStr($resumeProjectDo->uid, 'int');
+        $this->money = $resumeProjectDo->money ? hlw_lib_BaseUtils::getStr($resumeProjectDo->money, 'int') : 1;
         $resultDo = new ResultDO();
         $resultDo->success = true;
         $resultDo->code = 500;
@@ -91,9 +93,9 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             $res = $this->statusChange($resumeId, $projectId, $status);
             if ($res !== false) {
                 $status == 3 && $this->resumeReject($fineInfo); //简历不合适
-                $status == 4 && $this->resumeBuy($fineInfo, $uid); //购买记录记录
-                $status == 11 && $this->present($fineInfo, 1, $uid); //到场记录
-                $status == 10 && $this->present($fineInfo, 0, $uid); //到场记录
+                $status == 4 && $this->resumeBuy($fineInfo, $uid, $this->money); //购买记录记录
+                $status == 11 && $this->present($fineInfo, 1, $uid,  $this->money); //到场记录
+                $status == 10 && $this->present($fineInfo, 0, $uid,  $this->money); //到场记录
                 $resultDo->success = true;
                 $resultDo->code = 200;
                 $resultDo->message = '操作成功';
@@ -202,6 +204,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $note = hlw_lib_BaseUtils::getStr($resumeRequestDo->interview_note);
         $address = hlw_lib_BaseUtils::getStr($resumeRequestDo->interview_address);
         $interviewer = hlw_lib_BaseUtils::getStr($resumeRequestDo->interviewer);
+        $this->money = $resumeRequestDo->money ? hlw_lib_BaseUtils::getStr($resumeRequestDo->money, 'int') : 1;
         $uid = hlw_lib_BaseUtils::getStr($resumeRequestDo->uid);
         $fineInfo = $this->fineProjectInfo($resumeId, $projectId);
         $resultDo->success = true;
@@ -241,7 +244,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             $interviewModel->beginTransaction();
             $interviewModel->insert($data);
             $this->statusChange($resumeId, $projectId, 5);
-            $this->companyCoinUp($uid, 2);
+            $this->companyCoinUp($uid, 2, $this->money);
             $this->sentMess($fineId, 'interview', $this->interviewSmsId);
 
             $interviewModel->commit();
@@ -655,5 +658,37 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             return false;
         }
         return $compny->update($where, $data);
+    }
+
+    /**
+     * @desc  简历都买详情
+     * @param ResumeRequestDTO $resumeRequestDo
+     * @return ResultDO
+     */
+    public function jobResumeDetail(ResumeRequestDTO $resumeRequestDo) {
+        $resultDo = new ResultDO();
+        $resultDo->success = true;
+        $resultDo->code = 500;
+        $resumeId = hlw_lib_BaseUtils::getStr($resumeRequestDo->resume_id, 'int');
+        $projectId = hlw_lib_BaseUtils::getStr($resumeRequestDo->project_id, 'int');
+        $uid = hlw_lib_BaseUtils::getStr($resumeRequestDo->uid, 'int');
+        $resumeInfo = $this->getResume($resumeId, true);
+        $business = new  model_pinping_business();
+        $huilieCompny = new model_huiliewang_company();
+        $companyInfo = $huilieCompny->selectOne(['uid' => $uid], 'payd,resume_payd,interview_payd,interview_payd_expect');
+        $businessInfo = $business->selectOne(['business_id' => $projectId], 'maxsalary,minsalary,pro_type');
+        $surplus = $businessInfo['pro_type'] == 4 ? $companyInfo['resume_payd'] : $companyInfo['interview_payd'] - $companyInfo['interview_payd_expect'];
+        $data = [
+            'project_id' => $projectId,
+            'resume_id' => $resumeId,
+            'name' => $resumeInfo['name'] ? $resumeInfo['name'] : '',
+            'pro_type' => $businessInfo['pro_type'],
+            'salary' => $businessInfo['maxsalary'],
+            'money' => $businessInfo['maxsalary'] > 80 ? 2 : 1,
+            "surplus" => intval($surplus)
+        ];
+        $resultDo->code = 200;
+        $resultDo->message = json_encode($data);
+        return $resultDo;
     }
 }
