@@ -60,6 +60,14 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         }
         //隐藏联系信息
         $this->statusChange($resumeId, $projectId, 2);
+        $userModel = new model_pinping_user();
+        $userInfo = $userModel->selectOne(['role_id' => $projectInfo['role_id']], 'full_name,name');
+        $businessModewl = new model_pinping_business();
+        $businessInfo = $businessModewl->selectOne(['business_id' => $projectId], 'name');
+        $list['work_info'] = [
+            'user_name' => $userInfo['full_name'],
+            'work_name' => $businessInfo['name'],
+        ];
         $resultDo->code = 200;
         $resultDo->message = json_encode($list);
         return $resultDo;
@@ -94,8 +102,8 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             if ($res !== false) {
                 $status == 3 && $this->resumeReject($fineInfo); //简历不合适
                 $status == 4 && $this->resumeBuy($fineInfo, $uid, $this->money); //购买记录记录
-                $status == 11 && $this->present($fineInfo, 1, $uid,  $this->money); //到场记录
-                $status == 10 && $this->present($fineInfo, 0, $uid,  $this->money); //到场记录
+                $status == 11 && $this->present($fineInfo, 1, $uid, $this->money); //到场记录
+                $status == 10 && $this->present($fineInfo, 0, $uid, $this->money); //到场记录
                 $resultDo->success = true;
                 $resultDo->code = 200;
                 $resultDo->message = '操作成功';
@@ -341,6 +349,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         }
         $where = ['resume_id' => $resumeId, 'project_id' => $projectId,];
         $info = $this->fineProject->selectOne($where, $filed, '', 'order by id desc');
+        $info['role_id'] = $info['tj_role_id'] ? $info['tj_role_id'] : $info['tracker'];
         return $info ? $info : [];
     }
 
