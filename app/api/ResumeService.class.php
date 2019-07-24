@@ -262,18 +262,18 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             'description' => $note ? $note : '企业发起面试邀约',
         ];
         try {
-            $interviewModel->beginTransaction();
+//            $interviewModel->beginTransaction();
             $interviewModel->insert($data);
             $this->statusChange($resumeId, $projectId, 5);
             $this->companyCoinUp($uid, 2, $this->money);
             $this->sentMess($fineId, 'interview', $this->interviewSmsId);
 
-            $interviewModel->commit();
+//            $interviewModel->commit();
             $resultDo->code = 200;
             $resultDo->message = '提交成功';
             return $resultDo;
         } catch (Exception $e) {
-            $interviewModel->rollBack();
+//            $interviewModel->rollBack();
             $resultDo->code = 500;
             $resultDo->message = '提交失败';
             return $resultDo;
@@ -521,6 +521,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             if (!$this->companyCoinUp($uid, 4, $coin)) {
                 return false;
             }
+            $coin = -$coin;
         }
         $data = [
             'fine_id' => $fineId,
@@ -654,7 +655,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             $downCoinNow = $downCoin - $coin;
             $data = ['resume_payd' => $downCoinNow];
             $serviceType = 0;
-            $payStatus = 1;
+            $payStatus = 2;
         }
         //到场
         $interview_payd = $companyInfo['interview_payd'];
@@ -667,7 +668,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
                 'interview_payd' => intval($interview_paydNow),
                 'interview_payd_expect' => intval($interview_payd_expect)
             ];
-            $payStatus = 1;
+            $payStatus = 2;
         }
         if ($type == 2) {
             //邀约面试
@@ -675,7 +676,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             $data = [
                 'interview_payd_expect' => intval($interview_payd_expect)
             ];
-            $payStatus = 2;
+            $payStatus = 3;
         }
         if ($type == 4) {
             //未到场
@@ -689,6 +690,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         }
         //慧猎网订单记录
         $type != 4 && $this->companyPayLog($coin, $serviceType, $payStatus);
+
         return $compny->update($where, $data);
     }
 
@@ -722,7 +724,13 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             'type' => $type,
             'pay_type' => 0,
         ];
-        return $companyPay->insert($data);
+        $where = ['resume_id' => $this->resumeId, 'job_id' => $this->projectId];
+        if ($companyPay->selectOne($where)) {
+            $companyPay->update($where, $data);
+        } else {
+            return $companyPay->insert($data);
+        }
+        return true;
     }
 
     /**
