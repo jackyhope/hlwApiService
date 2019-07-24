@@ -21,6 +21,9 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
     protected $eduList = [0 => '未知', 1 => '高中', 2 => '中专', 3 => '大专', 4 => '本科', 5 => '硕士', 6 => '博士', 7 => 'MBA/EMBA', 8 => '博士后'];
     protected $proType = [4, 8];
     protected $money = 1;
+    protected $resumeId;
+    protected $projectId;
+    protected $uId;
 
     public function __construct() {
         $this->resumeModel = new model_pinping_resume();
@@ -37,6 +40,8 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $resultDo = new ResultDO();
         $resumeId = hlw_lib_BaseUtils::getStr($resumeProjectDo->resume_id, 'int');
         $projectId = hlw_lib_BaseUtils::getStr($resumeProjectDo->project_id, 'int');
+        $this->resumeId = $resumeId;
+        $this->projectId = $projectId;
         $resultDo->success = true;
         $resultDo->code = 500;
         if ($resumeId <= 0 || $projectId <= 0) {
@@ -84,6 +89,9 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $projectId = hlw_lib_BaseUtils::getStr($resumeProjectDo->project_id, 'int');
         $uid = hlw_lib_BaseUtils::getStr($resumeProjectDo->uid, 'int');
         $this->money = $resumeProjectDo->money ? hlw_lib_BaseUtils::getStr($resumeProjectDo->money, 'int') : 1;
+        $this->resumeId = $resumeId;
+        $this->projectId = $projectId;
+        $this->uId = $uid;
         $resultDo = new ResultDO();
         $resultDo->success = true;
         $resultDo->code = 500;
@@ -97,7 +105,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             return $resultDo;
         }
         try {
-            $this->fineProject->beginTransaction();
+//            $this->fineProject->beginTransaction();
             $res = $this->statusChange($resumeId, $projectId, $status);
             if ($res !== false) {
                 $status == 3 && $this->resumeReject($fineInfo); //简历不合适
@@ -109,9 +117,9 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
                 $resultDo->message = '操作成功';
                 return $resultDo;
             }
-            $this->fineProject->commit();
+//            $this->fineProject->commit();
         } catch (Exception $e) {
-            $this->fineProject->rollBack();
+//            $this->fineProject->rollBack();
             $resultDo->message = $e->getMessage();
             return $resultDo;
         }
@@ -127,6 +135,8 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
     public function projectLog(ResumeRequestDTO $resumeProjectDo) {
         $resumeId = hlw_lib_BaseUtils::getStr($resumeProjectDo->resume_id, 'int');
         $projectId = hlw_lib_BaseUtils::getStr($resumeProjectDo->project_id, 'int');
+        $this->resumeId = $resumeId;
+        $this->projectId = $projectId;
         $resultDo = new ResultDO();
         $resultDo->success = true;
         $resultDo->code = 500;
@@ -213,7 +223,10 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $address = hlw_lib_BaseUtils::getStr($resumeRequestDo->interview_address);
         $interviewer = hlw_lib_BaseUtils::getStr($resumeRequestDo->interviewer);
         $this->money = $resumeRequestDo->money ? hlw_lib_BaseUtils::getStr($resumeRequestDo->money, 'int') : 1;
+        $this->resumeId = $resumeId;
+        $this->projectId = $projectId;
         $uid = hlw_lib_BaseUtils::getStr($resumeRequestDo->uid);
+        $this->uId = $uid;
         $fineInfo = $this->fineProjectInfo($resumeId, $projectId);
         $resultDo->success = true;
         $resultDo->code = 500;
@@ -279,6 +292,8 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
 
         $resumeId = hlw_lib_BaseUtils::getStr($resumeRequestDo->resume_id, 'int');
         $projectId = hlw_lib_BaseUtils::getStr($resumeRequestDo->project_id, 'int');
+        $this->resumeId = $resumeId;
+        $this->projectId = $projectId;
         $projectInfo = $this->fineProjectInfo($resumeId, $projectId);
         $fineId = $projectInfo['id'];
         if (!$projectInfo) {
@@ -626,6 +641,8 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $where = ['uid' => $uid];
         $data = [];
         $companyInfo = $compny->selectOne($where, "resume_payd,interview_payd,interview_payd_expect");
+        $serviceType = 1;
+        $payStatus = 0;
         if ($type == 1) {
             //购买简历
             $downCoin = $companyInfo['resume_payd'];
@@ -636,6 +653,8 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             }
             $downCoinNow = $downCoin - $coin;
             $data = ['resume_payd' => $downCoinNow];
+            $serviceType = 0;
+            $payStatus = 1;
         }
         //到场
         $interview_payd = $companyInfo['interview_payd'];
@@ -648,6 +667,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
                 'interview_payd' => intval($interview_paydNow),
                 'interview_payd_expect' => intval($interview_payd_expect)
             ];
+            $payStatus = 1;
         }
         if ($type == 2) {
             //邀约面试
@@ -655,6 +675,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             $data = [
                 'interview_payd_expect' => intval($interview_payd_expect)
             ];
+            $payStatus = 2;
         }
         if ($type == 4) {
             //未到场
@@ -666,7 +687,42 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         if (!$data) {
             return false;
         }
+        //慧猎网订单记录
+        $type != 4 && $this->companyPayLog($coin, $serviceType, $payStatus);
         return $compny->update($where, $data);
+    }
+
+    /**
+     * @desc  账户变动记录
+     * @param $coin
+     * @param $type
+     * @param $status
+     * @return int
+     */
+    private function companyPayLog($coin, $type, $status) {
+        $companyPay = new model_huiliewang_companypay();
+        $sn = mktime() . rand(10000, 99999);
+        $resume = new model_pinping_resume();
+        $business = new model_pinping_business();
+        $resumeInfo = $resume->selectOne(['eid' => $this->resumeId], 'name');
+        $resumeName = $resumeInfo['name'] ? $resumeInfo['name'] : '';
+        $businessInfo = $business->selectOne(['business_id' => $this->projectId], 'name');
+        $businessName = $businessInfo['name'] ? $businessInfo['name'] : '';
+        $data = [
+            'resume' => $resumeName,
+            'resume_id' => $this->resumeId,
+            'job_id' => $this->projectId,
+            'job' => $businessName,
+            'order_id' => $sn,
+            'order_price' => $coin,
+            'pay_time' => time(),
+            'pay_state' => $status, // 1成功，2、预扣
+            'com_id' => $this->uId,
+            'pay_remark' => '',
+            'type' => $type,
+            'pay_type' => 0,
+        ];
+        return $companyPay->insert($data);
     }
 
     /**
