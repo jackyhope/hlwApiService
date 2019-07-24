@@ -115,9 +115,17 @@ class api_SysmsgService extends api_Abstract implements SysmsgServiceIf
             $this->resultDo->message = 'phone、content、uid、name缺失';
             return $this->resultDo;
         }
-        $this->content = json_decode($this->content, true);
         if (!isset($this->content) || !isset($this->content[0])) {
-            $this->resultDo->message = '短信json内容错误';
+            $this->resultDo->message = '短信数组内容错误';
+            return $this->resultDo;
+        }
+        $mobileModel = new model_huiliewang_mobilemsg();
+        $lastSend = $mobileModel->selectOne(['moblie' => $this->phone, 'template_id' => $this->templateId]);
+        if ($lastSend && time() - $lastSend['ctime'] < 60) {
+            $id = $lastSend['id'];
+            $id && $this->resultDo->success = true;
+            $id && $this->resultDo->code = 200;
+            $this->resultDo->message = $id ? '发送成功' : '发送失败';
             return $this->resultDo;
         }
         //短信发送
@@ -141,10 +149,10 @@ class api_SysmsgService extends api_Abstract implements SysmsgServiceIf
             'moblie' => $this->phone,
             'content' => json_encode($this->content),
             'ctime' => time(),
-            'template_id' => $this->templateId ? $this->templateId : 0 ,
+            'template_id' => $this->templateId ? $this->templateId : 0,
             'state' => 1
         ];
-        $mobileModel = new model_huiliewang_mobilemsg();
+
         $mobileModel->insert($data);
         $id = $mobileModel->lastInsertId();
         $id && $this->resultDo->success = true;
