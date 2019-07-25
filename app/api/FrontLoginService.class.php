@@ -111,7 +111,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
 
             if($pass != $member_msg['password']){
                 $Result->code=500;
-                $Result->message=$code.' =$code 账号密码不正确，请重新填写| '.$pass;
+                $Result->message='账号密码不正确，请重新填写!';
                 return $Result;
             }
         }
@@ -314,6 +314,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                 case 'search':
                     //编辑页面返回查找，为 search 的时候，post_data数组里面只有 uid和 type，根据uid查询
                     $company_msg = $this->model_company->selectOne(['uid'=>$post_data['uid']]);
+//                    var_dump($company_msg);die;
                     $Result->code=200;
                     $Result->success=true;
                     $Result->message = '查询成功';
