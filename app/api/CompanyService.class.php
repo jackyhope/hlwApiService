@@ -18,54 +18,102 @@ class api_CompanyService extends api_Abstract implements com\hlw\huiliewang\inte
         $resumeedu = new model_pinping_resumeedu();
         $resumework = new model_pinping_resumework();
         $resume = new model_pinping_resume();
-        $basedata = $resume->selectOne(['eid'=>$eid],['name,sex,edu,birthYear,marital_status,hlocation']);
+        $basedata = $resume->selectOne(['eid'=>$eid],['name,sex,edu,birthYear,marital_status,curStatus,curSalary,wantsalary,location,hlocation']);
 
-        $str = '请校验完善简历姓名、性别、学历、出生日期、婚姻状况、籍贯等基本信息';
         if(empty($basedata['name'])){
-            $resultDO->message = $str;
+            $resultDO->message = '请校验完善简历姓名、性别、学历、出生日期、婚姻状况、籍贯等基本信息';
             $resultDO->code = 500;
             return $resultDO;
         }
         if(empty($basedata['sex'])){
-            $resultDO->message = $str;
+            $resultDO->message = '请校验完善简历性别、学历、出生日期、婚姻状况、籍贯等基本信息';
             $resultDO->code = 500;
             return $resultDO;
         }
         if(empty($basedata['edu'])){
-            $resultDO->message = $str;
+            $resultDO->message = '请校验完善简历学历、出生日期、婚姻状况、籍贯等基本信息';
             $resultDO->code = 500;
             return $resultDO;
         }
         if(empty($basedata['birthYear'])){
-            $resultDO->message = $str;
+            $resultDO->message = '请校验完善简历出生日期、婚姻状况、籍贯等基本信息';
+            $resultDO->code = 500;
+            return $resultDO;
+        }
+        if(empty($basedata['marital_status'])){
+            $resultDO->message = '请校验完善简历婚姻状况、籍贯等基本信息';
             $resultDO->code = 500;
             return $resultDO;
         }
         if(empty($basedata['hlocation'])){
-            $resultDO->message = $str;
+            $resultDO->message = '请校验完善简历籍贯,目前所在城市,目前状态,目前年薪,期望年薪等基本信息';
+            $resultDO->code = 500;
+            return $resultDO;
+        }
+        if(empty($basedata['location'])){
+            $resultDO->message = '请校验完善简历目前所在城市,目前状态,目前年薪,期望年薪等基本信息';
+            $resultDO->code = 500;
+            return $resultDO;
+        }
+        if (empty($basedata['curStatus'])){
+            $resultDO->message = '请校验完善简历目前状态,目前年薪,期望年薪等基本信息';
+            $resultDO->code = 500;
+            return $resultDO;
+        }
+        if (empty($basedata['curSalary'])){
+            $resultDO->message = '请校验完善简历目前年薪,期望年薪等基本信息';
+            $resultDO->code = 500;
+            return $resultDO;
+        }
+        if (empty($basedata['wantsalary'])){
+            $resultDO->message = '请校验完善简历期望年薪等基本信息';
             $resultDO->code = 500;
             return $resultDO;
         }
 
-        $edudata = $resumeedu->selectOne(['eid'=>$eid],'starttime');
+        $edudata = $resumeedu->selectOne(['eid'=>$eid],'starttime,endtime,schoolName,majorName,degree');
         if(empty($edudata)){
             $resultDO->code = 500;
             $resultDO->message = '请完善教育经历资料';
             return $resultDO;
         }elseif (empty($edudata['starttime'])){
             $resultDO->code = 500;
-            $resultDO->message = '请完善教育经历资料';
+            $resultDO->message = '请完善教育经历开始或结束时间，毕业院校，专业，学历等信息';
+            return $resultDO;
+        }elseif(empty($edudata['schoolName'])){
+            $resultDO->code = 500;
+            $resultDO->message = '请完善毕业院校，专业，学历等信息';
+            return $resultDO;
+        }elseif(empty($edudata['majorName'])){
+            $resultDO->code = 500;
+            $resultDO->message = '请完善专业，学历等信息';
+            return $resultDO;
+        }elseif(empty($edudata['degree'])){
+            $resultDO->code = 500;
+            $resultDO->message = '请完善学历等信息';
             return $resultDO;
         }
 
-        $workdata = $resumework->selectOne(['eid'=>$eid],'starttime');
+        $workdata = $resumework->selectOne(['eid'=>$eid],'starttime,company,jobPosition,duty');
         if(empty($workdata)){
             $resultDO->code = 500;
             $resultDO->message = '请完善工作经历资料';
             return $resultDO;
         }elseif (empty($workdata['starttime'])){
             $resultDO->code = 500;
-            $resultDO->message = '请完善工作经历资料';
+            $resultDO->message = '请完善工作工作开始或结束时间,公司，担任职务等信息';
+            return $resultDO;
+        }elseif (empty($workdata['company'])){
+            $resultDO->code = 500;
+            $resultDO->message = '请完善工作 公司，担任职务,等信息';
+            return $resultDO;
+        }elseif (empty($workdata['jobPosition'])){
+            $resultDO->code = 500;
+            $resultDO->message = '请完善工作 担任职务,职务内容等信息';
+            return $resultDO;
+        }elseif (empty($workdata['duty'])){
+            $resultDO->code = 500;
+            $resultDO->message = '请完善工作 职务内容等信息';
             return $resultDO;
         }
 
