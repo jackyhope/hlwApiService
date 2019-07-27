@@ -370,6 +370,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
     /*
      * 更改某些表的状态字段
      * *  c_type 修改状态类型对比：   1 职位上下架
+     * status  1 = 上架   |   2 = 下架
      * @param  $changeDo
      *
      */
@@ -453,7 +454,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
         $this->model_companyjob->setPage($page);//当前第几页
         $this->model_companyjob->setLimit($pageSize);//每页几个
 
-        $jobber = $this->model_companyjob->select($where,'id,name,minsalary,maxsalary,ejob_salary_month,edate,service_type','','order by id asc');
+        $jobber = $this->model_companyjob->select($where,'id,name,minsalary,maxsalary,ejob_salary_month,edate,service_type,status','','order by id asc');
         if(gettype($jobber)=='object'){
             $j1 = json_decode(json_encode($jobber),true);
             if(count($j1['items'])>0){
