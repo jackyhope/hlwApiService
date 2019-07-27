@@ -64,7 +64,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             return $resultDo;
         }
         //隐藏联系信息
-        $this->statusChange($resumeId, $projectId, 2);
+        $huilieStatus == 1 && $this->statusChange($resumeId, $projectId, 2);
         $userModel = new model_pinping_user();
         $userInfo = $userModel->selectOne(['role_id' => $projectInfo['role_id']], 'full_name,name');
         $businessModewl = new model_pinping_business();
@@ -72,6 +72,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $list['work_info'] = [
             'user_name' => $userInfo['full_name'],
             'work_name' => $businessInfo['name'],
+            'huilie_status' => $huilieStatus,
         ];
         $resultDo->code = 200;
         $resultDo->message = json_encode($list);
@@ -156,15 +157,17 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $where = ['fine_id' => $fineId];
         $list = [];
         //1、顾问推荐简历
-        $tjList = ['role_id' => $roleId, 'user_name' => $userName, 'add_time' => date('Y-m-d H:i', $fineInfo['tjaddtime'])];
-        $list[1] = $tjList;
+        $tjList = ['role_id' => $roleId, 'step' => 'tj', 'user_name' => $userName, 'add_time' => date('m-d H:i', $fineInfo['tjaddtime']), 'title' => '顾问推荐候选人'];
+        $list[$tjList['add_time']] = ['tj' => $tjList];
         //2、HR确认简历 [面试/不合适]
         $bhsModel = new model_pinping_fineprojectbhs();
         $bhsInfo = $bhsModel->selectOne($where, '*', '', 'order by id desc');
         if ($bhsInfo) {
+            $bhsInfo['step'] = 'bhs';
+            $bhsInfo['title'] = '企业标记候选人不合适';
             $bhsInfo['role_id'] = $roleId;
-            $bhsInfo['add_time'] = date('Y-m-d H:i', $bhsInfo['addtime']);
-            $list[3] = $bhsInfo;
+            $bhsInfo['add_time'] = date('m-d H:i', $bhsInfo['addtime']);
+            $list[$bhsInfo['add_time']] = ['bhs' => $bhsInfo];
         }
         //3、HR确认面试
         $interview = new model_pinping_fineprojectinterview();
@@ -172,39 +175,56 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $interviewWhere['is_from_hr'] = 1;
         $interviewInfo = $interview->selectOne($interviewWhere, '*', '', 'order by id desc');
         if ($interviewInfo) {
+            $interviewInfo['step'] = 'interview';
+            $interviewInfo['title'] = '企业发起面试邀请';
             $interviewInfo['role_id'] = $roleId;
-            $interviewInfo['add_time'] = date('Y-m-d H:i', $interviewInfo['addtime']);
-            $list[5] = $interviewInfo;
+            $interviewInfo['add_time'] = date('m-d H:i', $interviewInfo['addtime']);
+            $list[$interviewInfo['add_time']] = ['hr_interview' => $interviewInfo];
         }
         //4、顾问确认面试
         $interviewWhere['is_from_hr'] = 0;
         $interviewGwInfo = $interview->selectOne($interviewWhere, '*', '', 'order by id desc');
         if ($interviewGwInfo) {
+            $interviewGwInfo['step'] = 'interview';
+            $interviewGwInfo['title'] = '顾问确认候选人最终面试信息';
             $interviewGwInfo['role_id'] = $roleId;
             $interviewGwInfo['user_name'] = $userName;
-            $interviewGwInfo['add_time'] = date('Y-m-d H:i', $interviewGwInfo['addtime']);
-            $list[6] = $interviewGwInfo;
+            $interviewGwInfo['add_time'] = date('m-d H:i', $interviewGwInfo['addtime']);
+            $list[$interviewGwInfo['add_time']] = ['interview' => $interviewGwInfo];
         }
         //5、购买
         $payModel = new model_pinping_fineresumebuy();
         $buyInfo = $payModel->selectOne($where, '*', '', 'order by id desc');
         if ($buyInfo) {
+            $buyInfo['step'] = 'buy';
+            $buyInfo['title'] = '企业购买简历';
             $buyInfo['role_id'] = $roleId;
             $buyInfo['user_name'] = $userName;
-            $buyInfo['add_time'] = date('Y-m-d H:i', $buyInfo['add_time']);
-            $list[4] = $buyInfo;
+            $buyInfo['add_time'] = date('m-d H:i', $buyInfo['add_time']);
+            $list[$buyInfo['add_time']] = ['buy' => $buyInfo];
         }
         //6、到场扣币
         $present = new model_pinping_fineprojectpresent();
         $presentInfo = $present->selectOne($where, '*', '', 'order by id desc');
         if ($presentInfo) {
+            $presentInfo['step'] = 'present';
+            $presentInfo['title'] = '候选人到场，扣除慧猎币';
             $presentInfo['role_id'] = $roleId;
             $presentInfo['user_name'] = $userName;
-            $presentInfo['add_time'] = date('Y-m-d H:i', $presentInfo['add_time']);
-            $list[10] = $presentInfo;
+            $presentInfo['add_time'] = date('m-d H:i', $presentInfo['add_time']);
+            $list[$presentInfo['add_time']] = ['present' => $presentInfo];
+        }
+        krsort($list);
+        $return = [];
+        if ($list) {
+            foreach ($list as $info) {
+                foreach ($info as $data) {
+                    $return[] = $data;
+                }
+            }
         }
         $resultDo->code = 200;
-        $resultDo->message = json_encode($list);
+        $resultDo->message = json_encode($return);
         return $resultDo;
     }
 
@@ -358,7 +378,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
      * @param string $filed
      * @return array|bool
      */
-    private function fineProjectInfo($resumeId, $projectId, $filed = 'id,tj_role_id,tracker,huilie_status,status,resume_id,com_id,project_id') {
+    private function fineProjectInfo($resumeId, $projectId, $filed = 'id,tj_role_id,tracker,huilie_status,status,resume_id,com_id,project_id,tjaddtime') {
         if (!$resumeId || !$projectId) {
             return false;
         }
@@ -458,9 +478,9 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $projectList = $projectModel->select($where, '*', '', 'order by id desc');
         $projectList = $projectList ? $projectList->items : [];
         foreach ($projectList as &$info) {
-            $info['starttime'] && $info['starttime'] = $info['starttime'] > 0 ? date("Y年m月", $info['starttime']) : '未知';
-            $info['endtime'] && $info['endtime'] = $info['endtime'] > 0 ? date("Y年m月", $info['endtime']) : '至今';
-            $info['starttime'] && $info['project_time'] = $info['starttime'] . '-' . $info['endtime'];
+            $info['starttime'] = $info['starttime'] > 0 ? date("Y/m", $info['starttime']) : '未知';
+            $info['endtime'] = $info['endtime'] > 0 ? date("Y/m", $info['endtime']) : '至今';
+            $info['project_time'] = $info['starttime'] . '-' . $info['endtime'];
         }
 
         //工作经验
@@ -468,8 +488,8 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $workList = $workModel->select($where, '*', '', 'order by id desc');
         $workList = $workList ? $workList->items : [];
         foreach ($workList as &$info) {
-            $info['starttime'] && $info['starttime'] = $info['starttime'] > 0 ? date("Y年m月", $info['starttime']) : '未知';
-            $info['endtime'] && $info['endtime'] = $info['endtime'] > 0 ? date("Y年m月", $info['endtime']) : '至今';
+            $info['starttime'] = $info['starttime'] ? date("Y/m", $info['starttime']) : '未知';
+            $info['endtime'] = $info['endtime'] ? date("Y/m", $info['endtime']) : '至今';
             $info['starttime'] && $info['work_time'] = $info['starttime'] . '-' . $info['endtime'];
         }
         //教育经验
@@ -477,8 +497,8 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $eduList = $eduModel->select($where, '*', '', 'order by id desc');
         $eduList = $eduList ? $eduList->items : [];
         foreach ($eduList as &$info) {
-            $info['starttime'] && $info['starttime'] = $info['starttime'] > 0 ? date("Y年m月", $info['starttime']) : '未知';
-            $info['endtime'] && $info['endtime'] = $info['endtime'] > 0 ? date("Y年m月", $info['endtime']) : '未知';
+            $info['starttime'] && $info['starttime'] = $info['starttime'] > 0 ? date("Y/m", $info['starttime']) : '未知';
+            $info['endtime'] && $info['endtime'] = $info['endtime'] > 0 ? date("Y/m", $info['endtime']) : '未知';
             $info['degree'] && $info['degree'] = $this->eduList[$info['degree']] ? $this->eduList[$info['degree']] : '未知';
             $info['starttime'] && $info['edu_time'] = $info['starttime'] . '-' . $info['endtime'];
         }
