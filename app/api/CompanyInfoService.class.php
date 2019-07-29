@@ -133,12 +133,13 @@ class api_CompanyInfoService extends api_Abstract implements CompanyInfoServiceI
         }
 //        $content = str_replace(array("&amp;", "background-color:#ffffff", "background-color:#fff", "white-space:nowrap;"), array("&", 'background-color:', 'background-color:', 'white-space:'), html_entity_decode($content, ENT_QUOTES, "GBK"));
 //        $linkman = hlw_lib_BaseUtils::getStr(iconv('UTF-8', 'GBK', $linkman));
-//        $name = iconv('UTF-8', 'GBK', $name);
-//        $address = iconv('UTF-8', 'GBK', $address);
-//        $linkjob = iconv('UTF-8', 'GBK', $linkjob);
-//        $welfare = iconv('UTF-8', 'GBK', $welfare);
-//        $website = iconv('UTF-8', 'GBK', $website);
-//        $content = hlw_lib_BaseUtils::getStr( iconv('UTF-8', 'GBK', $content),'html');
+        $name = $this->characet($name, 'GBK');
+        $address = $this->characet($address, 'GBK');
+        $linkjob = $this->characet($linkjob, 'GBK');
+        $welfare = $this->characet($welfare, 'GBK');
+        $website = $this->characet($website, 'GBK');
+        $content =  $this->characet($content, 'GBK');
+
 
         //数据修改
         $data = [
@@ -173,6 +174,8 @@ class api_CompanyInfoService extends api_Abstract implements CompanyInfoServiceI
         try {
             $where = ['uid' => $uid];
             $this->companyModel->update($where, $data);
+            $this->resultDo->message = var_export( $this->companyModel,true);
+            return $this->resultDo;
             $companyJobData = ['com_name' => $data['name'], 'pr' => $data['pr'], 'mun' => $data['mun'], 'com_provinceid' => $data['provinceid']];
             $this->companyJobModel->update($where, $companyJobData);
             $this->memberModel->update($where, $memberData);
@@ -256,12 +259,20 @@ class api_CompanyInfoService extends api_Abstract implements CompanyInfoServiceI
         return $this->resultDo;
     }
 
-    private function change_encoding($_str, $get_coding = 'GBK') {
-        $encode = mb_detect_encoding(strval($_str), array("ASCII", 'UTF-8', 'GB2312', "GBK", 'BIG5', 'EUC-CN'));//判断编码
-        if ($encode != $get_coding) {
-            $_str = iconv($encode, $get_coding, $_str);
+    /**
+     * 编码转换
+     * @param $data
+     * @param string $charSet
+     * @return string
+     */
+    function characet($data, $charSet = 'UTF-8') {
+        if (!empty($data)) {
+            $fileType = mb_detect_encoding($data, array('UTF-8', 'GBK', 'LATIN1', 'BIG5'));
+            if ($fileType != $charSet) {
+                $data = mb_convert_encoding($data, $charSet, $fileType);
+            }
         }
-        return $_str;
+        return $data;
     }
 
 
