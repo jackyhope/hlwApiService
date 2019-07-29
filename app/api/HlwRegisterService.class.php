@@ -15,7 +15,16 @@ class api_HlwRegisterService extends api_Abstract implements \com\hlw\huiliewang
     {
         // TODO: Implement sendMSG() method.
         $resultDO = new ResultDO();
+        $this->resultDo->success = false;
+        $this->resultDo->code = 500;
+        if(!tel){
+            $resultDO->message = '请添加手机号';
+        }
+        try{
 
+        }catch (\Exception $e){
+
+        }
         return $resultDO;
     }
 
@@ -68,10 +77,14 @@ class api_HlwRegisterService extends api_Abstract implements \com\hlw\huiliewang
         $invite = $requestDO->invite;
 
         $timerang = time()-intval($code_time);
-        if($timerang > 24*3600  || !($session_code == $code)){
+        if($timerang > 5*60 ){
             $resultDo->success = false;
             $resultDo->code = 500;
             $resultDo->message = '手机验证码过期';
+        }else if( !($session_code == $code)){
+            $resultDo->success = false;
+            $resultDo->code = 500;
+            $resultDo->message = '您的验证码有误';
         }else{
             $arr['regcode'] = intval($code);
             $arr['moblie'] = $tel;
