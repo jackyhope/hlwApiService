@@ -40,7 +40,7 @@ class api_CompanyInfoService extends api_Abstract implements CompanyInfoServiceI
         $phoneone = hlw_lib_BaseUtils::getStr($infoRequestDo->phoneone);#固定电话 头部
         $phonetwo = hlw_lib_BaseUtils::getStr($infoRequestDo->phonetwo);#固定电话 中部
         $phonethree = hlw_lib_BaseUtils::getStr($infoRequestDo->phonethree);#固定电话 尾部
-        $content = hlw_lib_BaseUtils::getStr($infoRequestDo->content,'html');#企业简介
+        $content = hlw_lib_BaseUtils::getStr($infoRequestDo->content, 'html');#企业简介
         $sdate = hlw_lib_BaseUtils::getStr($infoRequestDo->sdate);#创办时间
         $moneytype = hlw_lib_BaseUtils::getStr($infoRequestDo->moneytype, 'int');#企业性质
         $zip = hlw_lib_BaseUtils::getStr($infoRequestDo->zip);#邮政编码
@@ -176,6 +176,74 @@ class api_CompanyInfoService extends api_Abstract implements CompanyInfoServiceI
         $this->resultDo->success = TRUE;
         $this->resultDo->code = 200;
         $this->resultDo->message = iconv("UTF-8", "GB2312//IGNORE", '更新成功');
+        return $this->resultDo;
+    }
+
+    /**
+     * @desc  公司主页数据信息
+     * @param $uid
+     * @return ResultDO
+     */
+    public function getInfo($uid) {
+        $this->resultDo = new ResultDO();
+        $this->companyModel = new model_huiliewang_company();
+        $industry = new model_huiliewang_industry();
+        $cert = new model_huiliewang_companycert();
+        $city = new model_huiliewang_cityclass();
+        $job = new model_huiliewang_companyjob();
+        $fineProject = new model_pinping_fineproject();
+        $interview = new model_pinping_fineprojectinterview();
+        $filed = "name,hy,provinceid,tb_customer_id,con_oa_userroleid";
+        $companyInfo = $this->companyModel->selectOne(['uid' => $uid], $filed);
+        $inderstryId = $companyInfo['hy'];
+        $hyName = $industry->selectOne(['id' => $inderstryId], 'name');
+        $companyInfo['hy'] = $hyName['name'];
+        $provinceId = $companyInfo['provinceid'];
+        $cityName = $city->selectOne(['id' => $provinceId], 'name');
+        $certInfo = $cert->selectOne(['uid' => $uid, 'status' => 1]);
+        $companyInfo['province'] = $cityName['name'];
+        $companyInfo['is_cert'] = $certInfo ? 1 : 0;
+        //BD信息
+        $bdRole = $companyInfo['con_oa_userroleid'];
+        $user = new model_pinping_user();
+        $roleInfo = $user->selectOne(['role_id' => $bdRole], 'telephone,full_name');
+        $companyInfo['bd_name'] = $roleInfo['full_name'] ? $roleInfo['full_name'] : '';
+        $companyInfo['bd_telephone'] = $roleInfo['telephone'] ? $roleInfo['telephone'] : '';
+
+        //职位
+        $job = $job->selectOne(['uid' => $uid], 'count(*) as nums');
+        $companyInfo['job_count'] = $job['nums'] ? $job['nums'] : 0;
+        //简历、面试、
+        $customerId = $companyInfo['tb_customer_id'];
+        //新简历
+        $newProject = $fineProject->selectOne(['com_id' => $customerId, 'huilie_status' => 1], 'count(*) as nums');
+        $companyInfo['new_resumes'] = $newProject['nums'] ?  $newProject['nums'] : 0;
+        //邀约得面试
+        $hrInterviewProject = $fineProject->selectOne(['com_id' => $customerId, 'huilie_status' => 5], 'count(*) as nums');
+        $companyInfo['interview_resumes'] =  $hrInterviewProject['nums'] ?  $hrInterviewProject['nums'] : 0;
+        //购买的简历
+        $buyProject = $fineProject->selectOne(['com_id' => $customerId, 'huilie_status' => 4], 'count(*) as nums');
+        $companyInfo['buy_resumes'] = $buyProject['nums'] ? $buyProject['nums'] : 0;
+
+        //带面试
+        $where = "com_id = {$customerId} and huilie_status in (6,8)";
+        $fines = $fineProject->select($where);
+        $fineIds = $fines->items;
+        $fineId = '';
+        foreach ($fineIds as $fineInfo) {
+            $fineId .= $fineInfo['id'] . ',';
+        }
+        $fineId = trim($fineId, ',');
+        $time = time();
+        $dmsInfo = $interview->selectOne("fine_id in ({$fineId}) and addtime >{$time} ", 'count(distinct fine_id) as nums');
+        $companyInfo['wait_interview_count'] = $dmsInfo['nums'] ? $dmsInfo['nums'] : 0;
+
+        //待确认到场
+        $dcInfo = $interview->selectOne("fine_id in ({$fineId}) and addtime < {$time} ", 'count(distinct(fine_id)) as nums');
+        $companyInfo['wait_present_count'] = $dcInfo['nums'] ?  $dcInfo['nums'] : 0;
+        $this->resultDo->success = TRUE;
+        $this->resultDo->code = 200;
+        $this->resultDo->message = json_encode($companyInfo);
         return $this->resultDo;
     }
 
