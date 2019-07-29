@@ -5,6 +5,8 @@ use com\hlw\common\dataobject\common\ResultDO;
 
 class api_CustomerService extends api_Abstract implements CustomerServiceIf {
 
+    protected $customerOwner = 1;
+
     public function saveCustomer(\com\hlw\huilie\dataobject\customer\CustomerRequestDTO $CustomerDo) {
         $resultDo = new ResultDO();
         if (!$CustomerDo->name) {
@@ -46,6 +48,7 @@ class api_CustomerService extends api_Abstract implements CustomerServiceIf {
         $customer_contacts_linkqq = $CustomerDo->linkqq ? hlw_lib_BaseUtils::getStr($CustomerDo->linkqq) : '';
         $customer_contacts_linkmail = $CustomerDo->linkmail ? hlw_lib_BaseUtils::getStr($CustomerDo->linkmail) : '';
         $customer_contacts_linktel = $CustomerDo->linktel ? hlw_lib_BaseUtils::getStr($CustomerDo->linktel) : '';
+        $customer_customer_id = $CustomerDo->linktel ? hlw_lib_BaseUtils::getStr($CustomerDo->customer_id,'int') : '0';
 
         $customer_tele = '';
         if ($customer_phoneone) {
@@ -68,7 +71,11 @@ class api_CustomerService extends api_Abstract implements CustomerServiceIf {
             $model_customer->beginTransaction();
 
             //查询重复
-            $isExist = $model_customer->selectOne(['name' => $customer_name], 'customer_id');
+            $isExist = '';
+            if($customer_customer_id > 0){
+                $isExist = $model_customer->selectOne(['customer_id' => $customer_customer_id], 'customer_id');
+            }
+            !$isExist && $isExist = $model_customer->selectOne(['name' => $customer_name], 'customer_id');
             $customer_ins = [
                 'cooperation_code' => '',
                 'name' => $customer_name,
@@ -77,24 +84,24 @@ class api_CustomerService extends api_Abstract implements CustomerServiceIf {
                 'short_name' => $customer_name,
                 'customer_owner_name' => '',
                 'customer_owner_en_name' => '',
-                'create_time' => time(),
                 'update_time' => 0,
                 'is_deleted' => 0,
                 'is_locked' => 0,
-                'owner_role_id' => 0,
                 'delete_role_id' => 0,
                 'location' => $customer_address,
                 'telephone' => $customer_tele,
                 'introduce' => $customer_introduce
             ];
 
-
             if (!$isExist['customer_id']) {
+                $customer_ins['owner_role_id'] = $this->customerOwner;
+                $customer_ins['create_time'] = time();
                 $model_customer->insert($customer_ins);
                 $customer_id = $model_customer->lastInsertId();
                 $mode = 'add'; //add
             } else {
                 $customer_id = $isExist['customer_id'];
+                $customer_ins['update_time'] = time();
                 $model_customer->update(['customer_id' => $customer_id], $customer_ins);
                 $mode = 'update'; //update
             }
