@@ -399,6 +399,10 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                 $Result->message='状态内容不能为空';
                 return $Result;
             }
+            if(in_array($status,[1,2])){
+                $Result->message='状态只能为1 or 2';
+                return $Result;
+            }
             //OA端，business表状态修改
             $re = $this->model_business->update(['huilie_job_id'=>$huilie_job_id],['tb_huilie_status'=>$status]);
             //huilie端 company_job表 状态修改
