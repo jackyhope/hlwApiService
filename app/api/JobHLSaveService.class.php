@@ -135,8 +135,6 @@ class api_JobHLSaveService extends api_Abstract implements JobAddServiceIf
                 $this->jobModel->update(['id' => $jobId], $data);
             } else {
                 $this->jobModel->insert($data);
-                $result->message = var_export( $jobPost, true);
-                return $result;
             }
         } catch (Exception $e) {
             $result->message = '职位添加失败' . $e->getMessage();
