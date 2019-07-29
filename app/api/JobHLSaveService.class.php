@@ -31,7 +31,7 @@ class api_JobHLSaveService extends api_Abstract implements JobAddServiceIf
         $maxsalary = hlw_lib_BaseUtils::getStr($addRequestDo->maxsalary);
         $salaryMonth = hlw_lib_BaseUtils::getStr($addRequestDo->ejob_salary_month, 'int');
         $description = hlw_lib_BaseUtils::getStr($addRequestDo->description);
-        $detailReport = hlw_lib_BaseUtils::getStr($addRequestDo->detail_report, 'html');
+        $detailReport = hlw_lib_BaseUtils::getStr($addRequestDo->detail_report);
         $provinceid = hlw_lib_BaseUtils::getStr($addRequestDo->provinceid, 'int');
         $subordinate = hlw_lib_BaseUtils::getStr($addRequestDo->detail_subordinate, 'int');
         $hy = hlw_lib_BaseUtils::getStr($addRequestDo->hy, 'int');
@@ -76,6 +76,10 @@ class api_JobHLSaveService extends api_Abstract implements JobAddServiceIf
         //企业信息
         $companyInfo = $this->company->selectOne(['uid' => $uId]);
         //数据
+        $name = $this->characet($name,'gbk');
+        $description =  $this->characet($description,'gbk');
+        $detailReport = $this->characet($detailReport,'gbk');
+
         $data = [
             'name' => $name,
             'uid' => $uId,
@@ -117,7 +121,7 @@ class api_JobHLSaveService extends api_Abstract implements JobAddServiceIf
             $row1 = $this->jobClass->selectOne(['id' => intval($jobPost)], 'keyid');
             $row2 = $this->jobClass->selectOne(['id' => $row1['keyid']], 'keyid');
             if ($row2['keyid'] == '0') {
-                $data['job1_son'] = $jobPost;
+                $data['job1_son'] = intval($jobPost);
                 $data['job1'] = $row1['keyid'];
                 unset($data['job_post']);
             } else {
@@ -131,8 +135,7 @@ class api_JobHLSaveService extends api_Abstract implements JobAddServiceIf
                 $this->jobModel->update(['id' => $jobId], $data);
             } else {
                 $this->jobModel->insert($data);
-                $jobId = $this->jobModel->lastInsertId();
-                $result->message = $jobId;
+                $result->message = var_export( $jobPost, true);
                 return $result;
             }
         } catch (Exception $e) {
@@ -143,5 +146,22 @@ class api_JobHLSaveService extends api_Abstract implements JobAddServiceIf
         $result->success = true;
         $result->message = $jobId;
         return $result;
+    }
+
+    /**
+     * 编码转换
+     * @param $data
+     * @param string $charSet
+     * @return string
+     */
+    function characet($data, $charSet = 'UTF-8')
+    {
+        if (!empty($data)) {
+            $fileType = mb_detect_encoding($data, array('UTF-8', 'GBK', 'LATIN1', 'BIG5'));
+            if ($fileType != $charSet) {
+                $data = mb_convert_encoding($data, $charSet, $fileType);
+            }
+        }
+        return $data;
     }
 }

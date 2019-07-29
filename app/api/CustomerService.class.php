@@ -156,7 +156,7 @@ class api_CustomerService extends api_Abstract implements CustomerServiceIf {
 
             $resultDo->success = TRUE;
             $resultDo->code = 200;
-            $resultDo->message = '';
+            $resultDo->message = $customer_id;
 
             return $resultDo;
         } catch (Exception $ex) {

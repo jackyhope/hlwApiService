@@ -8,7 +8,7 @@
  */
 
 use com\hlw\huiliewang\interfaces\company\CompanyInfoServiceIf;
-use com\hlw\huiliewang\dataobject\company\CompanyInfoRequestDTO;
+use com\hlw\huiliewang\dataobject\companyInfo\editInfoRequestDTO;
 use com\hlw\common\dataobject\common\ResultDO;
 
 class api_CompanyInfoService extends api_Abstract implements CompanyInfoServiceIf
@@ -19,10 +19,11 @@ class api_CompanyInfoService extends api_Abstract implements CompanyInfoServiceI
     protected $resultDo;
 
     /**
-     * @desc 修改
-     * @param CompanyInfoRequestDTO $infoRequestDo
+     * @desc  修改
+     * @param editInfoRequestDTO $infoRequestDo
+     * @return ResultDO
      */
-    public function save(CompanyInfoRequestDTO $infoRequestDo) {
+    public function save(editInfoRequestDTO $infoRequestDo) {
         $this->memberModel = new model_huiliewang_member();
         $this->companyModel = new model_huiliewang_company();
         $this->companyJobModel = new model_huiliewang_companyjob();
@@ -33,16 +34,16 @@ class api_CompanyInfoService extends api_Abstract implements CompanyInfoServiceI
         $linkman = hlw_lib_BaseUtils::getStr($infoRequestDo->linkman);#联系人
         $linktel = hlw_lib_BaseUtils::getStr($infoRequestDo->linktel);#联系人电话
         $hy = hlw_lib_BaseUtils::getStr($infoRequestDo->hy, 'int');#企业行业
-        $pr = hlw_lib_BaseUtils::getStr($infoRequestDo->pr, 'int');#企业性质
+        $pr = hlw_lib_BaseUtils::getStr($infoRequestDo->pr, 'int') ? hlw_lib_BaseUtils::getStr($infoRequestDo->pr, 'int') : 1;#企业性质
         $provinceid = hlw_lib_BaseUtils::getStr($infoRequestDo->provinceid, 'int');#所在地城市
         $cityid = hlw_lib_BaseUtils::getStr($infoRequestDo->cityid, 'int');#所在地市
         $three_cityid = hlw_lib_BaseUtils::getStr($infoRequestDo->three_cityid, 'int');#所在地地区
         $phoneone = hlw_lib_BaseUtils::getStr($infoRequestDo->phoneone);#固定电话 头部
         $phonetwo = hlw_lib_BaseUtils::getStr($infoRequestDo->phonetwo);#固定电话 中部
         $phonethree = hlw_lib_BaseUtils::getStr($infoRequestDo->phonethree);#固定电话 尾部
-        $content = hlw_lib_BaseUtils::getStr($infoRequestDo->content, 'html');#企业简介
+        $content = $infoRequestDo->content;#企业简介
         $sdate = hlw_lib_BaseUtils::getStr($infoRequestDo->sdate);#创办时间
-        $moneytype = hlw_lib_BaseUtils::getStr($infoRequestDo->moneytype, 'int');#企业性质
+        $moneytype = hlw_lib_BaseUtils::getStr($infoRequestDo->moneytype, 'int') ? hlw_lib_BaseUtils::getStr($infoRequestDo->moneytype, 'int') : 1;#企业性质
         $zip = hlw_lib_BaseUtils::getStr($infoRequestDo->zip);#邮政编码
         $linkqq = hlw_lib_BaseUtils::getStr($infoRequestDo->linkqq);#QQ
         $linkmail = hlw_lib_BaseUtils::getStr($infoRequestDo->linkmail);#邮箱
@@ -53,10 +54,11 @@ class api_CompanyInfoService extends api_Abstract implements CompanyInfoServiceI
         $logo = hlw_lib_BaseUtils::getStr($infoRequestDo->logo);#LOGO
         $firmpic = hlw_lib_BaseUtils::getStr($infoRequestDo->firmpic);//firmpic
         $mun = hlw_lib_BaseUtils::getStr($infoRequestDo->mun, 'int');//firmpic
-        $linkjob = hlw_lib_BaseUtils::getStr($infoRequestDo->linkjob);//linkjob
+        $linkjob = $infoRequestDo->linkjob;//linkjob
         $money = hlw_lib_BaseUtils::getStr($infoRequestDo->money, 'int');//money
-        $welfare = hlw_lib_BaseUtils::getStr($infoRequestDo->welfare, 'int');//福利待遇
+        $welfare = $infoRequestDo->welfare;//福利待遇
         $link_phone = '';
+
 
         $this->resultDo->success = false;
         $this->resultDo->code = 500;
@@ -129,7 +131,15 @@ class api_CompanyInfoService extends api_Abstract implements CompanyInfoServiceI
             $this->resultDo->message = iconv("UTF-8", "GB2312//IGNORE", $this->resultDo->message);
             return $this->resultDo;
         }
-        $content = str_replace(array("&amp;", "background-color:#ffffff", "background-color:#fff", "white-space:nowrap;"), array("&", 'background-color:', 'background-color:', 'white-space:'), html_entity_decode($content, ENT_QUOTES, "GB2312"));
+//        $content = str_replace(array("&amp;", "background-color:#ffffff", "background-color:#fff", "white-space:nowrap;"), array("&", 'background-color:', 'background-color:', 'white-space:'), html_entity_decode($content, ENT_QUOTES, "GBK"));
+//        $linkman = hlw_lib_BaseUtils::getStr(iconv('UTF-8', 'GBK', $linkman));
+        $name = $this->characet($name, 'GBK');
+        $address = $this->characet($address, 'GBK');
+        $linkjob = $this->characet($linkjob, 'GBK');
+        $welfare = $this->characet($welfare, 'GBK');
+        $website = $this->characet($website, 'GBK');
+        $content =  $this->characet($content, 'GBK');
+
 
         //数据修改
         $data = [
@@ -164,6 +174,8 @@ class api_CompanyInfoService extends api_Abstract implements CompanyInfoServiceI
         try {
             $where = ['uid' => $uid];
             $this->companyModel->update($where, $data);
+            $this->resultDo->message = var_export( $this->companyModel,true);
+            return $this->resultDo;
             $companyJobData = ['com_name' => $data['name'], 'pr' => $data['pr'], 'mun' => $data['mun'], 'com_provinceid' => $data['provinceid']];
             $this->companyJobModel->update($where, $companyJobData);
             $this->memberModel->update($where, $memberData);
@@ -217,10 +229,10 @@ class api_CompanyInfoService extends api_Abstract implements CompanyInfoServiceI
         $customerId = $companyInfo['tb_customer_id'];
         //新简历
         $newProject = $fineProject->selectOne(['com_id' => $customerId, 'huilie_status' => 1], 'count(*) as nums');
-        $companyInfo['new_resumes'] = $newProject['nums'] ?  $newProject['nums'] : 0;
+        $companyInfo['new_resumes'] = $newProject['nums'] ? $newProject['nums'] : 0;
         //邀约得面试
         $hrInterviewProject = $fineProject->selectOne(['com_id' => $customerId, 'huilie_status' => 5], 'count(*) as nums');
-        $companyInfo['interview_resumes'] =  $hrInterviewProject['nums'] ?  $hrInterviewProject['nums'] : 0;
+        $companyInfo['interview_resumes'] = $hrInterviewProject['nums'] ? $hrInterviewProject['nums'] : 0;
         //购买的简历
         $buyProject = $fineProject->selectOne(['com_id' => $customerId, 'huilie_status' => 4], 'count(*) as nums');
         $companyInfo['buy_resumes'] = $buyProject['nums'] ? $buyProject['nums'] : 0;
@@ -240,11 +252,28 @@ class api_CompanyInfoService extends api_Abstract implements CompanyInfoServiceI
 
         //待确认到场
         $dcInfo = $interview->selectOne("fine_id in ({$fineId}) and addtime < {$time} ", 'count(distinct(fine_id)) as nums');
-        $companyInfo['wait_present_count'] = $dcInfo['nums'] ?  $dcInfo['nums'] : 0;
+        $companyInfo['wait_present_count'] = $dcInfo['nums'] ? $dcInfo['nums'] : 0;
         $this->resultDo->success = TRUE;
         $this->resultDo->code = 200;
         $this->resultDo->message = json_encode($companyInfo);
         return $this->resultDo;
     }
+
+    /**
+     * 编码转换
+     * @param $data
+     * @param string $charSet
+     * @return string
+     */
+    function characet($data, $charSet = 'UTF-8') {
+        if (!empty($data)) {
+            $fileType = mb_detect_encoding($data, array('UTF-8', 'GBK', 'LATIN1', 'BIG5'));
+            if ($fileType != $charSet) {
+                $data = mb_convert_encoding($data, $charSet, $fileType);
+            }
+        }
+        return $data;
+    }
+
 
 }
