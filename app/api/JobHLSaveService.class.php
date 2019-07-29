@@ -33,6 +33,8 @@ class api_JobHLSaveService extends api_Abstract implements JobAddServiceIf
         $description = hlw_lib_BaseUtils::getStr($addRequestDo->description);
         $detailReport = hlw_lib_BaseUtils::getStr($addRequestDo->detail_report);
         $provinceid = hlw_lib_BaseUtils::getStr($addRequestDo->provinceid, 'int');
+        $cityid = hlw_lib_BaseUtils::getStr($addRequestDo->cityid, 'int');
+        $three_cityid = hlw_lib_BaseUtils::getStr($addRequestDo->three_cityid, 'int');
         $subordinate = hlw_lib_BaseUtils::getStr($addRequestDo->detail_subordinate, 'int');
         $hy = hlw_lib_BaseUtils::getStr($addRequestDo->hy, 'int');
         $number = hlw_lib_BaseUtils::getStr($addRequestDo->number, 'int');
@@ -104,6 +106,8 @@ class api_JobHLSaveService extends api_Abstract implements JobAddServiceIf
             'hy' => $hy,
             'detail_subordinate' => $subordinate,
             'provinceid' => $provinceid,
+            'cityid' => $cityid,
+            'three_cityid' => $three_cityid,
             'detail_report' => $detailReport,
             'description' => $description,
             'ejob_salary_month' => $salaryMonth,
