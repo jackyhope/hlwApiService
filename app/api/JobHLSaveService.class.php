@@ -59,6 +59,18 @@ class api_JobHLSaveService extends api_Abstract implements JobAddServiceIf
             $result->message = '参数错误';
             return $result;
         }
+        $message = '';
+        !$provinceid && $message = '工作地点必填';
+        !$minsalary && $message = '请填写薪资待遇';
+        !$description && $message = '请填写职位描述';
+        !$salaryMonth && $message = '薪资发放月数错误';
+        !$jobPost && $message = '职位类别错误';
+        !$name && $message = '职位名称必填';
+        if($message){
+            $result->message = $message;
+            return $result;
+        }
+
         //检查职位名是否存在
         $jobInfo = $this->jobModel->selectOne(['uid' => $uId, 'name' => $name]);
         if ($jobInfo && $jobInfo['uid'] !== $uId && $jobId <= 0) {
@@ -78,9 +90,9 @@ class api_JobHLSaveService extends api_Abstract implements JobAddServiceIf
         //企业信息
         $companyInfo = $this->company->selectOne(['uid' => $uId]);
         //数据
-        $name = $this->characet($name,'utf-8');
-        $description =  $this->characet($description,'utf-8');
-        $detailReport = $this->characet($detailReport,'utf-8');
+        $name = $this->characet($name, 'utf-8');
+        $description = $this->characet($description, 'utf-8');
+        $detailReport = $this->characet($detailReport, 'utf-8');
 
         $data = [
             'name' => $name,
@@ -137,8 +149,6 @@ class api_JobHLSaveService extends api_Abstract implements JobAddServiceIf
         try {
             if ($jobId > 0) {
                 $this->jobModel->update(['id' => $jobId], $data);
-                $result->message = var_export( $this->jobModel,true);
-                return $result;
             } else {
                 $this->jobModel->insert($data);
             }
@@ -158,8 +168,7 @@ class api_JobHLSaveService extends api_Abstract implements JobAddServiceIf
      * @param string $charSet
      * @return string
      */
-    function characet($data, $charSet = 'UTF-8')
-    {
+    function characet($data, $charSet = 'UTF-8') {
         if (!empty($data)) {
             $fileType = mb_detect_encoding($data, array('UTF-8', 'GBK', 'LATIN1', 'BIG5'));
             if ($fileType != $charSet) {
