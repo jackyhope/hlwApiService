@@ -174,8 +174,6 @@ class api_CompanyInfoService extends api_Abstract implements CompanyInfoServiceI
         try {
             $where = ['uid' => $uid];
             $this->companyModel->update($where, $data);
-            $this->resultDo->message = var_export( $this->companyModel,true);
-            return $this->resultDo;
             $companyJobData = ['com_name' => $data['name'], 'pr' => $data['pr'], 'mun' => $data['mun'], 'com_provinceid' => $data['provinceid']];
             $this->companyJobModel->update($where, $companyJobData);
             $this->memberModel->update($where, $memberData);
