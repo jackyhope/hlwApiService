@@ -11,3 +11,6 @@ query  =   host:192.168.0.118,port:3306,user:root,database:resume,password:12345
 [pinping]
 main   =   host:192.168.0.118,port:3306,user:root,database:pinping,password:123456,charset:utf8
 query  =   host:192.168.0.118,port:3306,user:root,database:pinping,password:123456,charset:utf8
+[phpyun]
+main   =   host:192.168.0.118,port:3306,user:root,database:huiliewang,password:123456,charset:utf8
+query  =   host:192.168.0.118,port:3306,user:root,database:huiliewang,password:123456,charset:utf8
