@@ -120,7 +120,7 @@ class api_SysmsgService extends api_Abstract implements SysmsgServiceIf
             return $this->resultDo;
         }
         $mobileModel = new model_huiliewang_mobilemsg();
-        $lastSend = $mobileModel->selectOne(['moblie' => $this->phone, 'template_id' => $this->templateId]);
+        $lastSend = $mobileModel->selectOne(['moblie' => $this->phone, 'template_id' => $this->templateId],'*','','order by id desc');
         if ($lastSend && time() - $lastSend['ctime'] < 60) {
             $id = $lastSend['id'];
             $id && $this->resultDo->success = true;
