@@ -133,12 +133,12 @@ class api_CompanyInfoService extends api_Abstract implements CompanyInfoServiceI
         }
 //        $content = str_replace(array("&amp;", "background-color:#ffffff", "background-color:#fff", "white-space:nowrap;"), array("&", 'background-color:', 'background-color:', 'white-space:'), html_entity_decode($content, ENT_QUOTES, "GBK"));
 //        $linkman = hlw_lib_BaseUtils::getStr(iconv('UTF-8', 'GBK', $linkman));
-        $name = $this->characet($name, 'GBK');
-        $address = $this->characet($address, 'GBK');
-        $linkjob = $this->characet($linkjob, 'GBK');
-        $welfare = $this->characet($welfare, 'GBK');
-        $website = $this->characet($website, 'GBK');
-        $content =  $this->characet($content, 'GBK');
+        $name = $this->characet($name, 'UTF-8');
+        $address = $this->characet($address, 'UTF-8');
+        $linkjob = $this->characet($linkjob, 'UTF-8');
+        $welfare = $this->characet($welfare, 'UTF-8');
+        $website = $this->characet($website, 'UTF-8');
+        $content =  $this->characet($content, 'UTF-8');
 
 
         //数据修改
