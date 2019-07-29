@@ -122,6 +122,8 @@ class api_JobService extends api_Abstract implements JobServiceIf
             $businessInfo = $model_business->selectOne(['huilie_job_id' => $business_job_id, 'is_deleted' => 0], 'business_id,huilie_job_id');
             if ($businessInfo) {
                 $business_mode = 'update';
+            }else{
+                $business_mode = 'add';
             }
 
             $model_business->beginTransaction();
@@ -216,7 +218,7 @@ class api_JobService extends api_Abstract implements JobServiceIf
                     'pro_type' => '4'
                 ];
                 $model_business->update(['huilie_job_id' => $business_job_id], $business_upd);
-                $business_info = $model_business->selectOne(['huilie_job_id' => $business_job_id], '$business_id');
+                $business_info = $model_business->selectOne(['huilie_job_id' => $business_job_id], 'business_id');
                 $business_id = $business_info['$business_id'];
 
                 $business_data_upd = [
