@@ -370,6 +370,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
     /*
      * 更改某些表的状态字段
      * *  c_type 修改状态类型对比：   1 职位上下架
+     * status  1 = 上架   |   2 = 下架
      * @param  $changeDo
      *
      */
@@ -453,7 +454,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
         $this->model_companyjob->setPage($page);//当前第几页
         $this->model_companyjob->setLimit($pageSize);//每页几个
 
-        $jobber = $this->model_companyjob->select($where,'id,name,minsalary,maxsalary,ejob_salary_month,edate','','order by id asc');
+        $jobber = $this->model_companyjob->select($where,'id,name,minsalary,maxsalary,ejob_salary_month,edate,service_type,status','','order by id asc');
         if(gettype($jobber)=='object'){
             $j1 = json_decode(json_encode($jobber),true);
             if(count($j1['items'])>0){
@@ -486,6 +487,10 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                             $n2[$nk]['new_total'] = array_key_exists(1,$new_total[$nk])?$new_total[$nk][1]:0;
                             //下载的简历 4
                             $n2[$nk]['buy_total'] = array_key_exists(4,$new_total[$nk])?$new_total[$nk][4]:0;
+                            //待面试
+                            $n2[$nk]['waiting_interview'] = array_key_exists(4,$new_total[$nk])?$new_total[$nk][8]:0;
+                            //已到场
+                            $n2[$nk]['already_arrive'] = array_key_exists(4,$new_total[$nk])?$new_total[$nk][11]:0;
                         }
                     }
                 }
@@ -493,6 +498,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                 $list = $j1['items'];
                 unset($j1['items']);
                 foreach ($list as $kj=>$vj){
+                    $list[$kj]['service_type_name'] = $vj['service_type']==0?'慧沟通':'慧简历';
                     $list[$kj]['minsalary'] = intval($vj['minsalary']) * intval($vj['ejob_salary_month']);
                     $list[$kj]['maxsalary'] = intval($vj['maxsalary']) * intval($vj['ejob_salary_month']);
                     if(count($guwen)>0 && array_key_exists($vj['id'],$guwen)){
@@ -503,15 +509,27 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                         $list[$kj]['joiner'] = 0;
                         $list[$kj]['joiner_name'] = '无';
                     }
+
                     if(count($n2)>0 && array_key_exists($vj['id'],$n2)){
                         $list[$kj]['all_total']=array_key_exists('all_total',$n2[$vj['id']])?$n2[$vj['id']]['all_total']:0;
                         $list[$kj]['new_total']=array_key_exists('new_total',$n2[$vj['id']])?$n2[$vj['id']]['new_total']:0;
                         $list[$kj]['buy_total']=array_key_exists('buy_total',$n2[$vj['id']])?$n2[$vj['id']]['buy_total']:0;
+                        if($vj['service_type']==1){
+                            //慧简历
+                            $list[$kj]['waiting_interview']=array_key_exists('waiting_interview',$n2[$vj['id']])?$n2[$vj['id']]['waiting_interview']:0;
+                            $list[$kj]['already_arrive']=array_key_exists('already_arrive',$n2[$vj['id']])?$n2[$vj['id']]['already_arrive']:0;
+                        }
                     }else{
                         $list[$kj]['all_total']=0;
                         $list[$kj]['new_total']=0;
                         $list[$kj]['buy_total']=0;
+                        if($vj['service_type']==1){
+                            $list[$kj]['waiting_interview']=0;
+                            $list[$kj]['already_arrive']=0;
+                        }
                     }
+
+
                 }
                 $Result->code=200;
                 $Result->success=true;
