@@ -379,7 +379,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
         $Result = new FrontResultDTO();
         $Result->code=500;
         $Result->success=false;
-        $Result->message='操作失败';
+        $Result->message='操作 失败';
         $allow = [1];//允许的c_type值范围   下面判断用的
         //接收数据--
         $post_data = $changeDo->post_data;
@@ -399,7 +399,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                 $Result->message='状态内容不能为空';
                 return $Result;
             }
-            if(in_array($status,[1,2])){
+            if(!in_array($status,[1,2])){
                 $Result->message='状态只能为1 or 2';
                 return $Result;
             }
