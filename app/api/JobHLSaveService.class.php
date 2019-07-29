@@ -59,7 +59,7 @@ class api_JobHLSaveService extends api_Abstract implements JobAddServiceIf
         }
         //检查职位名是否存在
         $jobInfo = $this->jobModel->selectOne(['uid' => $uId, 'name' => $name]);
-        if ($jobInfo && $jobInfo['uid'] !== $uId) {
+        if ($jobInfo && $jobInfo['uid'] !== $uId && $jobId <= 0) {
             $result->code = 200;
             $result->success = true;
             $result->message = $jobInfo['id'];
