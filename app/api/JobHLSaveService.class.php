@@ -145,6 +145,7 @@ class api_JobHLSaveService extends api_Abstract implements JobAddServiceIf
             } else {
                 $data['job1_son'] = $row1['keyid'];
                 $data['job1'] = $row2['keyid'];
+                $data['job_post'] = intval($data['job_post']);
             }
         }
 
