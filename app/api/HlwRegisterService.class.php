@@ -126,6 +126,7 @@ class api_HlwRegisterService extends api_Abstract implements \com\hlw\huiliewang
                         'linktel'=>$tel
                     ];
                     $company->insert($arr_com);
+                    $customer->update(['customer_id'=>$customer_id],['customer_owner_id'=>intval($data['role_id']),'owner_role_id'=>intval($data['role_id']),'creator_role_id'=>intval($data['role_id']),'update_time'=>time(),'is_locked'=>1]);
                 }else{
                     $arr_com = [
                         'tb_customer_id'=>$customer_id,
