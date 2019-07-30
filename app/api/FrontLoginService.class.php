@@ -298,7 +298,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                                 $this->model_companycert->update(['uid'=>$post_data['uid'],'type'=>3],$cert_data);
                             }
                         }else{
-                            $this->model_companycert->add($cert_data);
+                            $this->model_companycert->insert($cert_data);
                         }
                         /*********2019-07-15-写入phpyun的company_cert表**/
                         $Result->code=200;
