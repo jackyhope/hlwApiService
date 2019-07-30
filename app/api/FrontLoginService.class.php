@@ -55,7 +55,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
         $Result = new FrontResultDTO();
         $Result->code=200;
         $Result->success=true;
-        //我要手机号，密码，type
+        //我要手机号，密码，ypet
         $post_data = $frontDo->post_data;
         $l_type = isset($post_data['l_type']) ? hlw_lib_BaseUtils::getStr($post_data['l_type'],'int',0) : 0;
         $username = isset($post_data['mobile']) ? hlw_lib_BaseUtils::getStr($post_data['mobile'],'string','') : '';//手机号
