@@ -41,7 +41,7 @@ class api_HlwRegisterService extends api_Abstract implements \com\hlw\huiliewang
             $resultDo->message = '手机号可以使用';
         }else{
             $resultDo->success = true;
-            $resultDo->code = 200;
+            $resultDo->code = 500;
             $resultDo->message = '手机号已存在';
         }
         return $resultDo;
