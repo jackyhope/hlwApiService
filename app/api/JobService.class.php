@@ -222,6 +222,7 @@ class api_JobService extends api_Abstract implements JobServiceIf
                     'minsalary' => ($business_minsalary * $business_ejob_salary_month) / 10000,
                     'maxsalary' => ($business_maxsalary * $business_ejob_salary_month) / 10000,
                     'requirement' => $business_description,
+                    'huilie_job_id' => $business_job_id,
                     'minexp' => $exp_arr[0],
                     'maxexp' => $exp_arr[1] > 0 ? $exp_arr[1] : 40,
                     'minage' => $age[0],
