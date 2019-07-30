@@ -631,19 +631,27 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
             $Result->message='uid不能为空！';//代表某个企业，也表示已登录状态
             return $Result;
         }
+        if(!in_array($post_data['c_type'],[1,4,8,99])){
+            $Result->message='访问类型不能为空！';
+            return $Result;
+        }
         $fine_where = [];
         //查简历，传了职位id
         if($job_id>0 && !in_array($job_type,[0,1])){
-            //查询可带  是否勾选未查看
-            if($is_look!=99 && in_array($is_look,[0,1,2,3,4,5,6,7,8,9,10,11])){
-                //表示 huilie_status 不为默认值，而且在可控范围内
-                $fine_where = ['huilie_status'=>$is_look];
+            if($post_data['c_type']==1){
+                //查询可带  是否勾选未查看
+                if($is_look!=99 && in_array($is_look,[0,1,2,3,4,5,6,7,8,9,10,11])){
+                    //表示 huilie_status 不为默认值，而且在可控范围内
+                    $fine_where = ['huilie_status='.$is_look];
+                }else{
+                    $fine_where = ['huilie_status in(1,2)'];
+                }
             }
             //有职位id，直接查business_id
             $bid = $this->model_business->selectOne(['huilie_job_id'=>$job_id],'business_id,joiner,joiner_name');
             if(count($bid)>=1){
                 //中点： 得到筛选条件 $fine_where;
-                $fine_where['project_id']=$bid['business_id'];
+                array_push($fine_where,'project_id='.$bid['business_id']);
             }else{
                 $Result->message='OA系统没有找到该职位(项目)';
                 return $Result;
@@ -675,9 +683,11 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                             $bid_arr = array_column($bid_arr,null,'business_id');//取business_id为键名
                             $business_id_arr = array_column($bid_arr,'business_id');//取值
                             $business_id_arr = implode(',',$business_id_arr);
-                            if($is_look!=99 && in_array($is_look,[0,1,2,3,4,5,6,7,8,9,10,11])){
-                                //表示 huilie_status 不为默认值，而且在可控范围内
-                                $fine_where = ['huilie_status = '.$is_look];
+                            if($post_data['c_type']==1){
+                                if($is_look!=99 && in_array($is_look,[0,1,2,3,4,5,6,7,8,9,10,11])){
+                                    //表示 huilie_status 不为默认值，而且在可控范围内
+                                    $fine_where = ['huilie_status = '.$is_look];
+                                }
                             }
                             $fine_where[]='project_id in('.$business_id_arr.')';
                         }
@@ -685,7 +695,9 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                 }
             }
         }
-
+        /*$Result->message='qeqweqweqw！';
+        $Result->data = $fine_where;
+        return $Result;*/
         //求简历
         if(count($fine_where)==0){
             $Result->message='OA系统没有找到该职位(项 目)';
@@ -714,7 +726,9 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                         unset($re_arr2[$rk]);//注销掉 简历库 没有数据的那些
                     }
                 }
-                $Result->message = '获取简历成功'.$resume_condition;
+                sort($re_arr2);
+                $Result->code = 200;
+                $Result->message = '获取简历成功';
                 $Result->data = $one_data;
                 $Result->datas = $re_arr2;
             }else{
@@ -870,12 +884,11 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
      * @return string 返回32位的加密串
      */
     private function return_encript($code,$salt){
-        return md5(md5($code).$salt);
-//        if(!empty($code) && !empty($salt)){
-//            return md5(md5($code).$salt);//密码加密
-//        }else{
-//            return '';
-//        }
+        if(!empty($code) && !empty($salt)){
+            return md5(md5($code).$salt);//密码加密
+        }else{
+            return '';
+        }
     }
 
     /**
