@@ -786,4 +786,49 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $resultDo->message = json_encode($data);
         return $resultDo;
     }
+
+    /**
+     * @desc  备注信息
+     * @param ResumeRequestDTO $resumeRequestDo
+     * @return ResultDO
+     */
+    public function note(\com\hlw\huilie\dataobject\resume\ResumeRequestDTO $resumeRequestDo) {
+        $resumeId = hlw_lib_BaseUtils::getStr($resumeRequestDo->resume_id, 'int');
+        $projectId = hlw_lib_BaseUtils::getStr($resumeRequestDo->project_id, 'int');
+        $fineInfo = $this->fineProjectInfo($resumeId, $projectId);
+        $resultDo = new ResultDO();
+        $resultDo->success = true;
+        $resultDo->code = 500;
+        if (!$fineInfo) {
+            $resultDo->message = '项目简历不存在';
+            return $resultDo;
+        }
+        $fineId = $fineInfo['id'];
+        $status = $fineInfo['huilie_status'];
+        //拒绝面试
+        $resultDo->code = 200;
+        if (7 == $status) {
+            $bhs = new model_pinping_fineprojectbhs();
+            $info = $bhs->selectOne(['fine_id' => $fineId], '', '', 'order by id desc');
+            $resultDo->message = json_encode($info);
+            return $resultDo;
+        }
+        //邀约面试
+        if (5 == $status) {
+            $interview = new model_pinping_fineprojectinterview();
+            $info = $interview->selectOne(['fine_id' => $fineId, 'is_from_hr' => 1], '', '', 'order by id desc');
+            $resultDo->message = json_encode($info);
+            return $resultDo;
+        }
+        //确认面试
+        if (6 == $status) {
+            $interview = new model_pinping_fineprojectinterview();
+            $info = $interview->selectOne(['fine_id' => $fineId, 'is_from_hr' => 0], '', '', 'order by id desc');
+            $resultDo->message = json_encode($info);
+            return $resultDo;
+        }
+        $resultDo->code = 500;
+        $resultDo->message = '没找到对应状态';
+        return $resultDo;
+    }
 }
