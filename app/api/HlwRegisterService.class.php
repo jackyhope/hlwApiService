@@ -90,13 +90,8 @@ class api_HlwRegisterService extends api_Abstract implements \com\hlw\huiliewang
             $arr['moblie'] = $tel;
             $arr['usertype'] = 2;
             $arr['passtext'] = $invite;
-
-            $flag = $member->selectOne(['moblie'=>$tel]);
-            if(empty($flag)){
-                $status = $member->insert($arr);
-                $member_id = $member->lastInsertId();
-            }else
-                $status = false;
+            $status = $member->insert($arr);
+            $member_id = $member->lastInsertId();
 
             if($status){
                 $customer = new model_pinping_customer();
@@ -155,15 +150,9 @@ class api_HlwRegisterService extends api_Abstract implements \com\hlw\huiliewang
                 $resultDo->data = [0=>['uid'=>$member_id]];
                 $resultDo->message = '注册成功！';
             }else{
-                if($flag){
-                    $resultDo->success = true;
-                    $resultDo->code = 200;
-                    $resultDo->message = '注册成功！';
-                }else{
                     $resultDo->success = false;
                     $resultDo->code = 500;
                     $resultDo->message = '注册失败！';
-                }
             }
         }
         return $resultDo;
