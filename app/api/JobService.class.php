@@ -13,6 +13,10 @@ class api_JobService extends api_Abstract implements JobServiceIf
         1 => '8'
     ];
 
+    public function __construct() {
+        $this->oaUser = OA_ROLE;
+    }
+
     public function saveJob(JobRequestDTO $saveJobDo) {
         $resultDo = new ResultDO();
 
@@ -124,7 +128,7 @@ class api_JobService extends api_Abstract implements JobServiceIf
             $businessInfo = $model_business->selectOne(['huilie_job_id' => $business_job_id, 'is_deleted' => 0], 'business_id,huilie_job_id');
             if ($businessInfo) {
                 $business_mode = 'update';
-            }else{
+            } else {
                 $business_mode = 'add';
             }
 
@@ -140,8 +144,8 @@ class api_JobService extends api_Abstract implements JobServiceIf
                     'maxexp' => $exp_arr[1] > 0 ? $exp_arr[1] : 40,
                     'minage' => $age[0],
                     'maxage' => $age[1] > 0 ? $age[1] : 65,
-                    'education' => $edu,
-                    'industry' => $hy,
+                    'education' => $edu > 0 ? $edu : 0,
+                    'industry' => $hy ? $hy : 0,
                     'startdate' => $business_sdate,
                     'prefixion' => 'M_',
                     'customer_id' => $customer_info['customer_id'],
@@ -195,30 +199,18 @@ class api_JobService extends api_Abstract implements JobServiceIf
                     'minage' => $age[0],
                     'maxage' => $age[1] > 0 ? $age[1] : 65,
                     'education' => $edu,
-                    'industry' => $hy,
+                    'industry' => $hy ? $hy : 0,
                     'startdate' => $business_sdate,
                     'prefixion' => 'M_',
                     'customer_id' => $customer_info['customer_id'],
-                    'total_amount' => 0,
-                    'total_subtotal_val' => 0,
-                    'final_discount_rate' => 0,
-                    'final_price' => 0,
                     'update_time' => time(),
-                    'status_id' => 1,
-                    'nextstep_time' => 0,
-                    'is_deleted' => 0,
-                    'delete_role_id' => 0,
-                    'delete_time' => 0,
                     'contacts_id' => $customer_info['contacts_id'],
                     'possibility' => '80%',
-                    'status_type_id' => 1,
-                    'grade' => '5',
-                    'isshare' => '',
-                    'pro_type' => '4'
+                    'pro_type' => $proType
                 ];
                 $model_business->update(['huilie_job_id' => $business_job_id], $business_upd);
                 $business_info = $model_business->selectOne(['huilie_job_id' => $business_job_id], 'business_id');
-                $business_id = $business_info['$business_id'];
+                $business_id = $business_info['business_id'];
 
                 $business_data_upd = [
                     'description' => '汇报对象:' . $business_detail_report . ';下属人数:' . $business_detail_subordinate . ';招聘人数:' . $business_number . ';到岗时间:' . $report,
@@ -232,7 +224,7 @@ class api_JobService extends api_Abstract implements JobServiceIf
 
             $resultDo->success = TRUE;
             $resultDo->code = 200;
-            $resultDo->message = json_encode($business_edate);
+            $resultDo->message = json_encode($model_business);
             return $resultDo;
         } catch (Exception $ex) {
             $resultDo->success = TRUE;

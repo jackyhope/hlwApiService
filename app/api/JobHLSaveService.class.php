@@ -29,28 +29,28 @@ class api_JobHLSaveService extends api_Abstract implements JobAddServiceIf
         $name = hlw_lib_BaseUtils::getStr($addRequestDo->name);
         $minsalary = hlw_lib_BaseUtils::getStr($addRequestDo->minsalary);
         $maxsalary = hlw_lib_BaseUtils::getStr($addRequestDo->maxsalary);
-        $salaryMonth = hlw_lib_BaseUtils::getStr($addRequestDo->ejob_salary_month, 'int');
+        $salaryMonth = hlw_lib_BaseUtils::getStr($addRequestDo->ejob_salary_month, 'int', 0);
         $description = hlw_lib_BaseUtils::getStr($addRequestDo->description);
         $detailReport = hlw_lib_BaseUtils::getStr($addRequestDo->detail_report);
-        $provinceid = hlw_lib_BaseUtils::getStr($addRequestDo->provinceid, 'int');
-        $cityid = hlw_lib_BaseUtils::getStr($addRequestDo->cityid, 'int');
-        $three_cityid = hlw_lib_BaseUtils::getStr($addRequestDo->three_cityid, 'int');
-        $subordinate = hlw_lib_BaseUtils::getStr($addRequestDo->detail_subordinate, 'int');
+        $provinceid = hlw_lib_BaseUtils::getStr($addRequestDo->provinceid, 'int', 0);
+        $cityid = hlw_lib_BaseUtils::getStr($addRequestDo->cityid, 'int', 0);
+        $three_cityid = hlw_lib_BaseUtils::getStr($addRequestDo->three_cityid, 'int', 0);
+        $subordinate = hlw_lib_BaseUtils::getStr($addRequestDo->detail_subordinate, 'int', 0);
         $hy = hlw_lib_BaseUtils::getStr($addRequestDo->hy, 'int');
-        $number = hlw_lib_BaseUtils::getStr($addRequestDo->number, 'int');
-        $exp = hlw_lib_BaseUtils::getStr($addRequestDo->exp, 'int');
-        $report = hlw_lib_BaseUtils::getStr($addRequestDo->report, 'int');
-        $age = hlw_lib_BaseUtils::getStr($addRequestDo->age, 'int');
-        $sex = hlw_lib_BaseUtils::getStr($addRequestDo->sex, 'int');
-        $edu = hlw_lib_BaseUtils::getStr($addRequestDo->edu, 'int');
-        $marriage = hlw_lib_BaseUtils::getStr($addRequestDo->marriage, 'int');
-        $tblink = hlw_lib_BaseUtils::getStr($addRequestDo->tblink, 'int');
+        $number = hlw_lib_BaseUtils::getStr($addRequestDo->number, 'int', 0);
+        $exp = hlw_lib_BaseUtils::getStr($addRequestDo->exp, 'int', 0);
+        $report = hlw_lib_BaseUtils::getStr($addRequestDo->report, 'int', 0);
+        $age = hlw_lib_BaseUtils::getStr($addRequestDo->age, 'int', 0);
+        $sex = hlw_lib_BaseUtils::getStr($addRequestDo->sex, 'int', 0);
+        $edu = hlw_lib_BaseUtils::getStr($addRequestDo->edu, 'int', 0);
+        $marriage = hlw_lib_BaseUtils::getStr($addRequestDo->marriage, 'int', 0);
+        $tblink = hlw_lib_BaseUtils::getStr($addRequestDo->tblink, 'int', 0);
         $lang = hlw_lib_BaseUtils::getStr($addRequestDo->lang);
         $welfare = hlw_lib_BaseUtils::getStr($addRequestDo->welfare);
         $jobPost = hlw_lib_BaseUtils::getStr($addRequestDo->job_post);
-        $jobId = hlw_lib_BaseUtils::getStr($addRequestDo->jobId, 'int');
-        $edate = hlw_lib_BaseUtils::getStr($addRequestDo->edate, 'int');
-        $service_type = hlw_lib_BaseUtils::getStr($addRequestDo->service_type, 'int');
+        $jobId = hlw_lib_BaseUtils::getStr($addRequestDo->jobId, 'int', 0);
+        $edate = hlw_lib_BaseUtils::getStr($addRequestDo->edate, 'int', 0);
+        $service_type = hlw_lib_BaseUtils::getStr($addRequestDo->service_type, 'int', 0);
 
         $name = $this->characet($name, 'utf-8');
         $description = $this->characet($description, 'utf-8');
@@ -71,7 +71,7 @@ class api_JobHLSaveService extends api_Abstract implements JobAddServiceIf
         !$salaryMonth && $message = '薪资发放月数错误';
         !$jobPost && $message = '职位类别错误';
         !$name && $message = '职位名称必填';
-        if($message){
+        if ($message) {
             $result->message = $message;
             return $result;
         }
@@ -119,9 +119,9 @@ class api_JobHLSaveService extends api_Abstract implements JobAddServiceIf
             'number' => $number,
             'hy' => $hy,
             'detail_subordinate' => $subordinate,
-            'provinceid' => $provinceid,
-            'cityid' => $cityid,
-            'three_cityid' => $three_cityid,
+            'provinceid' => $provinceid > 0 ? $provinceid : 0,
+            'cityid' => $cityid > 0 ? $cityid : 0,
+            'three_cityid' => $three_cityid > 0 ? $three_cityid : 0,
             'detail_report' => $detailReport,
             'description' => $description,
             'ejob_salary_month' => $salaryMonth,
