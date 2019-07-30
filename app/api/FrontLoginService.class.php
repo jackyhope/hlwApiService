@@ -870,11 +870,12 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
      * @return string 返回32位的加密串
      */
     private function return_encript($code,$salt){
-        if(!empty($code) && !empty($salt)){
-            return md5(md5($code).$salt);//密码加密
-        }else{
-            return '';
-        }
+        return md5(md5($code).$salt);
+//        if(!empty($code) && !empty($salt)){
+//            return md5(md5($code).$salt);//密码加密
+//        }else{
+//            return '';
+//        }
     }
 
     /**
