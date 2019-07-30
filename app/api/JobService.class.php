@@ -101,6 +101,7 @@ class api_JobService extends api_Abstract implements JobServiceIf
             $business_hy = $saveJobDo->hy ? hlw_lib_BaseUtils::getStr($saveJobDo->hy) : '';
             $business_sdate = $saveJobDo->sdate ? hlw_lib_BaseUtils::getStr($saveJobDo->sdate) : '';
             $service_type = $saveJobDo->service_type ? hlw_lib_BaseUtils::getStr($saveJobDo->service_type) : '0';
+            $customerId = $saveJobDo->customer_id ? hlw_lib_BaseUtils::getStr($saveJobDo->customer_id) : '0';
             $proType = isset($this->proTypeMap[$service_type]) ? $this->proTypeMap[$service_type] : 4;
 
 
@@ -117,7 +118,8 @@ class api_JobService extends api_Abstract implements JobServiceIf
             $model_rbusinesscontacts = new model_pinping_rbusinesscontacts();
 
             //查询公司相关信息
-            $customer_info = $model_customer->selectOne(['name' => $customer_name], 'customer_id,contacts_id');
+            $customer_info = $model_customer->selectOne(['customer_id' => $customerId], 'customer_id,contacts_id');
+            !$customer_info && $customer_info = $model_customer->selectOne(['name' => $customer_name], 'customer_id,contacts_id');
             //判断是否已经同步
             $businessInfo = $model_business->selectOne(['huilie_job_id' => $business_job_id, 'is_deleted' => 0], 'business_id,huilie_job_id');
             if ($businessInfo) {

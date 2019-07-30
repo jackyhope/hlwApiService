@@ -52,6 +52,11 @@ class api_JobHLSaveService extends api_Abstract implements JobAddServiceIf
         $edate = hlw_lib_BaseUtils::getStr($addRequestDo->edate, 'int');
         $service_type = hlw_lib_BaseUtils::getStr($addRequestDo->service_type, 'int');
 
+        $name = $this->characet($name, 'utf-8');
+        $description = $this->characet($description, 'utf-8');
+        $detailReport = $this->characet($detailReport, 'utf-8');
+
+
         $result->code = 500;
         $result->success = false;
         $result->message = '';
@@ -90,9 +95,6 @@ class api_JobHLSaveService extends api_Abstract implements JobAddServiceIf
         //企业信息
         $companyInfo = $this->company->selectOne(['uid' => $uId]);
         //数据
-        $name = $this->characet($name, 'utf-8');
-        $description = $this->characet($description, 'utf-8');
-        $detailReport = $this->characet($detailReport, 'utf-8');
 
         $data = [
             'name' => $name,
