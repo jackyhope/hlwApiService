@@ -106,6 +106,7 @@ class api_JobService extends api_Abstract implements JobServiceIf
             $business_sdate = $saveJobDo->sdate ? hlw_lib_BaseUtils::getStr($saveJobDo->sdate) : '';
             $service_type = $saveJobDo->service_type ? hlw_lib_BaseUtils::getStr($saveJobDo->service_type) : '0';
             $customerId = $saveJobDo->customer_id ? hlw_lib_BaseUtils::getStr($saveJobDo->customer_id) : '0';
+            $location = $saveJobDo->location ? hlw_lib_BaseUtils::getStr($saveJobDo->location) : '0';
             $proType = isset($this->proTypeMap[$service_type]) ? $this->proTypeMap[$service_type] : 4;
 
 
@@ -115,6 +116,7 @@ class api_JobService extends api_Abstract implements JobServiceIf
             $age = hlw_conf_constant::$huilie_to_oa_age[$business_age];
             $sex = hlw_conf_constant::$huilie_to_oa_sex[$business_sex];
             $hy = hlw_conf_constant::$huilie_to_oa_hy[$business_hy];
+            $address = hlw_conf_constant::$huilie_to_oa_city[$location];
 
             $model_business = new model_pinping_business();
             $model_business_data = new model_pinping_businessdata();
@@ -167,6 +169,7 @@ class api_JobService extends api_Abstract implements JobServiceIf
                     'status_type_id' => 1,
                     'grade' => '5',
                     'isshare' => '',
+                    'address' =>$address,
                     'pro_type' => $proType
                 ];
                 $model_business->insert($business_ins);
@@ -206,7 +209,8 @@ class api_JobService extends api_Abstract implements JobServiceIf
                     'update_time' => time(),
                     'contacts_id' => $customer_info['contacts_id'],
                     'possibility' => '80%',
-                    'pro_type' => $proType
+                    'pro_type' => $proType,
+                    'address' =>$address,
                 ];
                 $model_business->update(['huilie_job_id' => $business_job_id], $business_upd);
                 $business_info = $model_business->selectOne(['huilie_job_id' => $business_job_id], 'business_id');
