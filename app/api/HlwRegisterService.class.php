@@ -156,7 +156,7 @@ class api_HlwRegisterService extends api_Abstract implements \com\hlw\huiliewang
                 $resultDo->message = '注册成功！';
             }else{
                 if($flag){
-                    $resultDo->success = false;
+                    $resultDo->success = true;
                     $resultDo->code = 200;
                     $resultDo->message = '注册成功！';
                 }else{
