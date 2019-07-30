@@ -82,8 +82,13 @@ class api_AdminManagerService extends api_Abstract implements com\hlw\huiliewang
         // TODO: Implement modifyphone() method.
         $resultDO = new ResultDO();
         $member = new model_huiliewang_member();
+        $customer = new model_pinping_customer();
+        $customerr = $member->selectOne(['uid'=>$uid],'tb_customer_id');
         $res = $member->update(['uid'=>$uid],['moblie'=>$phone]);
         if($res){
+            $flag = $customer->update(['customer_id'=>intval($customerr['tb_customer_id'])],['telephone'=>$phone]);
+        }
+        if($flag){
             $resultDO->code = 200;
             $resultDO->success = true;
             $resultDO->message = '修改成功！';
