@@ -24,6 +24,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
     protected $model_fineproject;
     protected $model_resume;
     protected $model_fineprojectpresent;
+    protected $model_cuser;
 
     /**
      * api_FrontLoginService constructor.
@@ -44,6 +45,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
         $this->model_fineproject = new model_pinping_fineproject();
         $this->model_resume = new model_pinping_resume();
         $this->model_fineprojectpresent = new model_pinping_fineprojectpresent();
+        $this->model_cuser = new model_pinping_cuser();
     }
 
     /*
@@ -55,7 +57,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
         $Result = new FrontResultDTO();
         $Result->code=200;
         $Result->success=true;
-        //我要手机号，密码，ypet
+        //我要手机号，密码，type
         $post_data = $frontDo->post_data;
         $l_type = isset($post_data['l_type']) ? hlw_lib_BaseUtils::getStr($post_data['l_type'],'int',0) : 0;
         $username = isset($post_data['mobile']) ? hlw_lib_BaseUtils::getStr($post_data['mobile'],'string','') : '';//手机号
@@ -652,6 +654,13 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
             if(count($bid)>=1){
                 //中点： 得到筛选条件 $fine_where;
                 array_push($fine_where,'project_id='.$bid['business_id']);
+                //新增条件 判断是否能直接获取到职位类型
+                $z_ak = $this->model_companyjob->selectOne(['id'=>$job_id],'id,service_type');//传了职位查的
+                if(count($z_ak)>0){
+                    $z_ak[0]['project_id'] = $bid['business_id'];
+                    $z_ak = array_column($z_ak,null,'project_id');
+
+                }
             }else{
                 $Result->message='OA系统没有找到该职位(项目)';
                 return $Result;
@@ -675,12 +684,22 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                 if(count($job_id_arr)>0){
                     $job_id_arr = implode(',',$job_id_arr);
                     //有多个职位id，直接查business_id
-                    $bid_arr = $this->model_business->select(['huilie_job_id in('.$job_id_arr.')'],'business_id,joiner,joiner_name');
+                    $bid_arr = $this->model_business->select(['huilie_job_id in('.$job_id_arr.')'],'huilie_job_id,business_id,joiner,joiner_name');
+                    //情况二：多个job 新增条件 判断是否能直接获取到职位类型
+                    $z_ak = $this->model_companyjob->query('select id,service_type from phpyun_company_job where id in('.$job_id_arr.')');//传了职位查的
+
                     if(gettype($bid_arr)=='object'){
                         $bid_arr = json_decode(json_encode($bid_arr),true);
                         $bid_arr = $bid_arr['items'];
                         if(count($bid_arr)>0){
                             $bid_arr = array_column($bid_arr,null,'business_id');//取business_id为键名
+                            $new_bid_arr = array_column($bid_arr,null,'huilie_job_id');//取 huilie_job_id 为键名
+                            if(count($z_ak)>0){
+                                foreach($z_ak as $zk=>$zv){
+                                    $z_ak[$zk]['project_id'] = $new_bid_arr[$zv['id']]['business_id'];
+                                }
+                                $z_ak = array_column($z_ak,null,'project_id');
+                            }
                             $business_id_arr = array_column($bid_arr,'business_id');//取值
                             $business_id_arr = implode(',',$business_id_arr);
                             if($post_data['c_type']==1){
@@ -695,8 +714,9 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                 }
             }
         }
-        /*$Result->message='qeqweqweqw！';
+        /*$Result->message='检测 z_ak ';
         $Result->data = $fine_where;
+        $Result->datas = $z_ak;
         return $Result;*/
         //求简历
         if(count($fine_where)==0){
@@ -706,12 +726,18 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
         $this->model_fineproject->setCount(true);
         $this->model_fineproject->setPage($page);//当前第几页
         $this->model_fineproject->setLimit($pageSize);//每页几个
-        $f_data = $this->model_fineproject->select($fine_where,'huilie_status,`tjaddtime`,resume_id');
+        $f_data = $this->model_fineproject->select($fine_where,'huilie_status,`tjaddtime`,resume_id,project_id,tj_role_id,tjaddtime');
         if(gettype($f_data)=='object'){
             $f_data = json_decode(json_encode($f_data),true);
             $one_data = $f_data;unset($one_data['items']);
             $re_arr2 = $f_data['items']; unset($f_data);
             if(count($re_arr2)>0){
+                $cha_man = array_column($re_arr2,'tj_role_id');
+                $cha_man = implode(',',$cha_man);
+                $tui_man = $this->model_cuser->query('select `role_id`, `full_name` from mx_user where role_id in('.$cha_man.')');
+                if(count($tui_man)>0){
+                    $tui_man = array_column($tui_man,null,'role_id');
+                }
                 $re_arr2 = array_column($re_arr2,null,'resume_id');//07-19不考虑 resueme_id是否重复，留注释后期调bug
                 $resume_condition = array_column($re_arr2,'resume_id');
                 $resume_condition = implode(',',$resume_condition);
@@ -719,9 +745,11 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                 $cur_resume = json_decode(json_encode($cur_resume),true);
                 $cur_resume = array_column($cur_resume['items'],null,'eid');
                 foreach ($re_arr2 as $rk=>$rv){
-                    unset($rv['resume_id']);
+                    $rv['tj_namer'] = $tui_man[$rv['tj_role_id']]['full_name'];
+                    $rv['service_type'] = $z_ak[$rv['project_id']]['service_type'];
                     if(count($cur_resume[$rk])>0){
                         $re_arr2[$rk] = array_merge($rv,$cur_resume[$rk]);
+                        $re_arr2[$rk]['work_year'] = date('Y')-$cur_resume[$rk]['startWorkyear'];
                     }else{
                         unset($re_arr2[$rk]);//注销掉 简历库 没有数据的那些
                     }
