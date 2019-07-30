@@ -83,6 +83,30 @@ class api_JobService extends api_Abstract implements JobServiceIf
             return $resultDo;
         }
 
+        $jobClass = hlw_lib_BaseUtils::getStr($saveJobDo->job_class);
+        //职能
+        $jobclassId = '';
+        if ($jobClass) {
+            $jobClassModel = new model_pinping_jobclass();
+            $jobs = explode(',', $jobClass);
+            $listName = $jobClassModel->select();
+            $listName = $listName->items;
+            $jobNames = [];
+            foreach ($listName as $info) {
+                $jobNames[$info['job_id']] = $info['name'];
+            }
+            $oaJobClass = '';
+            foreach ($jobs as $jobName) {
+                foreach ($jobNames as $jobclassId => $jobInfo) {
+                    similar_text($jobName, $jobInfo, $percent);
+                    if ($percent > 60) {
+                        $oaJobClass .= $jobclassId . ',';
+                        break;
+                    }
+                }
+            }
+            $jobclassId = trim($oaJobClass,',');
+        }
         try {
             $business_name = hlw_lib_BaseUtils::getStr($saveJobDo->name, 'string');
             $business_edate = hlw_lib_BaseUtils::getStr($saveJobDo->edate, 'string');
@@ -169,8 +193,9 @@ class api_JobService extends api_Abstract implements JobServiceIf
                     'status_type_id' => 1,
                     'grade' => '5',
                     'isshare' => '',
-                    'address' =>$address,
-                    'pro_type' => $proType
+                    'address' => $address,
+                    'pro_type' => $proType,
+                    'jobclass' => $jobclassId,
                 ];
                 $model_business->insert($business_ins);
                 $business_id = $model_business->lastInsertId();
@@ -210,7 +235,8 @@ class api_JobService extends api_Abstract implements JobServiceIf
                     'contacts_id' => $customer_info['contacts_id'],
                     'possibility' => '80%',
                     'pro_type' => $proType,
-                    'address' =>$address,
+                    'address' => $address,
+                    'jobclass' => $jobclassId,
                 ];
                 $model_business->update(['huilie_job_id' => $business_job_id], $business_upd);
                 $business_info = $model_business->selectOne(['huilie_job_id' => $business_job_id], 'business_id');
