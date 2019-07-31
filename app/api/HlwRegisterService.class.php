@@ -90,6 +90,16 @@ class api_HlwRegisterService extends api_Abstract implements \com\hlw\huiliewang
             $arr['moblie'] = $tel;
             $arr['usertype'] = 2;
             $arr['passtext'] = $invite;
+
+            $flag = $member->selectOne(['moblie'=>$tel],'uid');
+            if(!empty($flag)){
+                $resultDo->success = true;
+                $resultDo->code = 200;
+                $resultDo->data = [0=>['uid'=>$flag['uid']]];
+                $resultDo->message = '注册成功！';
+                return $resultDo;
+            }
+
             $status = $member->insert($arr);
             $member_id = $member->lastInsertId();
 
