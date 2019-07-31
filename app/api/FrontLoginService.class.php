@@ -385,7 +385,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
         $allow = [1];//允许的c_type值范围   下面判断用的
         //接收数据--
         $post_data = $changeDo->post_data;
-        if(!isset($post_data['c_type']) || empty($post_data['c_type']) || in_array($post_data['c_type'],$allow)){
+        if(!isset($post_data['c_type']) || empty($post_data['c_type']) || !in_array($post_data['c_type'],$allow)){
             $Result->message='修改类型ctype不能为空';
             return $Result;
         }
@@ -457,6 +457,9 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
         if(!empty($kwd)){
             array_push($where,"name like '%".$kwd."%'");
         }
+        $onTotal = $this->model_companyjob->selectOne(['uid = ' . $uid, 'status =1'],'count(*) as counts');
+        $offTotal = $this->model_companyjob->selectOne(['uid = ' . $uid, 'status =2'],'count(*) as counts');
+
         $this->model_companyjob->setCount(true);
         $this->model_companyjob->setPage($page);//当前第几页
         $this->model_companyjob->setLimit($pageSize);//每页几个
@@ -537,9 +540,9 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                             $list[$kj]['already_arrive']=0;
                         }
                     }
-
-
                 }
+                $j1['totalOn'] = $onTotal['counts'] > 0 ? $onTotal['counts'] : 0;
+                $j1['totalOff'] = $offTotal['counts'] > 0 ? $offTotal['counts'] :0 ;
                 $Result->code=200;
                 $Result->success=true;
                 $Result->message='获取成功';
