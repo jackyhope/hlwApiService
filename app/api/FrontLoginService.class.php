@@ -247,15 +247,19 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
             switch ($post_data['c_type']){
                 case 'save':
                     //添加
+
                     unset($post_data['c_type']);
-                    $add_data = $post_data;
+                    //$add_data = $post_data;
                     //查找mobile，注册的那个手机号,作为企业联系人手机号使用
                     $phone = $this->model_member->selectOne(['uid'=>$post_data['uid']],'moblie');
+
                     $post_data['linktel']=$phone['moblie'];
+
                     //现在是补全添加
                     // 2019-07-13-待完成
                     try{
                         $is_has_company = $this->model_company->selectOne(['uid'=>$post_data['uid']],'uid,lastupdate');
+
                         if(count($is_has_company)>0){
                             //有这个uid对应的一条数据了，直接更新吧  ||  做个判断，时间不能小于1分钟，不然判定为重复写入
                             if(($is_has_company['lastupdate']+60)>$post_data['lastupdate']){
@@ -266,9 +270,27 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                                 return $Result;
                             }else{
                                 //允许更新status
-                                $company_data = $post_data;
-                                unset($company_data['status']);
-                                unset($company_data['wt_yy_photo']);
+
+                                $company_data =[
+                                    'name'=>hlw_lib_BaseUtils::getStr($post_data['name'],'string','未命名') ,//企业名称
+                                    'provinceid'=>hlw_lib_BaseUtils::getStr($post_data['provinceid'],'int',0),//省
+                                    'cityid'=>hlw_lib_BaseUtils::getStr($post_data['cityid'],'int',0),//市
+                                    'three_cityid'=>hlw_lib_BaseUtils::getStr($post_data['three_cityid'],'int',0),//区
+                                    'pro_name'=>hlw_lib_BaseUtils::getStr($post_data['provincename'],'string','未命名'),//省会名称
+                                    'cit_name'=>hlw_lib_BaseUtils::getStr($post_data['cityname'],'string','未命名'),//市名称
+                                    'thr_name'=>hlw_lib_BaseUtils::getStr($post_data['three_cityname'],'string','未命名'),//区名称
+                                    'address'=>hlw_lib_BaseUtils::getStr($post_data['address'],'string','未命名'),//详细地址
+                                    'hy'=>hlw_lib_BaseUtils::getStr($post_data['hy'],'int',0),//行业
+                                    'hyname'=>hlw_lib_BaseUtils::getStr($post_data['hyname'],'string','未命名'),//行业名称
+                                    'linkman'=>hlw_lib_BaseUtils::getStr($post_data['linkman'],'string','未命名'),//联系人
+                                    'lastupdate'=>time(),//更新时间
+                                    'linktel'=>$post_data['linktel'],//联系电话，获取的
+                                    'wt_yy_photo'=>hlw_lib_BaseUtils::getStr($post_data['wt_yy_photo'],'string','未命名'),//营业执照
+                                ];
+                                /*$Result->code=666;
+                                $Result->message='看到这里了不';
+                                $Result->data=$company_data;
+                                return $Result;*/
                                 $this->model_company->update(['uid'=>$post_data['uid']],$company_data);//更新到公司表
                                 //status状态，username 登录名--同步更
                                 $member_data = [
@@ -543,6 +565,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                 }
                 $j1['totalOn'] = $onTotal['counts'] > 0 ? $onTotal['counts'] : 0;
                 $j1['totalOff'] = $offTotal['counts'] > 0 ? $offTotal['counts'] :0 ;
+                $j1['cur_all_total'] = count($list);
                 $Result->code=200;
                 $Result->success=true;
                 $Result->message='获取成功';
@@ -655,6 +678,16 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                     $fine_where = ['huilie_status in(1,2)'];
                 }
             }
+            if($post_data['c_type']==8){
+                //查询可带  是否勾选未查看
+                if($is_look!=99 && in_array($is_look,[0,1,2,3,4,5,6,7,8,9,10,11])){
+                    //表示 huilie_status 不为默认值，而且在可控范围内
+                    $fine_where = ['huilie_status='.$is_look];
+                }else{
+                    $fine_where = ['huilie_status in(5,6,7)'];
+                }
+            }
+
             //有职位id，直接查business_id
             $bid = $this->model_business->selectOne(['huilie_job_id'=>$job_id],'business_id,joiner,joiner_name');
             if(count($bid)>=1){
@@ -672,6 +705,9 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                 return $Result;
             }
         }
+        /*$Result->message='看$fine_where';
+        $Result->data=$fine_where;
+        return $Result;*/
         //没传职位id，传了类型
         //07-20 service_type 值决定职位类型   uid决定是哪个公司 卡限制 $job_type类型只能是 0 或者 1       0表示慧沟通     1表示慧简历
         if($job_id<=0){
@@ -708,21 +744,35 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                             }
                             $business_id_arr = array_column($bid_arr,'business_id');//取值
                             $business_id_arr = implode(',',$business_id_arr);
+
                             if($post_data['c_type']==1){
+                                //查询可带  是否勾选未查看
                                 if($is_look!=99 && in_array($is_look,[0,1,2,3,4,5,6,7,8,9,10,11])){
                                     //表示 huilie_status 不为默认值，而且在可控范围内
-                                    $fine_where = ['huilie_status = '.$is_look];
+                                    $fine_where = ['huilie_status='.$is_look];
+                                }else{
+                                    $fine_where = ['huilie_status in(1,2)'];
                                 }
                             }
-                            $fine_where[]='project_id in('.$business_id_arr.')';
+                            if($post_data['c_type']==8){
+                                //查询可带  是否勾选未查看
+                                if($is_look!=99 && in_array($is_look,[0,1,2,3,4,5,6,7,8,9,10,11])){
+                                    //表示 huilie_status 不为默认值，而且在可控范围内
+                                    $fine_where = ['huilie_status='.$is_look];
+                                }else{
+                                    $fine_where = ['huilie_status in(5,6,7)'];
+                                }
+                            }
+
+                            array_push($fine_where,'project_id in('.$business_id_arr.')');
                         }
                     }
                 }
             }
         }
-        /*$Result->message='检测 z_ak ';
+        /*$Result->message='检测 $fine_where ';
         $Result->data = $fine_where;
-        $Result->datas = $z_ak;
+        //$Result->datas = $z_ak;
         return $Result;*/
         //求简历
         if(count($fine_where)==0){
@@ -732,7 +782,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
         $this->model_fineproject->setCount(true);
         $this->model_fineproject->setPage($page);//当前第几页
         $this->model_fineproject->setLimit($pageSize);//每页几个
-        $f_data = $this->model_fineproject->select($fine_where,'huilie_status,`tjaddtime`,resume_id,project_id,tj_role_id,tjaddtime');
+        $f_data = $this->model_fineproject->select($fine_where,'huilie_status,`tjaddtime`,resume_id,project_id,tj_role_id,tjaddtime,id fine_id');
         if(gettype($f_data)=='object'){
             $f_data = json_decode(json_encode($f_data),true);
             $one_data = $f_data;unset($one_data['items']);
@@ -761,6 +811,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                     }
                 }
                 sort($re_arr2);
+                $one_data['cur_all_total'] = count($re_arr2);
                 $Result->code = 200;
                 $Result->message = '获取简历成功';
                 $Result->data = $one_data;
