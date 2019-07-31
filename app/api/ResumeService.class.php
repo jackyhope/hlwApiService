@@ -776,7 +776,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $data = [
             'project_id' => $projectId,
             'resume_id' => $resumeId,
-            'name' => $resumeInfo['name'] ? $resumeInfo['name'] : '',
+            'name' => $resumeInfo['info']['name'] ? $resumeInfo['info']['name'] : '',
             'pro_type' => $businessInfo['pro_type'],
             'salary' => $businessInfo['maxsalary'],
             'money' => $businessInfo['maxsalary'] > 80 ? 2 : 1,
