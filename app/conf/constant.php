@@ -9,5 +9,5 @@ define('CENV', 'dev');
 if (strpos($_SERVER['SERVER_ADDR'], '192.168') !== FALSE || strpos($_SERVER['SERVER_ADDR'], '127.0') !== FALSE) {
     define('OA_ROLE', 88);
 } else {
-    define('OA_ROLE', 1);
+    define('OA_ROLE', 1271);
 }
