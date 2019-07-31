@@ -131,6 +131,7 @@ class api_JobHLSaveService extends api_Abstract implements JobAddServiceIf
             'edate' => $edate,
             'detail_dept_id' => '',
             'state' => 1,
+            'status' => 1,
             'service_type' => $service_type,
         ];
 

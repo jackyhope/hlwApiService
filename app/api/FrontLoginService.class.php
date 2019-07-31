@@ -433,7 +433,8 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
         $Result->success=false;
         $Result->message='操作失败';
         $post_data = $jobsDo->post_data;
-        $uid = hlw_lib_BaseUtils::getStr($post_data['uid'],'int',0);
+        $uid = hlw_lib_BaseUtils::getStr($post_data['uid'], 'int', 0);
+        $status = hlw_lib_BaseUtils::getStr($post_data['status'], 'int');
 
         //当前页
         if(isset($post_data['page']) && !empty(intval($post_data['page'])) && intval($post_data['page']) > 0){
@@ -450,8 +451,8 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
         if($uid<=0){
             $Result->message='请您先登录！';
         }
-        $where = ['uid = '.$uid];
-        $kwd = hlw_lib_BaseUtils::getStr($post_data['kwd'],'string','');
+        $where = ['uid = ' . $uid, 'status =' . $status];
+        $kwd = hlw_lib_BaseUtils::getStr($post_data['kwd'], 'string', '');
 
         if(!empty($kwd)){
             array_push($where,"name like '%".$kwd."%'");
@@ -460,12 +461,12 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
         $this->model_companyjob->setPage($page);//当前第几页
         $this->model_companyjob->setLimit($pageSize);//每页几个
 
-        $jobber = $this->model_companyjob->select($where,'id,name,minsalary,maxsalary,ejob_salary_month,edate,service_type,status','','order by id asc');
-        if(gettype($jobber)=='object'){
-            $j1 = json_decode(json_encode($jobber),true);
-            if(count($j1['items'])>0){
-                $job_id_arr = array_column($j1['items'],'id');//job id数组
-                $job_ids = implode(',',$job_id_arr);
+        $jobber = $this->model_companyjob->select($where, 'id,name,minsalary,maxsalary,ejob_salary_month,edate,service_type,status,sdate as add_time', '', 'order by id desc');
+        if (gettype($jobber) == 'object') {
+            $j1 = json_decode(json_encode($jobber), true);
+            if (count($j1['items']) > 0) {
+                $job_id_arr = array_column($j1['items'], 'id');//job id数组
+                $job_ids = implode(',', $job_id_arr);
 
                 $guwen = $this->model_business->query("select business_id,huilie_job_id,joiner,joiner_name from mx_business where huilie_job_id in(".$job_ids.")");
                 if(count($guwen)>0){
@@ -503,17 +504,19 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
 
                 $list = $j1['items'];
                 unset($j1['items']);
-                foreach ($list as $kj=>$vj){
-                    $list[$kj]['service_type_name'] = $vj['service_type']==0?'慧沟通':'慧简历';
-                    $list[$kj]['minsalary'] = intval($vj['minsalary']) * intval($vj['ejob_salary_month']);
-                    $list[$kj]['maxsalary'] = intval($vj['maxsalary']) * intval($vj['ejob_salary_month']);
-                    if(count($guwen)>0 && array_key_exists($vj['id'],$guwen)){
-                        $list[$kj]['joiner'] = array_key_exists('joiner',$guwen[$vj['id']])?$guwen[$vj['id']]['joiner']:0;
-                        $list[$kj]['joiner_name'] =array_key_exists('joiner_name',$guwen[$vj['id']])?$guwen[$vj['id']]['joiner_name']:'无';
+                foreach ($list as $kj => $vj) {
+                    $list[$kj]['service_type_name'] = $vj['service_type'] == 0 ? '慧沟通' : '慧简历';
+                    $list[$kj]['minsalary'] = round(intval($vj['minsalary']) * intval($vj['ejob_salary_month']) / 10000, 2);
+                    $list[$kj]['minsalary'] > 0 && $list[$kj]['minsalary'] .= 'w';
+                    $list[$kj]['maxsalary'] = round(intval($vj['maxsalary']) * intval($vj['ejob_salary_month']) / 10000, 2);
+                    $list[$kj]['maxsalary'] > 0 && $list[$kj]['maxsalary'] .= 'w';
+                    if (count($guwen) > 0 && array_key_exists($vj['id'], $guwen)) {
+                        $list[$kj]['joiner'] = array_key_exists('joiner', $guwen[$vj['id']]) ? $guwen[$vj['id']]['joiner'] : 0;
+                        $list[$kj]['joiner_name'] = (array_key_exists('joiner_name', $guwen[$vj['id']]) && $guwen[$vj['id']['joiner_name']]) ? $guwen[$vj['id']]['joiner_name'] : '待接入';
 
                     }else{
                         $list[$kj]['joiner'] = 0;
-                        $list[$kj]['joiner_name'] = '无';
+                        $list[$kj]['joiner_name'] = '待接入';
                     }
 
                     if(count($n2)>0 && array_key_exists($vj['id'],$n2)){
