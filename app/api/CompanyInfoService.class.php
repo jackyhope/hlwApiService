@@ -115,6 +115,8 @@ class api_CompanyInfoService extends api_Abstract implements CompanyInfoServiceI
         $welfare = $this->characet($welfare, 'UTF-8');
         $website = $this->characet($website, 'UTF-8');
         $content =  $this->characet($content, 'UTF-8');
+        $linkman =  $this->characet($linkman, 'UTF-8');
+        $logo =  $this->characet($logo, 'UTF-8');
 
         //公司名是否存在
         if ($name) {
