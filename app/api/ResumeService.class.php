@@ -778,8 +778,8 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             'resume_id' => $resumeId,
             'name' => $resumeInfo['info']['name'] ? $resumeInfo['info']['name'] : '',
             'pro_type' => $businessInfo['pro_type'],
-            'job_name' => $businessInfo['name'],
-            'salary' => $businessInfo['maxsalary'],
+            'job_name' => $businessInfo['name'] ? $businessInfo['name'] : '',
+            'salary' => $businessInfo['maxsalary'] ? $businessInfo['maxsalary'] : '',
             'money' => $businessInfo['maxsalary'] > 80 ? 2 : 1,
             "surplus" => intval($surplus)
         ];
