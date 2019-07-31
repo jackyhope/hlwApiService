@@ -190,6 +190,7 @@ class api_CompanyService extends api_Abstract implements com\hlw\huiliewang\inte
             'isunited' => intval($dataresume['isunited']),
             'hlocation' => $dataresume['hlocation'],
         ];
+        $fineproject->update(['id'=>$pid],['huilie_status'=>1]);
         $has = $resumeexpect->selectOne(['oa_fineid'=>intval($pid)]);
         if($has){
             $resultDO->success = true;
