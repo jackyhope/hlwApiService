@@ -73,7 +73,6 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             'user_name' => $userInfo['full_name'],
             'work_name' => $businessInfo['name'],
             'huilie_status' => $huilieStatus,
-            'pro_type' => $businessInfo['pro_type'],
         ];
         $resultDo->code = 200;
         $resultDo->message = json_encode($list);
@@ -360,7 +359,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             $this->errMsg = "当前状态不能购买操作";
             return false;
         }
-        if (($vale == 10 || $vale == 11) && ($hlStatus != 6 || $hlStatus != 8)) {
+        if (($vale == 10 || $vale == 11) && ($hlStatus != 6 || $hlStatus !=8)) {
             $this->errMsg = "当前状态不能到场操作";
             return false;
         }
