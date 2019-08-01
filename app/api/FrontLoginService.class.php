@@ -304,11 +304,14 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                         }
                         /*********2019-07-15-写入phpyun的company_cert表**/
                         $cert_data = [
+                            'type'=>3,
+                            'uid'=>$post_data['uid'],
                             'check'=>$post_data['wt_yy_photo'],
                             'ctime'=>$post_data['lastupdate'],
                             'step'=>1,
                             'did'=>0,
-                            'check2'=>0
+                            'check2'=>0,
+                            'status'=>0,//每次编辑初始化为0
                         ];
                         $has_company_cert = $this->model_companycert->selectOne(['uid'=>$post_data['uid'],'type'=>3]);
                         if(count($has_company_cert)>0){
@@ -728,7 +731,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                     //有多个职位id，直接查business_id
                     $bid_arr = $this->model_business->select(['huilie_job_id in('.$job_id_arr.')'],'huilie_job_id,business_id,joiner,joiner_name');
                     //情况二：多个job 新增条件 判断是否能直接获取到职位类型
-                    $z_ak = $this->model_companyjob->query('select id,service_type from phpyun_company_job where id in('.$job_id_arr.')');//传了职位查的
+                    $z_ak = $this->model_companyjob->query('select id,service_type,`name` from phpyun_company_job where id in('.$job_id_arr.')');//传了职位查的
 
                     if(gettype($bid_arr)=='object'){
                         $bid_arr = json_decode(json_encode($bid_arr),true);
@@ -763,7 +766,9 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                                     $fine_where = ['huilie_status in(5,6,7)'];
                                 }
                             }
-
+                            if($post_data['c_type']==4){
+                                $fine_where = ['huilie_status = 4'];
+                            }
                             array_push($fine_where,'project_id in('.$business_id_arr.')');
                         }
                     }
@@ -803,6 +808,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                 foreach ($re_arr2 as $rk=>$rv){
                     $rv['tj_namer'] = $tui_man[$rv['tj_role_id']]['full_name'];
                     $rv['service_type'] = $z_ak[$rv['project_id']]['service_type'];
+                    $rv['job_name'] = $z_ak[$rv['project_id']]['name'];
                     if(count($cur_resume[$rk])>0){
                         $re_arr2[$rk] = array_merge($rv,$cur_resume[$rk]);
                         $re_arr2[$rk]['work_year'] = date('Y')-$cur_resume[$rk]['startWorkyear'];

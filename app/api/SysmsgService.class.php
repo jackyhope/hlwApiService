@@ -157,7 +157,8 @@ class api_SysmsgService extends api_Abstract implements SysmsgServiceIf
         $id = $mobileModel->lastInsertId();
         $id && $this->resultDo->success = true;
         $id && $this->resultDo->code = 200;
-        $this->resultDo->message = $id ? '发送成功' : '发送失败';
+        $this->resultDo->message = $smsObj->getError();
+//                $id ? '发送成功' : '发送失败';
         return $this->resultDo;
     }
 
