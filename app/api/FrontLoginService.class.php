@@ -523,9 +523,10 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                             //下载的简历 4
                             $n2[$nk]['buy_total'] = array_key_exists(4,$new_total[$nk])?$new_total[$nk][4]:0;
                             //待面试
-                            $n2[$nk]['waiting_interview'] = array_key_exists(4,$new_total[$nk])?$new_total[$nk][8]:0;
+                            $n2[$nk]['waiting_interview'] = array_key_exists(6,$new_total[$nk])?$new_total[$nk][6]:0;
+                            $n2[$nk]['waiting_interview'] += array_key_exists(8,$new_total[$nk])?$new_total[$nk][8]:0;
                             //已到场
-                            $n2[$nk]['already_arrive'] = array_key_exists(4,$new_total[$nk])?$new_total[$nk][11]:0;
+                            $n2[$nk]['already_arrive'] = array_key_exists(11,$new_total[$nk])?$new_total[$nk][11]:0;
                         }
                     }
                 }
