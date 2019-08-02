@@ -268,6 +268,9 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             $resultDo->message = '提交成功';
             return $resultDo;
         }
+        $address = $this->characet($address);
+        $interviewer = $this->characet($interviewer);
+        $note = $this->characet($note);
         $data = [
             'fine_id' => $fineId,
             'name' => $resumeName,
@@ -833,4 +836,20 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $resultDo->message = '没找到对应状态';
         return $resultDo;
     }
+    /**
+     * 编码转换
+     * @param $data
+     * @param string $charSet
+     * @return string
+     */
+    function characet($data, $charSet = 'UTF-8') {
+        if (!empty($data)) {
+            $fileType = mb_detect_encoding($data, array('UTF-8', 'GBK', 'LATIN1', 'BIG5'));
+            if ($fileType != $charSet) {
+                $data = mb_convert_encoding($data, $charSet, $fileType);
+            }
+        }
+        return $data;
+    }
+
 }
