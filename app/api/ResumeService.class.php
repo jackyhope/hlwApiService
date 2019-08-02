@@ -360,7 +360,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             $this->errMsg = "当前状态不能购买操作";
             return false;
         }
-        if (($vale == 10 || $vale == 11) && ($hlStatus != 6 || $hlStatus !=8)) {
+        if (($vale == 10 || $vale == 11) && ($hlStatus != 6 || $hlStatus != 8)) {
             $this->errMsg = "当前状态不能到场操作";
             return false;
         }
@@ -584,7 +584,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $customerName = $customerInfo['name'];
         $smsContent = "";
         if ('interview' == $type) {
-            $smsContent = [123456, 4];
+//            $smsContent = [123456, 4];
         }
         //发送系统消息
         $messageData = [
@@ -594,13 +594,13 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             'degree' => 1,
             'content' => "慧猎客户《{$customerName}》，选择了预约面试，请跟进"
         ];
-        $messageMode->insert($messageData);
+        $res = $messageMode->insert($messageData);
         //短信发送
         $config = [];
         $tempId && $config['templateId'] = $tempId;
         $smsObj = new STxSms($config);
-        $smsRes = $smsObj->sentTemOne($phone, $smsContent);
-        if (!$smsRes) {
+        $smsContent && $smsObj->sentTemOne($phone, $smsContent);
+        if (!$res) {
             return false;
         }
         return true;
