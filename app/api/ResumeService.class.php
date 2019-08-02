@@ -73,6 +73,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             'user_name' => $userInfo['full_name'],
             'work_name' => $businessInfo['name'],
             'huilie_status' => $huilieStatus,
+            'pro_type' => $businessInfo['pro_type'],
         ];
         $resultDo->code = 200;
         $resultDo->message = json_encode($list);
@@ -771,14 +772,15 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $business = new  model_pinping_business();
         $huilieCompny = new model_huiliewang_company();
         $companyInfo = $huilieCompny->selectOne(['uid' => $uid], 'payd,resume_payd,interview_payd,interview_payd_expect');
-        $businessInfo = $business->selectOne(['business_id' => $projectId], 'maxsalary,minsalary,pro_type');
+        $businessInfo = $business->selectOne(['business_id' => $projectId], 'maxsalary,minsalary,pro_type,name');
         $surplus = $businessInfo['pro_type'] == 4 ? $companyInfo['resume_payd'] : $companyInfo['interview_payd'] - $companyInfo['interview_payd_expect'];
         $data = [
             'project_id' => $projectId,
             'resume_id' => $resumeId,
             'name' => $resumeInfo['info']['name'] ? $resumeInfo['info']['name'] : '',
             'pro_type' => $businessInfo['pro_type'],
-            'salary' => $businessInfo['maxsalary'],
+            'job_name' => $businessInfo['name'] ? $businessInfo['name'] : '',
+            'salary' => $businessInfo['maxsalary'] ? $businessInfo['maxsalary'] : '',
             'money' => $businessInfo['maxsalary'] > 80 ? 2 : 1,
             "surplus" => intval($surplus)
         ];
