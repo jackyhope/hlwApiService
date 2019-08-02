@@ -87,6 +87,7 @@ class api_HlwRegisterService extends api_Abstract implements \com\hlw\huiliewang
             $resultDo->message = '您的验证码有误';
         }else{
             $arr['regcode'] = intval($code);
+            $arr['username'] = $tel;
             $arr['moblie'] = $tel;
             $arr['usertype'] = 2;
             $arr['passtext'] = $invite;

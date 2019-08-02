@@ -144,7 +144,7 @@ class api_CompanyService extends api_Abstract implements com\hlw\huiliewang\inte
         if(empty($datamem)){
             $resultDO->code = 500;
             $resultDO->success = false;
-            $resultDO->message = '慧猎网没有注册该客户，请不要推荐简历!';
+            $resultDO->message = $this->characet('慧猎网没有注册该客户，请不要推荐简历!');
             return $resultDO;
         }
         $arr_resume = [
@@ -193,6 +193,7 @@ class api_CompanyService extends api_Abstract implements com\hlw\huiliewang\inte
         $fineproject->update(['id'=>$pid],['huilie_status'=>1]);
         $has = $resumeexpect->selectOne(['oa_fineid'=>intval($pid)]);
         if($has){
+            $resultDO->message = '111111';
             $resultDO->success = true;
             return $resultDO;
         }
@@ -221,5 +222,21 @@ class api_CompanyService extends api_Abstract implements com\hlw\huiliewang\inte
         $resultDO->code = 200;
         $resultDO->data = $data;
         return $resultDO;
+    }
+
+    /**
+     * 编码转换
+     * @param $data
+     * @param string $charSet
+     * @return string
+     */
+    function characet($data, $charSet = 'UTF-8') {
+        if (!empty($data)) {
+            $fileType = mb_detect_encoding($data, array('UTF-8', 'GBK', 'LATIN1', 'BIG5'));
+            if ($fileType != $charSet) {
+                $data = mb_convert_encoding($data, $charSet, $fileType);
+            }
+        }
+        return $data;
     }
 }
