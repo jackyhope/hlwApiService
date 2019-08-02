@@ -103,10 +103,13 @@ class api_SysmsgService extends api_Abstract implements SysmsgServiceIf
         if ($this->from && $this->from == 1) {
             //OA的ID转换成慧猎的ID
             $companyModel = new model_huiliewang_company();
+            $member = new model_huiliewang_member();
             $companyInfo = $companyModel->selectOne(['tb_customer_id' => $this->user_id], 'uid,name');
+            $memberIfo = $member->selectOne(['tb_customer_id' => $this->user_id],'moblie');
             if ($companyInfo && $companyInfo['uid']) {
                 $this->user_id = $companyInfo['uid'];
                 $this->userName = $companyInfo['name'];
+                $this->phone = $memberIfo['moblie'];
             }
         }
         $this->resultDo->success = false;
