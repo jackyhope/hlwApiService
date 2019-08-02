@@ -114,9 +114,9 @@ class api_CompanyInfoService extends api_Abstract implements CompanyInfoServiceI
         $linkjob = $this->characet($linkjob, 'UTF-8');
         $welfare = $this->characet($welfare, 'UTF-8');
         $website = $this->characet($website, 'UTF-8');
-        $content =  $this->characet($content, 'UTF-8');
-        $linkman =  $this->characet($linkman, 'UTF-8');
-        $logo =  $this->characet($logo, 'UTF-8');
+        $content = $this->characet($content, 'UTF-8');
+        $linkman = $this->characet($linkman, 'UTF-8');
+        $logo = $this->characet($logo, 'UTF-8');
 
         //公司名是否存在
         if ($name) {
@@ -142,7 +142,6 @@ class api_CompanyInfoService extends api_Abstract implements CompanyInfoServiceI
         }
 //        $content = str_replace(array("&amp;", "background-color:#ffffff", "background-color:#fff", "white-space:nowrap;"), array("&", 'background-color:', 'background-color:', 'white-space:'), html_entity_decode($content, ENT_QUOTES, "GBK"));
 //        $linkman = hlw_lib_BaseUtils::getStr(iconv('UTF-8', 'GBK', $linkman));
-
 
 
         //数据修改
@@ -248,13 +247,22 @@ class api_CompanyInfoService extends api_Abstract implements CompanyInfoServiceI
             $fineId .= $fineInfo['id'] . ',';
         }
         $fineId = trim($fineId, ',');
-        $time = time();
-        $dmsInfo = $interview->selectOne("fine_id in ({$fineId}) and addtime >{$time} ", 'count(distinct fine_id) as nums');
-        $companyInfo['wait_interview_count'] = $dmsInfo['nums'] ? $dmsInfo['nums'] : 0;
+        //面试列表处理
+        $interviewList = $interview->select("fine_id in ({$fineId}) and is_from_hr = 0");
+        $interviews = $interviewList->items;
+        $wait_interview_count = 0;
+        $wait_present_count = 0;
+        foreach ($interviews as $inter){
+            if(strtotime($inter['timestart']) < time()){
+                $wait_present_count ++;
+                continue;
+            }
+            $wait_interview_count ++;
 
+        }
+        $companyInfo['wait_interview_count'] = $wait_interview_count;
         //待确认到场
-        $dcInfo = $interview->selectOne("fine_id in ({$fineId}) and addtime < {$time} ", 'count(distinct(fine_id)) as nums');
-        $companyInfo['wait_present_count'] = $dcInfo['nums'] ? $dcInfo['nums'] : 0;
+        $companyInfo['wait_present_count'] = $wait_present_count;
         $this->resultDo->success = TRUE;
         $this->resultDo->code = 200;
         $this->resultDo->message = json_encode($companyInfo);
