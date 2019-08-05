@@ -985,6 +985,14 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                 $log_data['interview_payd'] = $start_coin;//返还真实点数记录
                 //写日志 phpyun_company_log
                 $this->companyLog($log_data);
+                $pay_data = [
+                    'com_id'=>$fine_proj_arr['tj_role_id'],
+                    'pay_remark'=>$post_data['remark'],
+                    'resume_id' => $fine_proj_arr['resume_id'],
+                    'resume' => $resume_msg['name'],
+                    'job' => $huilie_job['name'],
+                    'job_id' => $fine_proj_arr['project_id'],
+                ];
                 $this->companyPay($pay_data);
                 //已到场
                 $this->model_fineproject->update(['id'=>$fine_id],['huilie_status'=>10]);

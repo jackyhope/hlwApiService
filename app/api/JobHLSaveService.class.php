@@ -142,7 +142,7 @@ class api_JobHLSaveService extends api_Abstract implements JobAddServiceIf
             if ($row2['keyid'] == '0') {
                 $data['job1_son'] = intval($jobPost);
                 $data['job1'] = $row1['keyid'];
-                unset($data['job_post']);
+                $data['job_post'] = intval($data['job_post']);
             } else {
                 $data['job1_son'] = $row1['keyid'];
                 $data['job1'] = $row2['keyid'];
