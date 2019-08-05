@@ -707,6 +707,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                 $z_ak = $this->model_companyjob->selectOne(['id'=>$job_id],'id,service_type');//传了职位查的
                 if(count($z_ak)>0){
                     $z_ak[0]['project_id'] = $bid['business_id'];
+                    $z_ak[0]['name'] = $z_ak['name'];
                     $z_ak = array_column($z_ak,null,'project_id');
 
                 }
