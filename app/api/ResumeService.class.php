@@ -113,7 +113,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
                 $status == 3 && $this->resumeReject($fineInfo); //简历不合适
                 $status == 4 && $this->resumeBuy($fineInfo, $uid, $this->money); //购买记录记录
                 $status == 11 && $this->present($fineInfo, 1, $uid, $this->money); //到场记录
-                $status == 10 && $this->present($fineInfo, 0, $uid, $this->money); //到场记录
+                $status == 9 && $this->present($fineInfo, 0, $uid, $this->money); //到场记录
                 $resultDo->success = true;
                 $resultDo->code = 200;
                 $resultDo->message = '操作成功';
@@ -363,7 +363,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             $this->errMsg = "当前状态不能购买操作";
             return false;
         }
-        if (($vale == 10 || $vale == 11) && ($hlStatus != 6 && $hlStatus != 8 && $hlStatus != 10 && $hlStatus !=11)) {
+        if (($vale == 10 || $vale == 11 || $vale == 9) && ($hlStatus != 6 && $hlStatus != 8 && $hlStatus != 10 && $hlStatus != 11 && $hlStatus != 9)) {
             $this->errMsg = "当前状态不能到场操作";
             return false;
         }
@@ -712,9 +712,11 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         if (!$data) {
             return false;
         }
+        if ($type == 4) {
+            return true;
+        }
         //慧猎网订单记录
-        $type != 4 && $this->companyPayLog($coin, $serviceType, $payStatus);
-
+        $this->companyPayLog($coin, $serviceType, $payStatus);
         return $compny->update($where, $data);
     }
 
@@ -776,7 +778,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $huilieCompny = new model_huiliewang_company();
         $companyInfo = $huilieCompny->selectOne(['uid' => $uid], 'payd,resume_payd,interview_payd,interview_payd_expect');
         $businessInfo = $business->selectOne(['business_id' => $projectId], 'maxsalary,minsalary,pro_type,name');
-        $surplus = $businessInfo['pro_type'] == 4 ? $companyInfo['resume_payd'] : $companyInfo['interview_payd'] - $companyInfo['interview_payd_expect'];
+        $surplus = $businessInfo['pro_type'] == 4 ? $companyInfo['resume_payd'] : $companyInfo['interview_payd'] + $companyInfo['interview_payd_expect'];
         $data = [
             'project_id' => $projectId,
             'resume_id' => $resumeId,
