@@ -20,6 +20,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
     protected $model_customer;
     protected $model_companyjob;
     protected $model_companylog;
+    protected $model_companypay;
 
     protected $model_fineproject;
     protected $model_resume;
@@ -39,6 +40,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
         $this->model_companycert = new model_huiliewang_companycert();
         $this->model_companyjob = new model_huiliewang_companyjob();
         $this->model_companylog = new model_huiliewang_companylog();
+        $this->model_companypay = new model_huiliewang_companypay();
 
         $this->model_business = new model_pinping_business();
         $this->model_customer = new model_pinping_customer();
@@ -850,14 +852,15 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
         $c_type = hlw_lib_BaseUtils::getStr($post_data['c_type'],'int',0);
         $fine_id = hlw_lib_BaseUtils::getStr($post_data['fine_id'],'int',0);//fine_project表
         $is_from_hr = hlw_lib_BaseUtils::getStr($post_data['is_from_hr'],'int',0);
+        $post_data['remark'] = hlw_lib_BaseUtils::getStr($post_data['remark'],'int','');
         $ctime = $post_data['ctime'];//传过来的时间
 
-        if($c_type<=0 || $fine_id<=0){
+        if($c_type<0 || $fine_id<=0){
             $Result->message='数据不正确';
             return $Result;
         }
         //mx_fine_project_present  到场表
-        $fine_proj_arr = $this->model_fineproject->selectOne(['fine_id'=>$fine_id],'resume_id,project_id,tj_role_id');
+        $fine_proj_arr = $this->model_fineproject->selectOne(['id'=>$fine_id],'resume_id,project_id,tj_role_id');
         $resume_msg = $this->model_resume->selectOne(['eid'=>$fine_proj_arr['resume_id']],'name');
         //简历id   fine_id   status状态   huilie_coin 扣点数  add_time   role_id顾问推荐人  is_present 是否到场  is_from_hr 是否hr
         $up_data = [
@@ -885,31 +888,61 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
         }
         /*****************************二次访问规避屏蔽重复写入**/
 
-        $huilie_job = $this->model_business->selectOne(['business_id'=>$fine_proj_arr['project_id']],'huilie_job_id');
+        $huilie_job = $this->model_business->selectOne(['business_id'=>$fine_proj_arr['project_id']],'huilie_job_id,name,maxsalary');
         $company_uid = $this->model_companyjob->selectOne(['id'=>$huilie_job['huilie_job_id']],'uid');
 
         //仅扣除  预扣金币，实际金币无变化
         /************订单商品待定，具体扣的数值待定，从哪个表获取所扣待定。先写固定值-07-20*/
-        $start_coin=1;
+
+        if($huilie_job['maxsalary']>80){
+            $start_coin=2;
+        }else{
+            $start_coin=1;
+        }
         /************订单商品待定，具体扣的数值待定，从哪个表获取所扣待定。先写固定值-07-20*/
         $log_data = [
             'uid' => $company_uid['uid'],
             'job_id' => $huilie_job['huilie_job_id'],
             'resume_id' => $fine_proj_arr['resume_id'],
+            'resume_name' => $resume_msg['name'],
             'payd' => 0,
             'resume_payd' => 0,
             'interview_payd' => 0,
             'interview_payd_expect' => 0,
             'create_time' => $ctime,
         ];
+        //到这里，都是慧面试
+
+
+
         if($c_type==1){
             $log_data['interview_payd_expect'] = -$start_coin;//扣除点数记录
             //扣除 预扣金币和实际金币，2种情况， 一是 hr点了已到场  二是 OA端顾问点了已到场
             if($is_from_hr==1){
                 //hr 搞事情
+                $pay_data = [
+                    'order_price'=>$start_coin,
+                    'order_id' => mktime() . rand(10000, 99999),
+                    'pay_time' => $ctime,
+                    'pay_state' => 2,
+                    'type' => 1,
+                    'pay_type' => 2,
+                    'resume_id' => $fine_proj_arr['resume_id'],
+                    'resume' => $resume_msg['name'],
+                    'job_id' => $huilie_job['huilie_job_id'],
+                    'job' => $huilie_job['name'],
+                    'did' => '',
+                ];
+                $pay_data['com_id'] = $company_uid['uid'];
+                $pay_data['pay_remark'] = '慧面试扣除-HR确认人才已到场';
+
                 $log_data['com_id'] = $company_uid['uid'];
                 $log_data['deduct_remark'] = 'HR确认人才已到场';
             }else{
+                $pay_data = [
+                    'com_id'=>$fine_proj_arr['tj_role_id'],
+                    'pay_remark'=>'慧面试扣除-顾问确认人才已到场'
+                ];
                 $log_data['com_id'] = $fine_proj_arr['tj_role_id'];
                 $log_data['deduct_remark'] = '顾问确认人才已到场';
             }
@@ -922,19 +955,24 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                 $this->model_fineprojectpresent->insert($up_data);
                 //写日志 phpyun_company_log
                 $this->companyLog($log_data);
+                $pay_c_id = $this->companyPay($pay_data);
+                //已到场
+                $fine_update_data = [
+                    'huilie_status'=>11,
+                    'call_result'=>$pay_c_id
+                ];
+                $this->model_fineproject->update(['id'=>$fine_id],$fine_update_data);
+
             }else{
                 //sql执行失败
             }
-            //已到场
-            $this->model_fineproject->update(['fine_id'=>$fine_id],['huilie_status'=>11]);
         }
+
         if($c_type==0){
             //未到场，分2种，
-            //1、hr点的未到场，写一条记录即可，不扣除任何
-            $this->moel_fineprojectpresent->insert($up_data);
             if($is_from_hr==0){
+                $up_data['unarrive_remark'] = $log_data['deduct_remark'] = $post_data['remark'];//顾问点未到场，说明原因
                 $log_data['com_id'] = $fine_proj_arr['tj_role_id'];
-                $log_data['deduct_remark'] = '顾问确认人才未到场';
                 //2、顾问点的未到场, 退还真实金币，扣除预扣金币
                 $sql = "update phpyun_company set interview_payd_expect=interview_payd_expect-".$start_coin.",interview_payd=interview_payd+".$start_coin." where uid=".$company_uid['uid'];
                 $this->model_company->query($sql);unset($sql);//注销sql变量
@@ -942,13 +980,21 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                 $log_data['interview_payd'] = $start_coin;//返还真实点数记录
                 //写日志 phpyun_company_log
                 $this->companyLog($log_data);
+                $this->companyPay($pay_data);
                 //已到场
-                $this->model_fineproject->update(['fine_id'=>$fine_id],['huilie_status'=>10]);
+                $this->model_fineproject->update(['id'=>$fine_id],['huilie_status'=>10]);
             }else{
                 //已到场
-                $this->model_fineproject->update(['fine_id'=>$fine_id],['huilie_status'=>9]);
+                $this->model_fineproject->update(['id'=>$fine_id],['huilie_status'=>9]);
             }
+            //1、hr点的未到场，写一条记录即可，不扣除任何
+            $this->model_fineprojectpresent->insert($up_data);
         }
+        $Result->code=200;
+        $Result->success=true;
+        $Result->message='操作成功!';
+        return $Result;
+
 
 
     }
@@ -963,8 +1009,25 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
      */
     private function companyLog($log_data){
         $this->model_companylog->insert($log_data);
-        return $this->model_companylog->lastInsertId();
     }
+
+    private function companyPay($pay_data){
+        $model = new model_huiliewang_companypay();
+        $ck_where = [
+            'resume_id'=> $pay_data['resume_id'],
+            'job_id' => $pay_data['job_id'],
+        ];
+        $is_has = $model->selectOne($ck_where,'id');
+        if($is_has['id']>0){
+            $model->update('id='.$is_has['id'],$pay_data);
+            return $model;
+        }else{
+            $model->insert($pay_data);
+            return $model;
+        }
+    }
+
+
     private function CheckMoblie($moblie){
         return preg_match("/1[345789]{1}\d{9}$/",trim($moblie));
     }
