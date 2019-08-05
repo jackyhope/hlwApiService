@@ -26,6 +26,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
     protected $model_resume;
     protected $model_fineprojectpresent;
     protected $model_cuser;
+    protected $model_users;
 
     /**
      * api_FrontLoginService constructor.
@@ -48,6 +49,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
         $this->model_resume = new model_pinping_resume();
         $this->model_fineprojectpresent = new model_pinping_fineprojectpresent();
         $this->model_cuser = new model_pinping_cuser();
+        $this->model_users = new model_pinping_user();
     }
 
     /*
@@ -490,7 +492,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
         $this->model_companyjob->setCount(true);
         $this->model_companyjob->setPage($page);//当前第几页
         $this->model_companyjob->setLimit($pageSize);//每页几个
-
+        $users = $this->model_users->users(['status'=>1]);
         $jobber = $this->model_companyjob->select($where, 'id,name,minsalary,maxsalary,ejob_salary_month,edate,service_type,status,sdate as add_time', '', 'order by id desc');
         if (gettype($jobber) == 'object') {
             $j1 = json_decode(json_encode($jobber), true);
@@ -498,7 +500,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                 $job_id_arr = array_column($j1['items'], 'id');//job id数组
                 $job_ids = implode(',', $job_id_arr);
 
-                $guwen = $this->model_business->query("select business_id,huilie_job_id,joiner,joiner_name from mx_business where huilie_job_id in(".$job_ids.")");
+                $guwen = $this->model_business->query("select business_id,huilie_job_id,joiner,joiner_name,owner_role_id from mx_business where huilie_job_id in(".$job_ids.")");
                 if(count($guwen)>0){
                     $guwen = array_column($guwen,null,'huilie_job_id');
                 }
@@ -541,9 +543,11 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                     $list[$kj]['minsalary'] > 0 && $list[$kj]['minsalary'] .= 'w';
                     $list[$kj]['maxsalary'] = round(intval($vj['maxsalary']) * intval($vj['ejob_salary_month']) / 10000, 2);
                     $list[$kj]['maxsalary'] > 0 && $list[$kj]['maxsalary'] .= 'w';
+                    $ownerRole = @$guwen[$vj['id']]['owner_role_id'];
+                    $ownerRoles = explode(',',$ownerRole);
                     if (count($guwen) > 0 && array_key_exists($vj['id'], $guwen)) {
                         $list[$kj]['joiner'] = array_key_exists('joiner', $guwen[$vj['id']]) ? $guwen[$vj['id']]['joiner'] : 0;
-                        $list[$kj]['joiner_name'] = (array_key_exists('joiner_name', $guwen[$vj['id']]) && $guwen[$vj['id']['joiner_name']]) ? $guwen[$vj['id']]['joiner_name'] : '待接入';
+                        $list[$kj]['joiner_name'] = isset($ownerRoles[1]) ? $users[$ownerRoles[1]] : '待接入';
 
                     }else{
                         $list[$kj]['joiner'] = 0;
