@@ -880,6 +880,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
         ];
         /*****************************二次访问规避屏蔽重复写入**/
         $is_has = $this->model_fineprojectpresent->selectOne($chk_data);
+
         if(count($is_has) > 0){
             $Result->code=200;
             $Result->success=true;
@@ -929,8 +930,8 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                     'pay_type' => 2,
                     'resume_id' => $fine_proj_arr['resume_id'],
                     'resume' => $resume_msg['name'],
-                    'job_id' => $huilie_job['huilie_job_id'],
                     'job' => $huilie_job['name'],
+                    'job_id' => $fine_proj_arr['project_id'],
                     'did' => '',
                 ];
                 $pay_data['com_id'] = $company_uid['uid'];
@@ -941,7 +942,11 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
             }else{
                 $pay_data = [
                     'com_id'=>$fine_proj_arr['tj_role_id'],
-                    'pay_remark'=>'慧面试扣除-顾问确认人才已到场'
+                    'pay_remark'=>'慧面试扣除-顾问确认人才已到场',
+                    'resume_id' => $fine_proj_arr['resume_id'],
+                    'resume' => $resume_msg['name'],
+                    'job' => $huilie_job['name'],
+                    'job_id' => $fine_proj_arr['project_id'],
                 ];
                 $log_data['com_id'] = $fine_proj_arr['tj_role_id'];
                 $log_data['deduct_remark'] = '顾问确认人才已到场';
@@ -950,6 +955,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
             $up_data['huilie_coin'] = $start_coin;
             $sql = "update phpyun_company set interview_payd_expect=interview_payd_expect-".$start_coin." where uid=".$company_uid['uid'];
             $this->model_company->query($sql);unset($sql);//注销sql变量
+
             if(empty($this->model_company->getDbError())){
                 //扣除成功,继续写表
                 $this->model_fineprojectpresent->insert($up_data);
@@ -958,8 +964,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                 $pay_c_id = $this->companyPay($pay_data);
                 //已到场
                 $fine_update_data = [
-                    'huilie_status'=>11,
-                    'call_result'=>$pay_c_id
+                    'huilie_status'=>11
                 ];
                 $this->model_fineproject->update(['id'=>$fine_id],$fine_update_data);
 
