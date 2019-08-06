@@ -731,9 +731,9 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
             if($job_type != 99){
                 array_push($job_where,'service_type = '.$job_type);
             }
-            if(!empty($kwd)){
-                array_push($job_where,"name like '%".$kwd."%'");
-            }
+//            if(!empty($kwd)){
+//                array_push($job_where,"name like '%".$kwd."%'");
+//            }
             $job_id_arr = $this->model_companyjob->select($job_where,'id');
             if(gettype($job_id_arr)=='object'){
                 $job_id_arr = json_decode(json_encode($job_id_arr),true);
@@ -815,7 +815,11 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                 $re_arr2 = array_column($re_arr2,null,'resume_id');//07-19不考虑 resueme_id是否重复，留注释后期调bug
                 $resume_condition = array_column($re_arr2,'resume_id');
                 $resume_condition = implode(',',$resume_condition);
-                $cur_resume = $this->model_resume->select(["eid in(".$resume_condition.")"]);
+                $resume_where = ["eid in(".$resume_condition.")"];
+                if(!empty($kwd)){
+                    array_push($resume_where,"name like '%".$kwd."%'");
+                }
+                $cur_resume = $this->model_resume->select($resume_where);
                 $cur_resume = json_decode(json_encode($cur_resume),true);
                 $cur_resume = array_column($cur_resume['items'],null,'eid');
                 foreach ($re_arr2 as $rk=>$rv){
