@@ -440,7 +440,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             'resume_id' => $resumeId,
             'resume_name' => $resumeInfo['name'],
             'salary' => $resumeInfo['wantsalary'] > 0 ? $resumeInfo['wantsalary'] : $resumeInfo['curSalary'],
-            'role_id' => $roleId,
+//            'role_id' => $roleId,
             'huilie_coin' => $coin,
             'add_time' => time(),
         ];

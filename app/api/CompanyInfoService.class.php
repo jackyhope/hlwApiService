@@ -206,7 +206,7 @@ class api_CompanyInfoService extends api_Abstract implements CompanyInfoServiceI
         $job = new model_huiliewang_companyjob();
         $fineProject = new model_pinping_fineproject();
         $interview = new model_pinping_fineprojectinterview();
-        $filed = "name,hy,provinceid,tb_customer_id,con_oa_userroleid,resume_payd,interview_payd,logo,wt_yy_photo";
+        $filed = "name,hy,provinceid,tb_customer_id,con_oa_userroleid,resume_payd,interview_payd,interview_payd_expect,logo,wt_yy_photo";
         $companyInfo = $this->companyModel->selectOne(['uid' => $uid], $filed);
         $inderstryId = $companyInfo['hy'];
         $hyName = $industry->selectOne(['id' => $inderstryId], 'name');
@@ -237,6 +237,7 @@ class api_CompanyInfoService extends api_Abstract implements CompanyInfoServiceI
         //购买的简历
         $buyProject = $fineProject->selectOne(['com_id' => $customerId, 'huilie_status' => 4], 'count(*) as nums');
         $companyInfo['buy_resumes'] = $buyProject['nums'] ? $buyProject['nums'] : 0;
+        $companyInfo['interview_payd'] = $companyInfo['interview_payd'] + $companyInfo['interview_payd_expect'];
 
         //带面试
         $where = "com_id = {$customerId} and huilie_status in (6,8)";
