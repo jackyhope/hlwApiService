@@ -265,6 +265,8 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                         $is_has_company = $this->model_company->selectOne(['uid'=>$post_data['uid']],'uid,lastupdate');
 
                         if(count($is_has_company)>0){
+                            $user_msg = $this->model_member->selectOne(['uid'=>$post_data['uid']],'*');
+                            $Result->data = $user_msg;
                             //有这个uid对应的一条数据了，直接更新吧  ||  做个判断，时间不能小于1分钟，不然判定为重复写入
                             if(($is_has_company['lastupdate']+60)>$post_data['lastupdate']){
                                 // 频繁更新时间差为60秒, 小于60秒就不做操作直接返回
@@ -318,6 +320,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                             'status'=>0,//每次编辑初始化为0
                         ];
                         $has_company_cert = $this->model_companycert->selectOne(['uid'=>$post_data['uid'],'type'=>3]);
+
                         if(count($has_company_cert)>0){
                             if(($has_company_cert['ctime']+60) >$post_data['lastupdate']){
                                 //频繁更新时间差为60秒, 小于60秒就不做操作直接返回
@@ -385,9 +388,11 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                             $this->model_customer->query($sql);
                         }
                     }
+                    //查询并返回
+                    $user_msg = $this->model_member->selectOne(['uid'=>$post_data['uid']],'*');
                     $Result->code = 200;
                     $Result->message='操作成功';
-                    /*$Result->data = [$sql];*/
+                    $Result->data = $user_msg;
                     return $Result;
                     break;
             }
