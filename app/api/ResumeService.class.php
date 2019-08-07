@@ -24,6 +24,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
     protected $resumeId;
     protected $projectId;
     protected $uId;
+    protected $otherData;
 
     public function __construct() {
         $this->resumeModel = new model_pinping_resume();
@@ -90,6 +91,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $status = hlw_lib_BaseUtils::getStr($resumeProjectDo->status, 'int');
         $projectId = hlw_lib_BaseUtils::getStr($resumeProjectDo->project_id, 'int');
         $uid = hlw_lib_BaseUtils::getStr($resumeProjectDo->uid, 'int');
+        $this->otherData = hlw_lib_BaseUtils::getStr($resumeProjectDo->others);
         $this->money = $resumeProjectDo->money ? hlw_lib_BaseUtils::getStr($resumeProjectDo->money, 'int') : 1;
         $this->resumeId = $resumeId;
         $this->projectId = $projectId;
@@ -434,6 +436,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         if (!$this->companyCoinUp($uid, 1, $coin)) {
             return false;
         }
+        //购买记录
         $data = [
             'fine_id' => $fineId,
             'status' => $fineInfo['status'],
@@ -444,6 +447,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             'huilie_coin' => $coin,
             'add_time' => time(),
         ];
+        $this->connectData($fineId);
         return $resumeBug->insert($data);
     }
 
@@ -460,11 +464,6 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             $this->errMsg = '简历获取失败';
             return false;
         }
-        //隐藏联系信息
-        if (!$isBuy) {
-            $resumeInfo['telephone'] = '************';
-            $resumeInfo['email'] = '************';
-        }
         $sexs = [1 => '男', 2 => '女', 0 => '未知'];
         $maritals = [1 => '未婚', 2 => '已婚', 3 => '保密', 0 => '未知'];
         $resumeInfo['sex'] = $sexs[$resumeInfo['sex']];
@@ -475,7 +474,15 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $resumeInfo['job_class'] = $this->jobclassName($resumeInfo['job_class']);
         $resumeInfo['intentCity'] = $this->cityName($resumeInfo['intentCity']);
         $resumeInfo['location'] = $this->cityName($resumeInfo['location']);
-
+        //沟通结果
+        $connectInfo = $this->connectResult($resumeInfo);
+        $connect_result = $connectInfo['connect_result'];
+        $resumeInfo = $connectInfo['resume'];
+        //隐藏联系信息
+        if (!$isBuy) {
+            $resumeInfo['telephone'] = '************';
+            $resumeInfo['email'] = '************';
+        }
         $where = ['eid' => $resumeId];
         //项目经验
         $projectModel = new model_pinping_resumeproject();
@@ -514,6 +521,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             'project' => $projectList,
             'work' => $workList,
             'edu' => $eduList,
+            'connect_result' => $connect_result
         ];
     }
 
@@ -729,7 +737,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
      */
     private function companyPayLog($coin, $type, $status) {
         $companyPay = new model_huiliewang_companypay();
-        $sn = mktime() . rand(10000, 99999);
+        $sn = time() . rand(10000, 99999);
         $resume = new model_pinping_resume();
         $business = new model_pinping_business();
         $resumeInfo = $resume->selectOne(['eid' => $this->resumeId], 'name');
@@ -772,6 +780,8 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $resultDo->code = 500;
         $resumeId = hlw_lib_BaseUtils::getStr($resumeRequestDo->resume_id, 'int');
         $projectId = hlw_lib_BaseUtils::getStr($resumeRequestDo->project_id, 'int');
+        $this->resumeId = $resumeId;
+        $this->projectId = $projectId;
         $uid = hlw_lib_BaseUtils::getStr($resumeRequestDo->uid, 'int');
         $resumeInfo = $this->getResume($resumeId, true);
         $business = new  model_pinping_business();
@@ -838,6 +848,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $resultDo->message = '没找到对应状态';
         return $resultDo;
     }
+
     /**
      * 编码转换
      * @param $data
@@ -854,4 +865,50 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         return $data;
     }
 
+    /**
+     * @desc 沟通字段
+     * @param $fineId
+     * @return int
+     */
+    private function connectData($fineId) {
+        $others = json_encode($this->otherData);
+        $data = [
+            'fine_id' => $fineId,
+            'eid' => $this->resumeId,
+            'optional_fields' => $others
+        ];
+        $blendingModel = new model_pinping_resumeblending();
+        return $blendingModel->insert($data);
+
+    }
+
+    /**
+     * @desc  沟通结果
+     * @param  array $resumeInfo
+     * @return array
+     */
+    private function connectResult($resumeInfo) {
+        $fineInfo = $this->fineProjectInfo($this->resumeId, $this->projectId);
+        $data = ['resume' => $resumeInfo, 'connect_result' => []];
+        if (!$fineInfo || $fineInfo['huilie_status'] != 12) {
+            return $data;
+        }
+        $fineId = $fineInfo['id'];
+        $blendingModel = new model_pinping_resumeblending();
+        $connectInfo = $blendingModel->selectOne(['fine_id' => $fineId]);
+        if (!$connectInfo) {
+            return $data;
+        }
+        $connect_result = [];
+        foreach ($connectInfo as $key => $value) {
+            //老子段
+            if (strstr($key, 'old_')) {
+                $key1 = trim(str_replace('old_', '', $key));
+                $resumeInfo[$key1] = $value;
+            } else {
+                $connect_result[$key] = $value;
+            }
+        }
+        return ['resume' => $resumeInfo, 'connect_result' => $connect_result];
+    }
 }
