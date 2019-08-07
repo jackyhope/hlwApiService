@@ -1138,6 +1138,58 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
 
         return $where ? ' AND ' . implode(' AND ', $where) : '';
     }
-
+    /**
+     * 勾兑，以前的简历购买改版流程，变成 发起勾兑，顾问去勾兑人才，填写报表
+     * @param  $blendingDo
+     */
+    public function blendingData(\com\hlw\huiliewang\dataobject\frontLogin\FrontRequestDTO $blendingDo)
+    {
+        $Result = new FrontResultDTO();
+        $Result->code=500;
+        $Result->success=false;
+        $Result->message='操作失败';
+        $post_data = $blendingDo->post_data;
+        $old = $this->model_resume->selectOne(['eid'=>$post_data['eid']],'name,telephone,curCompany,curDepartment,curStatus,wantsalary,hlocation,marital_status,curSalary');
+        //继续组装旧的字段--查出来的
+        $blending_data = $post_data;
+        $blending_data['old_name'] = $old['name'];
+        $blending_data['old_telephone'] = $old['telephone'];
+        $blending_data['old_curCompany'] = $old['curCompany'];
+        $blending_data['old_curDepartment'] = $old['curDepartment'];
+        $blending_data['old_curStatus'] = $old['curStatus'];
+        $blending_data['old_wantsalary'] = $old['wantsalary'];
+        $blending_data['old_hlocation'] = $old['hlocation'];
+        $blending_data['old_marital_status'] = $old['marital_status'];
+        $blending_data['old_curSalary'] = $old['curSalary'];
+        //写入 blending表
+        try{
+            $model_blend = new model_pinping_blending();
+            //根据更新时间判定是否二次访问
+            $is_update = $model_blend->getInfo($blending_data['fine_id'],'update_time');
+            if(count($is_update)>0){
+                $diff_time = $is_update['update_time']+60-$blending_data['update_time'];
+                if($diff_time>0){
+                    $Result->message='操作成功！';
+                    return $Result;
+                }else{
+                    $model_blend->beginTransaction();
+                    //第一：更新blend表数据
+                    $model_blend->update(['fine_id'=>$blending_data['fine_id']],$blending_data);
+                    //第二：更新fine_project huilie_status状态为 沟通完成 12
+                    $this->model_fineproject->update(['id'=>$blending_data['fine_id']],['huilie_status'=>12]);
+                    $model_blend->commit();
+                    $Result->message='更新成功！';
+                    return $Result;
+                }
+            }else{
+                $Result->message='记录不存在，请检查hr是否发起对该简历的慧沟通';
+                return $Result;
+            }
+        }catch (Exception $ex){
+            $model_blend->rollBack();
+            $Result->message='操作失败！数据库操作异常！';
+            return $Result;
+        }
+    }
 
 }
