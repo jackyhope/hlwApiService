@@ -908,12 +908,11 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
 
         //仅扣除  预扣金币，实际金币无变化
         /************订单商品待定，具体扣的数值待定，从哪个表获取所扣待定。先写固定值-07-20*/
+        //订单 单笔扣除多少，按pay表记录来算 start --------------
+        $order_pay_arr = $this->companyPay([],'order_price');
+        $start_coin = $order_pay_arr['order_price'];
+        //订单扣除金额取值  end -------------------------------
 
-        if($huilie_job['maxsalary']>80){
-            $start_coin=2;
-        }else{
-            $start_coin=1;
-        }
         /************订单商品待定，具体扣的数值待定，从哪个表获取所扣待定。先写固定值-07-20*/
         $log_data = [
             'uid' => $company_uid['uid'],
@@ -965,9 +964,9 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                 $log_data['com_id'] = $fine_proj_arr['tj_role_id'];
                 $log_data['deduct_remark'] = '顾问确认人才已到场';
             }
-            //订单 单笔起扣点，  config_sy_orderstart_faceview
+
             $up_data['huilie_coin'] = $start_coin;
-            $sql = "update phpyun_company set interview_payd_expect=interview_payd_expect-".$start_coin." where uid=".$company_uid['uid'];
+            $sql = "update phpyun_company set interview_payd_expect=interview_payd_expect+".$start_coin.",interview_payd-".$start_coin." where uid=".$company_uid['uid'];
             $this->model_company->query($sql);unset($sql);//注销sql变量
 
             if(empty($this->model_company->getDbError())){
@@ -975,7 +974,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                 $this->model_fineprojectpresent->insert($up_data);
                 //写日志 phpyun_company_log
                 $this->companyLog($log_data);
-                $pay_c_id = $this->companyPay($pay_data);
+                $this->companyPay($pay_data);
                 //已到场
                 $fine_update_data = [
                     'huilie_status'=>11
@@ -993,7 +992,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                 $up_data['unarrive_remark'] = $log_data['deduct_remark'] = $post_data['remark'];//顾问点未到场，说明原因
                 $log_data['com_id'] = $fine_proj_arr['tj_role_id'];
                 //2、顾问点的未到场, 退还真实金币，扣除预扣金币
-                $sql = "update phpyun_company set interview_payd_expect=interview_payd_expect-".$start_coin.",interview_payd=interview_payd+".$start_coin." where uid=".$company_uid['uid'];
+                $sql = "update phpyun_company set interview_payd_expect=interview_payd_expect+".$start_coin." where uid=".$company_uid['uid'];
                 $this->model_company->query($sql);unset($sql);//注销sql变量
                 $log_data['interview_payd_expect'] = -$start_coin;//扣除预扣点数记录
                 $log_data['interview_payd'] = $start_coin;//返还真实点数记录
@@ -1038,19 +1037,27 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
         $this->model_companylog->insert($log_data);
     }
 
-    private function companyPay($pay_data){
+    private function companyPay($pay_data,$type='save'){
         $model = new model_huiliewang_companypay();
         $ck_where = [
             'resume_id'=> $pay_data['resume_id'],
             'job_id' => $pay_data['job_id'],
         ];
-        $is_has = $model->selectOne($ck_where,'id');
-        if($is_has['id']>0){
-            $model->update('id='.$is_has['id'],$pay_data);
-            return $model;
+        if($type=='save'){
+            $is_has = $model->selectOne($ck_where,'id');
+            if($is_has['id']>0){
+                $model->update('id='.$is_has['id'],$pay_data);
+                return $model;
+            }else{
+                $model->insert($pay_data);
+                return $model;
+            }
+
         }else{
-            $model->insert($pay_data);
-            return $model;
+            //return 一个查询结果数组，通用型 08-07
+            $field_str = 'id,'.$type;
+            $is_has = $model->selectOne($ck_where,$field_str);
+            return $is_has;
         }
     }
 
@@ -1138,6 +1145,8 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
 
         return $where ? ' AND ' . implode(' AND ', $where) : '';
     }
+
+
     /**
      * 勾兑，以前的简历购买改版流程，变成 发起勾兑，顾问去勾兑人才，填写报表
      * @param  $blendingDo
