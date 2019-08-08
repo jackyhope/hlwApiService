@@ -13,22 +13,30 @@ if (strpos($_SERVER['SERVER_ADDR'], '192.168') !== FALSE || strpos($_SERVER['SER
 }
 /**2019-08-08  add **/
 define('new_price',array(
-        'communicate_base_position'=>300,
-        'communicate_expert_position'=>500,
-        'interview'=>array(
+        'communicate'=>array(
             'base'=>array(
+                'price'=>300,
+                'deduct'=>1
+            ),
+            'expert'=>array(
+                'price'=>500,
+                'deduct'=>1
+            ),
+        ),
+        'interview'=>array(
+            '0-20'=>array(
                 'price'=>2000,
                 'interval'=>'0-20',
                 'giving'=>0.5,
                 'start_buy'=>10000
             ),
-            'Intermediate'=>array(
+            '20-50'=>array(
                 'price'=>3000,
                 'interval'=>'20-50',
                 'giving'=>0.5,
                 'start_buy'=>10000
             ),
-            'expert'=>array(
+            '50-9999999'=>array(
                 'price'=>4000,
                 'interval'=>'50-9999999',
                 'giving'=>0.5,
