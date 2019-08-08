@@ -17,19 +17,19 @@ define('new_price',array(
         'communicate_expert_position'=>500,
         'interview'=>array(
             'base'=>array(
-                'price'=>1000,
+                'price'=>2000,
                 'interval'=>'0-20',
                 'giving'=>0.5,
                 'start_buy'=>10000
             ),
             'Intermediate'=>array(
-                'price'=>1000,
+                'price'=>3000,
                 'interval'=>'20-50',
                 'giving'=>0.5,
                 'start_buy'=>10000
             ),
             'expert'=>array(
-                'price'=>1000,
+                'price'=>4000,
                 'interval'=>'50-9999999',
                 'giving'=>0.5,
                 'start_buy'=>10000
