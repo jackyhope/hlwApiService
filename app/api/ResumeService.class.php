@@ -56,7 +56,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         }
         $huilieStatus = $projectInfo['huilie_status'];
         $isShowContacts = false;
-        if ($huilieStatus == 4 || $huilieStatus == 11) {
+        if ($huilieStatus == 4 || $huilieStatus == 11 || $huilieStatus == 12) {
             $isShowContacts = true;
         }
         $list = $this->getResume($resumeId, $isShowContacts);
@@ -433,7 +433,16 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         if ($info) {
             return true;
         }
-        if (!$this->companyCoinUp($uid, 1, $coin)) {
+        $businessModel = new  model_pinping_business();
+        $companyJobModel = new model_huiliewang_companyjob();
+        $businessInfo = $businessModel->selectOne(['business_id'=>$this->projectId],'huilie_job_id,business_id');
+        $huilieJobId = $businessInfo['huilie_job_id'];
+        $huilieJobInfo = $companyJobModel->selectOne(['id'=>$huilieJobId],'id,service_type');
+        $type = 1;
+        if($huilieJobInfo['service_type'] == 3){
+            $type = 5;
+        }
+        if (!$this->companyCoinUp($uid, $type, $coin)) {
             return false;
         }
         //购买记录
@@ -673,7 +682,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $compny = new model_huiliewang_company();
         $where = ['uid' => $uid];
         $data = [];
-        $companyInfo = $compny->selectOne($where, "resume_payd,interview_payd,interview_payd_expect");
+        $companyInfo = $compny->selectOne($where, "resume_payd,interview_payd,interview_payd_expect,resume_payd_high");
         $serviceType = 1;
         $payStatus = 0;
         if ($type == 1) {
@@ -687,6 +696,19 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             $downCoinNow = $downCoin - $coin;
             $data = ['resume_payd' => $downCoinNow];
             $serviceType = 0;
+            $payStatus = 2;
+        }
+        if ($type == 5) {
+            //购买简历
+            $downCoin = $companyInfo['resume_payd_high'];
+            if ($downCoin < $coin) {
+                $this->errMsg = '慧沟通高级点数不够';
+                throw new \Exception($this->errMsg);
+                return false;
+            }
+            $downCoinNow = $downCoin - $coin;
+            $data = ['resume_payd_high' => $downCoinNow];
+            $serviceType = 3;
             $payStatus = 2;
         }
         //到场
@@ -786,9 +808,26 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $resumeInfo = $this->getResume($resumeId, true);
         $business = new  model_pinping_business();
         $huilieCompny = new model_huiliewang_company();
-        $companyInfo = $huilieCompny->selectOne(['uid' => $uid], 'payd,resume_payd,interview_payd,interview_payd_expect');
-        $businessInfo = $business->selectOne(['business_id' => $projectId], 'maxsalary,minsalary,pro_type,name');
-        $surplus = $businessInfo['pro_type'] == 4 ? $companyInfo['resume_payd'] : $companyInfo['interview_payd'] + $companyInfo['interview_payd_expect'];
+        $huilieJob = new model_huiliewang_companyjob();
+        $companyInfo = $huilieCompny->selectOne(['uid' => $uid], 'payd,resume_payd,interview_payd,interview_payd_expect,resume_payd_high');
+        $businessInfo = $business->selectOne(['business_id' => $projectId], 'maxsalary,minsalary,pro_type,name,huilie_job_id');
+        $hulieJobId = $huilieJob['huilie_job_id'];
+        $huilieJobInfo = $huilieJob->selectOne(['id'=>$hulieJobId],'id,service_type');
+        $jobType = $huilieJobInfo['service_type'];
+        $money = 1;
+        if($businessInfo['pro_type'] == 8){
+            $surplus = $companyInfo['interview_payd'] + $companyInfo['interview_payd_expect'];
+        }else{
+            $surplus = $jobType == 2 ? $companyInfo['resume_payd_high'] : $companyInfo['resume_payd'];
+        }
+        $salary = $businessInfo['maxsalary'];
+        if ($businessInfo['pro_type'] == 8) {
+            $newPriceInterview = new_price['interview'];
+            $keyInterview = '0-20';
+            ($salary >= 20 && $salary < 50) && $keyInterview = '20-50';
+            $salary > 50 && $keyInterview = '50-9999999';
+            $money = $newPriceInterview[$keyInterview]['price'];
+        }
         $data = [
             'project_id' => $projectId,
             'resume_id' => $resumeId,
@@ -796,7 +835,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             'pro_type' => $businessInfo['pro_type'],
             'job_name' => $businessInfo['name'] ? $businessInfo['name'] : '',
             'salary' => $businessInfo['maxsalary'] ? $businessInfo['maxsalary'] : '',
-            'money' => $businessInfo['maxsalary'] > 80 ? 2 : 1,
+            'money' => $money,
             "surplus" => intval($surplus)
         ];
         $resultDo->code = 200;
