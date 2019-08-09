@@ -951,7 +951,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $connect_result = [];
         foreach ($connectInfo as $key => $value) {
             //老子段
-            if($key == 'other_cont'){
+            if($key == 'other_cont' && $value){
                 $connect_result[$key] = json_decode($value,true);
             }
             if (strstr($key, 'old_')) {
