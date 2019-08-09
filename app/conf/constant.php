@@ -12,39 +12,41 @@ if (strpos($_SERVER['SERVER_ADDR'], '192.168') !== FALSE || strpos($_SERVER['SER
     define('OA_ROLE', 1271);
 }
 /**2019-08-08  add **/
-define('new_price',array(
-        'communicate'=>array(
-            'base'=>array(
-                'price'=>300,
-                'deduct'=>1,
-                'giving'=>1
+define('new_price',json_encode(
+        array(
+            'communicate'=>array(
+                'base'=>array(
+                    'price'=>300,
+                    'deduct'=>1,
+                    'giving'=>1
+                ),
+                'expert'=>array(
+                    'price'=>500,
+                    'deduct'=>1,
+                    'giving'=>1
+                ),
             ),
-            'expert'=>array(
-                'price'=>500,
-                'deduct'=>1,
-                'giving'=>1
+            'interview'=>array(
+                '0-20'=>array(
+                    'price'=>2000,
+                    'interval'=>'0-20',
+                    'giving'=>0.5,
+                    'start_buy'=>10000
+                ),
+                '20-50'=>array(
+                    'price'=>3000,
+                    'interval'=>'20-50',
+                    'giving'=>0.5,
+                    'start_buy'=>10000
+                ),
+                '50-9999999'=>array(
+                    'price'=>4000,
+                    'interval'=>'50-9999999',
+                    'giving'=>0.5,
+                    'start_buy'=>10000
+                )
             ),
-        ),
-        'interview'=>array(
-            '0-20'=>array(
-                'price'=>2000,
-                'interval'=>'0-20',
-                'giving'=>0.5,
-                'start_buy'=>10000
-            ),
-            '20-50'=>array(
-                'price'=>3000,
-                'interval'=>'20-50',
-                'giving'=>0.5,
-                'start_buy'=>10000
-            ),
-            '50-9999999'=>array(
-                'price'=>4000,
-                'interval'=>'50-9999999',
-                'giving'=>0.5,
-                'start_buy'=>10000
-            )
-        ),
+        )
     )
 );
 /**2019-08-08  add **/
