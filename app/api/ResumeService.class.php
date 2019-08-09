@@ -957,6 +957,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
                 $connect_result[$key] = $value;
             }
         }
+        $connect_result['optional_fields'] = json_decode($connect_result['optional_fields'],true);
         return ['resume' => $resumeInfo, 'connect_result' => $connect_result];
     }
 }
