@@ -951,12 +951,16 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $connect_result = [];
         foreach ($connectInfo as $key => $value) {
             //老子段
+            if($key == 'other_cont'){
+                $connect_result[$key] = json_decode($value,true);
+            }
             if (strstr($key, 'old_')) {
                 $key1 = trim(str_replace('old_', '', $key));
                 $resumeInfo[$key1] = $value;
             } else {
                 $connect_result[$key] = $value;
             }
+
         }
         $connect_result['optional_fields'] = json_decode($connect_result['optional_fields'],true);
         return ['resume' => $resumeInfo, 'connect_result' => $connect_result];
