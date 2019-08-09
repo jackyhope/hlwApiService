@@ -51,6 +51,7 @@ class api_JobHLSaveService extends api_Abstract implements JobAddServiceIf
         $jobId = hlw_lib_BaseUtils::getStr($addRequestDo->jobId, 'int', 0);
         $edate = hlw_lib_BaseUtils::getStr($addRequestDo->edate, 'int', 0);
         $service_type = hlw_lib_BaseUtils::getStr($addRequestDo->service_type, 'int', 0);
+        $job_type = hlw_lib_BaseUtils::getStr($addRequestDo->job_type, 'int', 1);
 
         $name = $this->characet($name, 'utf-8');
         $description = $this->characet($description, 'utf-8');
@@ -133,6 +134,7 @@ class api_JobHLSaveService extends api_Abstract implements JobAddServiceIf
             'state' => 1,
             'status' => 1,
             'service_type' => $service_type,
+            'job_type' => $job_type,
         ];
 
         if ($jobPost) {
