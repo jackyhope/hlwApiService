@@ -1159,6 +1159,10 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
         $Result->message='操作失败';
         $post_data = $blendingDo->post_data;
         $old = $this->model_resume->selectOne(['eid'=>$post_data['eid']],'name,telephone,curCompany,curDepartment,curStatus,wantsalary,hlocation,marital_status,curSalary');
+        if(count($old)==0){
+            $Result->message='操作失败,没有找到该简历';
+            return $Result;
+        }
         //继续组装旧的字段--查出来的
         $blending_data = $post_data;
         $blending_data['old_name'] = $old['name'];
