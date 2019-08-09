@@ -922,6 +922,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $data = [
             'fine_id' => $fineId,
             'eid' => $this->resumeId,
+            'create_time' => time(),
             'optional_fields' => $others
         ];
         $blendingModel = new model_pinping_resumeblending();
