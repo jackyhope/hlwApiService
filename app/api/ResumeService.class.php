@@ -437,9 +437,9 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $companyJobModel = new model_huiliewang_companyjob();
         $businessInfo = $businessModel->selectOne(['business_id' => $this->projectId], 'huilie_job_id,business_id');
         $huilieJobId = $businessInfo['huilie_job_id'];
-        $huilieJobInfo = $companyJobModel->selectOne(['id' => $huilieJobId], 'id,service_type');
+        $huilieJobInfo = $companyJobModel->selectOne(['id' => $huilieJobId], 'id,service_type,job_type');
         $type = 1;
-        if ($huilieJobInfo['service_type'] == 3) {
+        if ($huilieJobInfo['job_type'] == 2) {
             $type = 5;
         }
         if (!$this->companyCoinUp($uid, $type, $coin)) {
