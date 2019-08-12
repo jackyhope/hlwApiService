@@ -1182,6 +1182,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
             if(count($is_update)>0){
                 $diff_time = $is_update['update_time']+60-$blending_data['update_time'];
                 if($diff_time>0){
+                    $Result->code = 200;
                     $Result->message='操作成功！';
                     return $Result;
                 }else{
@@ -1191,6 +1192,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                     //第二：更新fine_project huilie_status状态为 沟通完成 12
                     $this->model_fineproject->update(['id'=>$blending_data['fine_id']],['huilie_status'=>12]);
                     $model_blend->commit();
+                    $Result->code = 200;
                     $Result->message='更新成功！';
                     return $Result;
                 }
