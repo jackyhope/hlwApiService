@@ -41,9 +41,9 @@ class api_CompanyService extends api_Abstract implements com\hlw\huiliewang\inte
             return $resultDO;
         }
         if(empty($basedata['marital_status'])){
-            $resultDO->message = '请校验完善简历婚姻状况、籍贯等基本信息';
-            $resultDO->code = 500;
-            return $resultDO;
+//            $resultDO->message = '请校验完善简历婚姻状况、籍贯等基本信息';
+//            $resultDO->code = 500;
+//            return $resultDO;
         }
         if(empty($basedata['hlocation'])){
             $resultDO->message = '请校验完善简历籍贯,目前所在城市,目前状态,目前年薪,期望年薪等基本信息';
