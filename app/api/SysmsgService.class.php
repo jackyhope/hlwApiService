@@ -104,12 +104,15 @@ class api_SysmsgService extends api_Abstract implements SysmsgServiceIf
             //OA的ID转换成慧猎的ID
             $companyModel = new model_huiliewang_company();
             $member = new model_huiliewang_member();
-            $companyInfo = $companyModel->selectOne(['tb_customer_id' => $this->user_id], 'uid,name');
+            $companyInfo = $companyModel->selectOne(['tb_customer_id' => $this->user_id], 'uid,name,linkman,linktel');
             $memberIfo = $member->selectOne(['tb_customer_id' => $this->user_id],'moblie');
             if ($companyInfo && $companyInfo['uid']) {
                 $this->user_id = $companyInfo['uid'];
-                $this->userName = $companyInfo['name'];
-                $this->phone = $memberIfo['moblie'];
+                $this->userName = $companyInfo['linkman'] ? $companyInfo['linkman'] : $companyInfo['name'];
+                $this->phone = $companyInfo['linktel'] ? $companyInfo['linktel'] : $memberIfo['moblie'];
+            }else{
+                $this->resultDo->message = '客户信息不存在';
+                return $this->resultDo;
             }
         }
         $this->resultDo->success = false;
@@ -207,6 +210,7 @@ class api_SysmsgService extends api_Abstract implements SysmsgServiceIf
         $this->user_id = hlw_lib_BaseUtils::getStr($sysmsgDo->uid, 'int'); //用户ID
         $this->user_type = hlw_lib_BaseUtils::getStr($sysmsgDo->user_type, 'int'); //用户类型
         $this->content = hlw_lib_BaseUtils::getStr($sysmsgDo->content); //内容
+        $this->userName = hlw_lib_BaseUtils::getStr($sysmsgDo->name); //内容
         if (!$this->company_id && !$this->user_id && !$this->user_type) {
             $this->resultDo->success = false;
             $this->resultDo->code = 500;
@@ -217,17 +221,28 @@ class api_SysmsgService extends api_Abstract implements SysmsgServiceIf
         if ($this->from && $this->from == 1) {
             //OA的ID转换成慧猎的ID
             $companyModel = new model_huiliewang_company();
-            $companyInfo = $companyModel->selectOne(['tb_customer_id' => $this->user_id], 'uid');
+            $companyInfo = $companyModel->selectOne(['tb_customer_id' => $this->user_id], 'uid,linktel,linkman');
             if ($companyInfo && $companyInfo['uid']) {
                 $this->user_id = $companyInfo['uid'];
+                $this->userName = $companyInfo['linkman'] ? $companyInfo['linkman'] : $this->userName;
             }
+        }
+        //重复判断
+        $msgModel = new model_huiliewang_sysmsg();
+        $lastSend = $msgModel->selectOne(['fa_uid' => $this->user_id, 'username' => $this->userName],'*','','order by id desc');
+        if ($lastSend && time() - $lastSend['ctime'] < 60) {
+            $id = $lastSend['id'];
+            $id && $this->resultDo->success = true;
+            $id && $this->resultDo->code = 200;
+            $this->resultDo->message = $id ? '发送成功' : '发送失败';
+            return $this->resultDo;
         }
         $this->resultDo->success = true;
         $this->resultDo->code = 200;
         $this->resultDo->message = '发送成功';
+        //发送
         try {
-            $msgModel = new model_huiliewang_sysmsg();
-            $data = ['content' => $this->content, 'fa_uid' => $this->user_id, 'username' => 'sdsdsds', 'ctime' => time()];
+            $data = ['content' => $this->content[0], 'fa_uid' => $this->user_id, 'username' => $this->userName, 'ctime' => time()];
             $msgModel->sent($data);
         } catch (\Exception $e) {
             $this->resultDo->success = false;
