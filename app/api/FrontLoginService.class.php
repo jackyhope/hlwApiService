@@ -702,6 +702,9 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                     $fine_where = ['huilie_status in(5,6,7)'];
                 }
             }
+            if($post_data['c_type']==99){
+                $fine_where = ['huilie_status != 99 '];
+            }
 
             //有职位id，直接查business_id
             $bid = $this->model_business->selectOne(['huilie_job_id'=>$job_id],'business_id,joiner,joiner_name');
@@ -781,6 +784,9 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                             }
                             if($post_data['c_type']==4){
                                 $fine_where = ['huilie_status in(4,12)'];
+                            }
+                            if($post_data['c_type']==99){
+                                $fine_where = ['huilie_status != 99'];
                             }
                             array_push($fine_where,'project_id in('.$business_id_arr.')');
                         }
