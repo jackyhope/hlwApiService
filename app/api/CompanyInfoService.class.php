@@ -206,7 +206,7 @@ class api_CompanyInfoService extends api_Abstract implements CompanyInfoServiceI
         $job = new model_huiliewang_companyjob();
         $fineProject = new model_pinping_fineproject();
         $interview = new model_pinping_fineprojectinterview();
-        $filed = "name,hy,provinceid,tb_customer_id,con_oa_userroleid,resume_payd,interview_payd,interview_payd_expect,logo,wt_yy_photo";
+        $filed = "name,hy,provinceid,tb_customer_id,con_oa_userroleid,resume_payd,resume_payd_high,interview_payd,interview_payd_expect,logo,wt_yy_photo";
         $companyInfo = $this->companyModel->selectOne(['uid' => $uid], $filed);
         $inderstryId = $companyInfo['hy'];
         $hyName = $industry->selectOne(['id' => $inderstryId], 'name');
