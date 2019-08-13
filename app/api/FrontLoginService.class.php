@@ -724,6 +724,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                 return $Result;
             }
         }
+        //hlw_lib_BaseUtils::addLog(var_export($post_data,true),'crab0813-night03.log','/home/wwwroot/');
         /*$Result->message='看$fine_where';
         $Result->data=$fine_where;
         return $Result;*/
@@ -794,6 +795,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                 }
             }
         }
+        //hlw_lib_BaseUtils::addLog('$fine_where='.var_export($fine_where,true),'crab0813-night03.log','/home/wwwroot/');
         /*$Result->message='检测 $fine_where ';
         $Result->data = $fine_where;
         //$Result->datas = $z_ak;
@@ -807,6 +809,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
         $this->model_fineproject->setPage($page);//当前第几页
         $this->model_fineproject->setLimit($pageSize);//每页几个
         $f_data = $this->model_fineproject->select($fine_where,'huilie_status,`tjaddtime`,resume_id,project_id,tj_role_id,tjaddtime,id fine_id','','order by tjaddtime DESC');
+        //hlw_lib_BaseUtils::addLog('$this->model_fineproject='.var_export($this->model_fineproject,true),'crab0813-night+.log','/home/wwwroot/');
         if(gettype($f_data)=='object'){
             $f_data = json_decode(json_encode($f_data),true);
             $one_data = $f_data;unset($one_data['items']);
@@ -818,7 +821,9 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                 if(count($tui_man)>0){
                     $tui_man = array_column($tui_man,null,'role_id');
                 }
-                $re_arr2 = array_column($re_arr2,null,'resume_id');//07-19不考虑 resueme_id是否重复，留注释后期调bug
+                $re_arr2 = array_column($re_arr2,null,'fine_id');//07-19不考虑 resueme_id是否重复，留注释后期调bug
+                //hlw_lib_BaseUtils::addLog('$re_arr2='.var_export($re_arr2,true),'crab0813-666.log','/home/wwwroot/');
+
                 $resume_condition = array_column($re_arr2,'resume_id');
                 $resume_condition = implode(',',$resume_condition);
                 $resume_where = ["eid in(".$resume_condition.")"];
@@ -832,15 +837,19 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                     $rv['tj_namer'] = $tui_man[$rv['tj_role_id']]['full_name'];
                     $rv['service_type'] = $z_ak[$rv['project_id']]['service_type'];
                     $rv['job_name'] = $z_ak[$rv['project_id']]['name'];
-                    if(count($cur_resume[$rk])>0){
-                        $re_arr2[$rk] = array_merge($rv,$cur_resume[$rk]);
-                        $re_arr2[$rk]['work_year'] = date('Y')-$cur_resume[$rk]['startWorkyear'];
+                    $rk = explode('-',$rk);
+                    $rk = $rk[0];
+                    if(count($cur_resume[$re_arr2[$rk]['resume_id']])>0){
+                        $re_arr2[$rk] = array_merge($rv,$cur_resume[$re_arr2[$rk]['resume_id']]);
+                        $re_arr2[$rk]['work_year'] = date('Y')-$cur_resume[$re_arr2[$rk]['resume_id']]['startWorkyear'];
                     }else{
                         unset($re_arr2[$rk]);//注销掉 简历库 没有数据的那些
                     }
                 }
                 sort($re_arr2);
                 $one_data['cur_all_total'] = count($re_arr2);
+                $last_names = array_column($re_arr2,'tjaddtime');
+                array_multisort($last_names,SORT_DESC,$re_arr2);
                 $Result->code = 200;
                 $Result->message = '获取简历成功';
                 $Result->data = $one_data;
@@ -853,7 +862,6 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
         }
         return $Result;
     }
-
     /**
      * $c_type  确认是否到场。到场为 1  未到场为 0
      * @param $presentDo

@@ -255,8 +255,6 @@ class api_SysmsgService extends api_Abstract implements SysmsgServiceIf
         try {
             $content = isset($this->content[0]) ? $this->content[0] : '';
             $data = ['content' => $content, 'fa_uid' => $this->user_id, 'username' => $this->userName, 'ctime' => time()];
-            $data['resume_id'] = $resumeId;
-            $data['project_id'] = $jobId;
             $msgModel->sent($data);
         } catch (\Exception $e) {
             $this->resultDo->success = false;
