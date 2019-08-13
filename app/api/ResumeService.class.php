@@ -685,6 +685,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         $companyInfo = $compny->selectOne($where, "resume_payd,interview_payd,interview_payd_expect,resume_payd_high");
         $serviceType = 1;
         $payStatus = 0;
+        $jobType = 1;
         if ($type == 1) {
             //购买简历
             $downCoin = $companyInfo['resume_payd'];
@@ -697,6 +698,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             $data = ['resume_payd' => $downCoinNow];
             $serviceType = 0;
             $payStatus = 2;
+            $jobType = 1;
         }
         if ($type == 5) {
             //购买简历
@@ -708,12 +710,20 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             }
             $downCoinNow = $downCoin - $coin;
             $data = ['resume_payd_high' => $downCoinNow];
-            $serviceType = 3;
+            $serviceType = 0;
             $payStatus = 2;
+            $jobType = 2;
         }
         //到场
         $interview_payd = $companyInfo['interview_payd'];
         $interview_payd_expect = $companyInfo['interview_payd_expect'];
+        $interviewJobType = 1;
+        if($coin == 3000){
+            $interviewJobType = 2;
+        }
+        if($coin == 4000){
+            $interviewJobType = 3;
+        }
         if ($type == 3) {
             //到场
             $interview_paydNow = $interview_payd - $coin;
@@ -723,6 +733,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
                 'interview_payd_expect' => intval($interview_payd_expect)
             ];
             $payStatus = 2;
+            $jobType = $interviewJobType;
         }
         if ($type == 2) {
             //邀约面试
@@ -731,6 +742,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
                 'interview_payd_expect' => intval($interview_payd_expect)
             ];
             $payStatus = 3;
+            $jobType = $interviewJobType;
         }
         if ($type == 4) {
             //未到场
@@ -738,6 +750,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             $data = [
                 'interview_payd_expect' => intval($interview_payd_expect),
             ];
+            $jobType = $interviewJobType;
         }
         if (!$data) {
             return false;
@@ -746,7 +759,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             return true;
         }
         //慧猎网订单记录
-        $this->companyPayLog($coin, $serviceType, $payStatus);
+        $this->companyPayLog($coin, $serviceType, $payStatus, $jobType);
         return $compny->update($where, $data);
     }
 
@@ -755,9 +768,10 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
      * @param $coin
      * @param $type
      * @param $status
+     * @param $jobType
      * @return int
      */
-    private function companyPayLog($coin, $type, $status) {
+    private function companyPayLog($coin, $type, $status, $jobType = 0) {
         $companyPay = new model_huiliewang_companypay();
         $sn = time() . rand(10000, 99999);
         $resume = new model_pinping_resume();
@@ -780,6 +794,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             'com_id' => $this->uId,
             'pay_remark' => $mark,
             'type' => $type,
+            'job_type' => $jobType,
             'pay_type' => 0,
         ];
         $where = ['resume_id' => $this->resumeId, 'job_id' => $this->projectId];
@@ -959,12 +974,12 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             }
 
         }
-        if($connect_result['other_cont']){
-            $connect_result['other_cont'] = json_decode($connect_result['other_cont'],true);
-        }else{
+        if ($connect_result['other_cont']) {
+            $connect_result['other_cont'] = json_decode($connect_result['other_cont'], true);
+        } else {
             $connect_result['other_cont'] = '';
         }
-        $connect_result['optional_fields'] = json_decode($connect_result['optional_fields'],true);
-        return ['resume' => $resumeInfo, 'connect_result' => $connect_result,'ertrt'=>$value];
+        $connect_result['optional_fields'] = json_decode($connect_result['optional_fields'], true);
+        return ['resume' => $resumeInfo, 'connect_result' => $connect_result, 'ertrt' => $value];
     }
 }
