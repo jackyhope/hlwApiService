@@ -844,7 +844,7 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
             $newPriceInterview = $priceConfig['interview'];
             $keyInterview = '0-20';
             ($salary >= 20 && $salary < 50) && $keyInterview = '20-50';
-            $salary > 50 && $keyInterview = '50-9999999';
+            $salary >= 50 && $keyInterview = '50-9999999';
             $money = $newPriceInterview[$keyInterview]['price'];
         } else {
             $newPriceResume = $priceConfig['communicate'];
