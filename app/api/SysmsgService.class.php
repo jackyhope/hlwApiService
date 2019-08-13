@@ -253,4 +253,16 @@ class api_SysmsgService extends api_Abstract implements SysmsgServiceIf
         return $this->resultDo;
     }
 
+    /**
+     * @desc 返回发布的职位
+     * @param $jobid
+     */
+    public function getCompanyJob($jobid)
+    {
+        // TODO: Implement getCompanyJob() method.
+        $companyJob = new model_huiliewang_companyjob();
+        $name = $companyJob->selectOne(['id'=>$jobid],'name');
+        return $name;
+    }
+
 }
