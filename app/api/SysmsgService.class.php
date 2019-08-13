@@ -242,7 +242,8 @@ class api_SysmsgService extends api_Abstract implements SysmsgServiceIf
         $this->resultDo->message = '发送成功';
         //发送
         try {
-            $data = ['content' => $this->content[0], 'fa_uid' => $this->user_id, 'username' => $this->userName, 'ctime' => time()];
+            $content = isset($this->content[0]) ? $this->content[0] : '';
+            $data = ['content' => $content, 'fa_uid' => $this->user_id, 'username' => $this->userName, 'ctime' => time()];
             $msgModel->sent($data);
         } catch (\Exception $e) {
             $this->resultDo->success = false;
