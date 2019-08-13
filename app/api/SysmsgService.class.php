@@ -262,7 +262,7 @@ class api_SysmsgService extends api_Abstract implements SysmsgServiceIf
         // TODO: Implement getCompanyJob() method.
         $companyJob = new model_huiliewang_companyjob();
         $name = $companyJob->selectOne(['id'=>$jobid],'name');
-        return $name;
+        return $name['name'];
     }
 
 }
