@@ -872,7 +872,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
         $c_type = hlw_lib_BaseUtils::getStr($post_data['c_type'],'int',0);
         $fine_id = hlw_lib_BaseUtils::getStr($post_data['fine_id'],'int',0);//fine_project表
         $is_from_hr = hlw_lib_BaseUtils::getStr($post_data['is_from_hr'],'int',0);
-        $post_data['remark'] = hlw_lib_BaseUtils::getStr($post_data['remark'],'int','');
+        $post_data['remark'] = hlw_lib_BaseUtils::getStr($post_data['remark'],'string','');
         $ctime = $post_data['ctime'];//传过来的时间
 
         if($c_type<0 || $fine_id<=0){
@@ -915,8 +915,15 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
         //仅扣除  预扣金币，实际金币无变化
         /************订单商品待定，具体扣的数值待定，从哪个表获取所扣待定。先写固定值-07-20*/
         //订单 单笔扣除多少，按pay表记录来算 start --------------
-        $order_pay_arr = $this->companyPay([],'order_price');
+        $ck_where = [
+            'resume_id'=> $fine_proj_arr['resume_id'],
+            'job_id' => $fine_proj_arr['project_id'],
+        ];
+        $order_pay_arr = $this->companyPay($ck_where,'order_price');
         $start_coin = $order_pay_arr['order_price'];
+        //hlw_lib_BaseUtils::addLog('接收数组'.var_export($post_data,true),'crab0813+.log','/home/wwwroot/');
+        //hlw_lib_BaseUtils::addLog('订单数组'.var_export($order_pay_arr,true),'crab0813+.log','/home/wwwroot/');
+        //hlw_lib_BaseUtils::addLog('订单扣多少 ||$start_coin '.$start_coin.' ||','crab0813+.log','/home/wwwroot/');
         //订单扣除金额取值  end -------------------------------
 
         /************订单商品待定，具体扣的数值待定，从哪个表获取所扣待定。先写固定值-07-20*/
@@ -973,8 +980,8 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
 
             $up_data['huilie_coin'] = $start_coin;
             $sql = "update phpyun_company set interview_payd_expect=interview_payd_expect+".$start_coin.",interview_payd-".$start_coin." where uid=".$company_uid['uid'];
+            //hlw_lib_BaseUtils::addLog('已到场|| '.$sql.' ||','crab0813+.log','/home/wwwroot/');
             $this->model_company->query($sql);unset($sql);//注销sql变量
-
             if(empty($this->model_company->getDbError())){
                 //扣除成功,继续写表
                 $this->model_fineprojectpresent->insert($up_data);
@@ -999,6 +1006,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
                 $log_data['com_id'] = $fine_proj_arr['tj_role_id'];
                 //2、顾问点的未到场, 退还真实金币，扣除预扣金币
                 $sql = "update phpyun_company set interview_payd_expect=interview_payd_expect+".$start_coin." where uid=".$company_uid['uid'];
+                //hlw_lib_BaseUtils::addLog('未到场|| '.$sql.' ||','crab0813+.log','/home/wwwroot/');
                 $this->model_company->query($sql);unset($sql);//注销sql变量
                 $log_data['interview_payd_expect'] = -$start_coin;//扣除预扣点数记录
                 $log_data['interview_payd'] = $start_coin;//返还真实点数记录
