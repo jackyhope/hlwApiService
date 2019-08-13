@@ -806,7 +806,7 @@ class api_FrontLoginService extends api_Abstract implements FrontLoginServiceIf
         $this->model_fineproject->setCount(true);
         $this->model_fineproject->setPage($page);//当前第几页
         $this->model_fineproject->setLimit($pageSize);//每页几个
-        $f_data = $this->model_fineproject->select($fine_where,'huilie_status,`tjaddtime`,resume_id,project_id,tj_role_id,tjaddtime,id fine_id');
+        $f_data = $this->model_fineproject->select($fine_where,'huilie_status,`tjaddtime`,resume_id,project_id,tj_role_id,tjaddtime,id fine_id','','order by tjaddtime DESC');
         if(gettype($f_data)=='object'){
             $f_data = json_decode(json_encode($f_data),true);
             $one_data = $f_data;unset($one_data['items']);
