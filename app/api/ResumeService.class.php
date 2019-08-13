@@ -208,7 +208,9 @@ class api_ResumeService extends api_Abstract implements ResumeServiceIf
         }
         //6、到场扣币
         $present = new model_pinping_fineprojectpresent();
-        $presentInfo = $present->selectOne($where, '*', '', 'order by id desc');
+        $presentWhere = $where;
+        $presentWhere['is_present'] = 1;
+        $presentInfo = $present->selectOne($presentWhere, '*', '', 'order by id desc');
         if ($presentInfo) {
             $presentInfo['step'] = 'present';
             $presentInfo['title'] = '候选人到场，扣除慧猎币';
