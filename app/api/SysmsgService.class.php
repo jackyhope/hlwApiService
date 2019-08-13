@@ -25,6 +25,7 @@ class api_SysmsgService extends api_Abstract implements SysmsgServiceIf
     protected $sysmsgDo;
     protected $userName;
     protected $templateId;
+    protected $fineId;
     protected $from; //1：pc 0:慧猎
 
     public function __construct() {
@@ -105,12 +106,12 @@ class api_SysmsgService extends api_Abstract implements SysmsgServiceIf
             $companyModel = new model_huiliewang_company();
             $member = new model_huiliewang_member();
             $companyInfo = $companyModel->selectOne(['tb_customer_id' => $this->user_id], 'uid,name,linkman,linktel');
-            $memberIfo = $member->selectOne(['tb_customer_id' => $this->user_id],'moblie');
+            $memberIfo = $member->selectOne(['tb_customer_id' => $this->user_id], 'moblie');
             if ($companyInfo && $companyInfo['uid']) {
                 $this->user_id = $companyInfo['uid'];
                 $this->userName = $companyInfo['linkman'] ? $companyInfo['linkman'] : $companyInfo['name'];
                 $this->phone = $companyInfo['linktel'] ? $companyInfo['linktel'] : $memberIfo['moblie'];
-            }else{
+            } else {
                 $this->resultDo->message = '客户信息不存在';
                 return $this->resultDo;
             }
@@ -126,7 +127,7 @@ class api_SysmsgService extends api_Abstract implements SysmsgServiceIf
             return $this->resultDo;
         }
         $mobileModel = new model_huiliewang_mobilemsg();
-        $lastSend = $mobileModel->selectOne(['moblie' => $this->phone, 'template_id' => $this->templateId],'*','','order by id desc');
+        $lastSend = $mobileModel->selectOne(['moblie' => $this->phone, 'template_id' => $this->templateId], '*', '', 'order by id desc');
         if ($lastSend && time() - $lastSend['ctime'] < 60) {
             $id = $lastSend['id'];
             $id && $this->resultDo->success = true;
@@ -211,6 +212,7 @@ class api_SysmsgService extends api_Abstract implements SysmsgServiceIf
         $this->user_type = hlw_lib_BaseUtils::getStr($sysmsgDo->user_type, 'int'); //用户类型
         $this->content = hlw_lib_BaseUtils::getStr($sysmsgDo->content); //内容
         $this->userName = hlw_lib_BaseUtils::getStr($sysmsgDo->name); //内容
+        $this->fineId = hlw_lib_BaseUtils::getStr($sysmsgDo->fineId); //内容
         if (!$this->company_id && !$this->user_id && !$this->user_type) {
             $this->resultDo->success = false;
             $this->resultDo->code = 500;
@@ -227,9 +229,18 @@ class api_SysmsgService extends api_Abstract implements SysmsgServiceIf
                 $this->userName = $companyInfo['linkman'] ? $companyInfo['linkman'] : $this->userName;
             }
         }
+        //
+        $resumeId = 0;
+        $jobId = 0;
+        if ($this->fineId) {
+            $fine = new model_pinping_fineproject();
+            $fineInfo = $fine->selectOne(['id' => $this->fineId]);
+            $resumeId = $fineInfo['resume_id'];
+            $jobId = $fineInfo['project_id'];
+        }
         //重复判断
         $msgModel = new model_huiliewang_sysmsg();
-        $lastSend = $msgModel->selectOne(['fa_uid' => $this->user_id, 'username' => $this->userName],'*','','order by id desc');
+        $lastSend = $msgModel->selectOne(['fa_uid' => $this->user_id, 'username' => $this->userName], '*', '', 'order by id desc');
         if ($lastSend && time() - $lastSend['ctime'] < 60) {
             $id = $lastSend['id'];
             $id && $this->resultDo->success = true;
@@ -244,6 +255,8 @@ class api_SysmsgService extends api_Abstract implements SysmsgServiceIf
         try {
             $content = isset($this->content[0]) ? $this->content[0] : '';
             $data = ['content' => $content, 'fa_uid' => $this->user_id, 'username' => $this->userName, 'ctime' => time()];
+            $data['resume_id'] = $resumeId;
+            $data['project_id'] = $jobId;
             $msgModel->sent($data);
         } catch (\Exception $e) {
             $this->resultDo->success = false;
@@ -257,11 +270,10 @@ class api_SysmsgService extends api_Abstract implements SysmsgServiceIf
      * @desc 返回发布的职位
      * @param $jobid
      */
-    public function getCompanyJob($jobid)
-    {
+    public function getCompanyJob($jobid) {
         // TODO: Implement getCompanyJob() method.
         $companyJob = new model_huiliewang_companyjob();
-        $name = $companyJob->selectOne(['id'=>$jobid],'name');
+        $name = $companyJob->selectOne(['id' => $jobid], 'name');
         return $name;
     }
 
